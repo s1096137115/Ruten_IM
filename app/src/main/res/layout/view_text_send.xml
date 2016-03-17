@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/textsend"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:background="@android:color/white"
+    android:visibility="visible">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider"
+        android:id="@+id/relativeLayout"
+        />
+
+    <EditText
+        android:id="@+id/textInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/textSendButton"
+        android:background="@android:color/white"
+        android:imeOptions="flagNoExtractUi|actionSend"
+        android:inputType="textShortMessage|textMultiLine|textCapSentences"
+        android:minHeight="48dp"
+        android:minLines="1"
+        android:paddingBottom="12dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="12dp"
+        android:textColor="@color/primarytext"
+        android:layout_marginLeft="5dp"
+        android:hint="回覆..."
+        android:maxLines="4"
+        android:layout_below="@+id/relativeLayout">
+    </EditText>
+
+    <ImageButton
+        android:id="@+id/textSendButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/button_send_text"/>
+
+</RelativeLayout>
