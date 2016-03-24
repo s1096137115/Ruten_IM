@@ -1,13 +1,50 @@
 package com.avengers.publicim.data.entities;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/4.
  */
 public class Message {
+	public static final String TABLE_NAME = "message";
+
+	public static final String MID = "mid";
+
+	public static final String FROM_ID = "from_id";
+
+	public static final String FROM_NAME = "from_name";
+
+	public static final String TO_ID = "to_id";
+
+	public static final String TO_NAME = "to_name";
+
+	public static final String TYPE = "type";
+
+	public static final String CONTENT = "content";
+
+	public static final String DATE = "date";
+
+	public static final String CHAT_ID = "chat_id";
+
+	public static final String CREATE_SQL =
+			"CREATE TABLE " + TABLE_NAME + "("
+					+ MID + " VARCHAR(30) PRIMARY KEY, "
+					+ FROM_ID + " VARCHAR(30), "
+					+ FROM_NAME + " VARCHAR(30), "
+					+ TO_ID + " VARCHAR(30), "
+					+ TO_NAME + " VARCHAR(30), "
+					+ TYPE + " VARCHAR(30), "
+					+ CONTENT + " TEXT, "
+					+ DATE + " VARCHAR(30), "
+					+ CHAT_ID + " VARCHAR(50), "
+					+ "FOREIGN KEY (" + CHAT_ID + ") REFERENCES " + ChatManager.TABLE_NAME + "(" + Chat.CID + ") "
+					+ ") ";
+
 	@SerializedName("mid")// 可以讓你的field名稱與API不同
-	private Integer mid;
+	private String mid;
 
 	@SerializedName("from")
 	private User from;
@@ -19,26 +56,63 @@ public class Message {
 	private String type;
 
 	@SerializedName("context")
-	private String context;
+	private String content;
 
 	@SerializedName("date")
 	private String date;
 
-	public Message(Integer mid ,User from ,User to ,String type ,String context ,String date) {
+	private String chatId;
+
+	public Message(String mid, User from, User to, String type, String content, String date, String chatId) {
 		this.mid = mid;
 		this.from = from;
 		this.to = to;
 		this.type = type;
-		this.context = context;
+		this.content = content;
 		this.date = date;
+		this.chatId = chatId;
 	}
 
-	public String getContext() {
-		return context;
+	public static Message newInstance(Cursor cursor){
+		User from = User.newInstance(
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.FROM_ID)),
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.FROM_NAME))
+		);
+		User to = User.newInstance(
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.TO_ID)),
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.TO_NAME))
+		);
+
+		return new Message(
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.MID)),
+				from,
+				to,
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.TYPE)),
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTENT)),
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.DATE)),
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.CHAT_ID))
+		);
 	}
 
-	public void setContext(String context) {
-		this.context = context;
+	public ContentValues getContentValues(){
+		ContentValues values = new ContentValues();
+		values.put(Message.MID, getMid());
+		values.put(Message.FROM_ID, getFrom().getUid());
+		values.put(Message.FROM_NAME, getFrom().getName());
+		values.put(Message.TO_ID, getTo().getUid());
+		values.put(Message.TO_NAME, getTo().getName());
+		values.put(Message.TYPE, getType());
+		values.put(Message.CONTENT, getContent());
+		values.put(Message.DATE, getDate());
+		return values;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
 	}
 
 	public String getDate() {
@@ -57,11 +131,11 @@ public class Message {
 		this.from = from;
 	}
 
-	public Integer getMid() {
+	public String getMid() {
 		return mid;
 	}
 
-	public void setMid(Integer mid) {
+	public void setMid(String mid) {
 		this.mid = mid;
 	}
 

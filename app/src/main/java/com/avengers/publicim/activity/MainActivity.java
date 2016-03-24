@@ -2,17 +2,22 @@ package com.avengers.publicim.activity;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.avengers.publicim.R;
+import com.avengers.publicim.adapter.RosterAdapter;
+import com.avengers.publicim.conponent.IMApplication;
 
 import io.socket.client.Socket;
 
 public class MainActivity extends BaseActivity {
-	Socket socket;
+	Socket mSocket;
+	RecyclerView mRecyclerView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -20,13 +25,27 @@ public class MainActivity extends BaseActivity {
 		setContentView(R.layout.activity_main);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-
+		mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+		mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+		mRecyclerView.setAdapter(new RosterAdapter(this, IMApplication.getRoster().getEntries()));
 
 		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+		assert fab != null;
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				mIMService.connect();
+			}
+		});
+
+		FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+		assert fab2 != null;
+		fab2.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+//				RosterAdapter ra = new RosterAdapter(MainActivity.this, mIMService.getRosters());
+//				mRecyclerView.setAdapter(ra);
+//				ra.notifyDataSetChanged();
 			}
 		});
 	}

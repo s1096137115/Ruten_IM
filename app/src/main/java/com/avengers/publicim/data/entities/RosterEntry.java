@@ -1,11 +1,15 @@
 package com.avengers.publicim.data.entities;
 
+import android.database.Cursor;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/3.
  */
-public class Roster {
+public class RosterEntry {
+	public static final String RELATIONSHIP = "relationship";
+
 	@SerializedName("relationship")// 可以讓你的field名稱與API不同
 	private Integer relationship;
 
@@ -14,6 +18,19 @@ public class Roster {
 
 	@SerializedName("user")
 	private User user;
+
+	public RosterEntry(User user, Presence presence, Integer relationship) {
+		this.presence = presence;
+		this.relationship = relationship;
+		this.user = user;
+	}
+
+	public static RosterEntry newInstance(Cursor cursor){
+		return new RosterEntry(
+				User.newInstance(cursor), Presence.newInstance(cursor),
+				cursor.getInt(cursor.getColumnIndexOrThrow(RosterEntry.RELATIONSHIP))
+		);
+	}
 
 	public Presence getPresence() {
 		return presence;

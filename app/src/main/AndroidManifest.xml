@@ -6,7 +6,7 @@
 
 	<application
 		android:allowBackup="false"
-		android:name=".conponent.RutenApplication"
+		android:name=".conponent.IMApplication"
 		android:icon="@mipmap/ic_launcher"
 		android:label="@string/app_name"
 		android:theme="@style/AppTheme.NoActionBar">

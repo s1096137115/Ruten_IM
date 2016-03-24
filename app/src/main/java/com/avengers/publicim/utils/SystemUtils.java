@@ -5,7 +5,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import com.avengers.publicim.conponent.RutenApplication;
+import com.avengers.publicim.conponent.IMApplication;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -23,8 +23,8 @@ public class SystemUtils {
 	 */
 	public static boolean isAppOnForeground() {
 		final Set<String> activePackages = new HashSet<>();
-		final String appPagName = RutenApplication.getContext().getPackageName();
-		final ActivityManager mgr = (ActivityManager) RutenApplication.getContext().getSystemService(Context.ACTIVITY_SERVICE);
+		final String appPagName = IMApplication.getContext().getPackageName();
+		final ActivityManager mgr = (ActivityManager) IMApplication.getContext().getSystemService(Context.ACTIVITY_SERVICE);
 		final List<ActivityManager.RunningAppProcessInfo> processInfos = mgr.getRunningAppProcesses();
 		for (ActivityManager.RunningAppProcessInfo processInfo : processInfos) {
 			if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
@@ -44,7 +44,7 @@ public class SystemUtils {
 	 * @return
 	 */
 	public static boolean hasInternetConnection() {
-		ConnectivityManager cm = (ConnectivityManager) RutenApplication.getContext()
+		ConnectivityManager cm = (ConnectivityManager) IMApplication.getContext()
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 		boolean network = (activeNetwork != null && activeNetwork.isConnected());

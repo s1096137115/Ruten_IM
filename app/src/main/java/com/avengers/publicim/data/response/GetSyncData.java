@@ -1,9 +1,9 @@
 package com.avengers.publicim.data.response;
 
+import com.avengers.publicim.data.entities.RosterEntry;
 import com.google.gson.annotations.SerializedName;
-import com.avengers.publicim.data.entities.Roster;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/15.
@@ -16,7 +16,7 @@ public class GetSyncData{
 	private String error;
 
 	@SerializedName("roster")
-	private ArrayList<Roster> rosters = new ArrayList<>();
+	private List<RosterEntry> rosterEntries;
 
 	public String getAction() {
 		return action;
@@ -34,11 +34,11 @@ public class GetSyncData{
 		this.error = error;
 	}
 
-	public ArrayList<Roster> getRosters() {
-		return rosters;
+	public List<RosterEntry> getRosterEntries() {
+		return rosterEntries;
 	}
 
-	public void setRosters(ArrayList<Roster> rosters) {
-		this.rosters = rosters;
+	public void setRosterEntries(List<RosterEntry> rosterEntries) {
+		this.rosterEntries = rosterEntries;
 	}
 }

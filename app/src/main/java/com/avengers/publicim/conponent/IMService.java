@@ -8,11 +8,11 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.data.response.GetSyncData;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,8 +26,9 @@ import io.socket.emitter.Emitter;
 public class IMService extends Service {
 	private IMBinder mBinder = new IMBinder();
 	private Socket mSocket;
-	DbHelper mDB;
+	private DbHelper mDB;
 	private Handler mHandler = new Handler();
+	private GetSyncData mGSD;
 
 	public IMService() {
 	}
@@ -35,7 +36,7 @@ public class IMService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		RutenApplication app = (RutenApplication) getApplication();
+		IMApplication app = (IMApplication) getApplication();
 		mDB = DbHelper.getInstance(this);
 		mSocket = app.getSocket();
 		setListener(mSocket);
@@ -59,16 +60,20 @@ public class IMService extends Service {
 		mSocket.disconnect();
 	}
 
+//	public ArrayList<RosterEntry> getRosters(){
+//		return mGSD.getRosterEntries();
+//	}
+
 	public void sendMessage(String msg){
 		try {
-			User user = new User("dog","Android-2234");
-			User user2 = new User("cat","Android-1234");
+			User user = new User("Android-2234", "dog");
+			User user2 = new User("Android-1234", "cat");
 
 			long now = System.currentTimeMillis();
 			SimpleDateFormat sdf = new SimpleDateFormat(Constants.SAVE_DB_SIMPLE_DATETIME_FORMAT);
 			String nowTime = sdf.format(now);
 
-			Message message = new Message(null, user, user2, Message.Type.TEXT, msg, nowTime);
+			Message message = new Message(null, user, user2, Message.Type.TEXT, msg, nowTime, "001");
 			String str = new Gson().toJson(message);
 			JSONObject obj = new JSONObject(str);
 			Log.d("acho", "ack");
@@ -142,7 +147,7 @@ public class IMService extends Service {
 			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
-					Toast.makeText(RutenApplication.getContext(),
+					Toast.makeText(IMApplication.getContext(),
 							"error", Toast.LENGTH_LONG).show();
 				}
 			});
@@ -156,7 +161,8 @@ public class IMService extends Service {
 			try {
 				Gson gson = new Gson();
 				String json = args[0].toString();
-				GetSyncData getSyncData = gson.fromJson(json, GetSyncData.class);
+				//todo 根據json的action對應class
+				mGSD = gson.fromJson(json, GetSyncData.class);
 				Log.d("acho","after");
 			} catch (Exception e) {
 				e.printStackTrace();

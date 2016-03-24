@@ -1,40 +1,45 @@
 package com.avengers.publicim.data.entities;
 
+import android.database.Cursor;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/9.
  */
 public class User {
-	public static final String TABLE_NAME = "User";
-
-	public static final String ID = "id";
+	public static final String UID = "uid";
 
 	public static final String NAME = "name";
-
-	public static final String CREATE_SQL =
-			"CREATE TABLE " + TABLE_NAME + "("
-					+ ID + " VARCHAR(30) PRIMARY KEY, "
-					+ NAME + " VARCHAR(30) "
-					+ ") ";
 
 	@SerializedName("name")
 	private String name;
 
 	@SerializedName("identify")
-	private String id;
+	private String uid;
 
-	public User(String name, String id) {
+	public User(String uid, String name) {
 		this.name = name;
-		this.id = id;
+		this.uid = uid;
 	}
 
-	public String getId() {
-		return id;
+	public static User newInstance(String uid, String name){
+		return new User(uid, name);
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public static User newInstance(Cursor cursor){
+		return new User(
+				cursor.getString(cursor.getColumnIndexOrThrow(User.UID)),
+				cursor.getString(cursor.getColumnIndexOrThrow(User.NAME))
+		);
+	}
+
+	public String getUid() {
+		return uid;
+	}
+
+	public void setUid(String uid) {
+		this.uid = uid;
 	}
 
 	public String getName() {
