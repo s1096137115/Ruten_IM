@@ -1,14 +1,14 @@
 package com.avengers.publicim.conponent;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.avengers.publicim.data.entities.ChatManager;
+import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.RosterEntry;
-import com.avengers.publicim.data.entities.RosterManager;
 import com.avengers.publicim.data.entities.User;
 
 import java.util.ArrayList;
@@ -21,6 +21,11 @@ public class DbHelper extends SQLiteOpenHelper{
 	final private static int _DB_VERSION = 1;
 	final private static String _DB_DATABASE_NAME = "IMDatabase.db"; //todo "user name" + IMDatabase
 	private static DbHelper instance = null;
+
+	public static class IntBoolean {
+		public static final int TRUE = 1;
+		public static final int FALSE = 0;
+	}
 
 	public DbHelper(Context context) {
 		super(context, _DB_DATABASE_NAME, null, _DB_VERSION);
@@ -35,8 +40,8 @@ public class DbHelper extends SQLiteOpenHelper{
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(RosterManager.CREATE_SQL);
-		db.execSQL(ChatManager.CREATE_SQL);
+		db.execSQL(RosterEntry.CREATE_SQL);
+		db.execSQL(Chat.CREATE_SQL);
 		db.execSQL(Message.CREATE_SQL);
 	}
 
@@ -47,32 +52,33 @@ public class DbHelper extends SQLiteOpenHelper{
 
 	public List<RosterEntry> getLocalRoster(){
 		SQLiteDatabase db = getWritableDatabase();
-		String SQL_SEL = String.format("SELECT * FROM %s ORDER BY %s DESC",
-				RosterManager.TABLE_NAME, User.NAME);
+		String SQL_SEL = String.format("SELECT * FROM %s GROUP BY %s ORDER BY %s ",
+				RosterEntry.TABLE_NAME, User.NAME, User.NAME);
 		Cursor cursor = db.rawQuery(SQL_SEL, null);
 		List<RosterEntry> roster = new ArrayList<>();
 		while(cursor.moveToNext()){
 			roster.add(RosterEntry.newInstance(cursor));
         }
+		cursor.close();
 		return roster;
 	}
 
-//	public ArrayList<Chat> getChats(){
-//		SQLiteDatabase db = getWritableDatabase();
-//		String SQL_SEL = String.format("SELECT * FROM %s WHERE %s = '%s' ORDER BY %s DESC",
-//				ChatManager.TABLE_NAME, User.UID, rosterEntry.getUser().getUid(), Message.DATE);
-//		Cursor cursor = db.rawQuery(SQL_SEL, null);
-//		ArrayList<Chat> list = new ArrayList<>();
-//        while(cursor.moveToNext()){
-//            list.add(Message.newInstance(cursor));
-//        }
-//		return list;
-//	}
+	public Cursor getContentOfChats(){
+		SQLiteDatabase db = getWritableDatabase();
+//		String SQL_SEL = String.format("SELECT * FROM (SELECT * , MAX(m.date) last, SUM(m.read) %s FROM %s m " +
+//				"GROUP BY m.to_name) j, %s c WHERE j.to_name = c.cid ORDER BY j.last DESC",
+//				Chat.UNREAD, Message.TABLE_NAME, Chat.TABLE_NAME);
+		String SQL_SEL = String.format("SELECT * FROM %s c LEFT JOIN (SELECT * , MAX(msg.date) last ," +
+				"SUM(msg.read = 0) unread FROM %s msg GROUP BY msg.chat_id)info ON info.chat_id = c.cid " +
+				"ORDER BY c.date DESC",
+				Chat.TABLE_NAME, Message.TABLE_NAME);
+		return db.rawQuery(SQL_SEL, null);
+	}
 
 	public ArrayList<Message> getMessages(RosterEntry rosterEntry){
 		SQLiteDatabase db = getWritableDatabase();
 		String SQL_SEL = String.format("SELECT * FROM %s WHERE %s = '%s' ORDER BY %s DESC",
-				Message.TABLE_NAME, User.UID, rosterEntry.getUser().getUid(), Message.DATE);
+				Message.TABLE_NAME, Message.CHAT_ID, rosterEntry.getUser().getName(), Message.DATE);
 		Cursor cursor = db.rawQuery(SQL_SEL, null);
 		ArrayList<Message> list = new ArrayList<>();
 //        while(cursor.moveToNext()){
@@ -84,17 +90,50 @@ public class DbHelper extends SQLiteOpenHelper{
 				list.add(Message.newInstance(cursor));
 			} while (cursor.moveToPrevious());
 		}
+		cursor.close();
 		return list;
 	}
 
-	public void addChat(){
-
+	public long insertRoster(RosterEntry entry){
+		SQLiteDatabase db = getWritableDatabase();
+		return db.insert(RosterEntry.TABLE_NAME, null, entry.getContentValues());
 	}
 
-	public void addMessage(Message msg){
+	public long insertChat(Chat chat){
+		SQLiteDatabase db = getWritableDatabase();
+		return db.insert(Chat.TABLE_NAME, null, chat.getContentValues());
+	}
+
+	public void insertMessage(Message msg){
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.insert(Message.TABLE_NAME, null, msg.getContentValues());
 	}
 
+	public void updateRoster(RosterEntry entry){
+		SQLiteDatabase db = getWritableDatabase();
+		String whereSql = String.format("%s = '%s' AND %s = '%s'",
+				User.NAME, entry.getUser().getName(), User.UID, entry.getUser().getUid());
+		db.update(RosterEntry.TABLE_NAME, entry.getContentValues(), whereSql, null);
+	}
+
+	public void updateChat(Chat chat){
+		SQLiteDatabase db = getWritableDatabase();
+		String whereSql = String.format("%s = '%s'", Chat.CID, chat.getCid());
+		db.update(Chat.TABLE_NAME, chat.getContentValues(), whereSql, null);
+	}
+
+	public void updateMessage(Message message){
+		SQLiteDatabase db = getWritableDatabase();
+		String whereSql = String.format("%s = '%s'", Message.MID, message.getMid());
+		db.update(Message.TABLE_NAME, message.getContentValues(), whereSql, null);
+	}
+
+	public void updateMessageofRead(Chat chat, int read){
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(Message.READ, read);
+		String whereSql = String.format("%s = '%s'", Message.CHAT_ID, chat.getCid());
+		db.update(Message.TABLE_NAME, values, whereSql, null);
+	}
 
 }

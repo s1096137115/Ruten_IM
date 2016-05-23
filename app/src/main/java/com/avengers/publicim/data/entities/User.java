@@ -4,10 +4,12 @@ import android.database.Cursor;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by D-IT-MAX2 on 2016/3/9.
  */
-public class User {
+public class User implements Serializable {
 	public static final String UID = "uid";
 
 	public static final String NAME = "name";
@@ -50,5 +52,20 @@ public class User {
 		this.name = name;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof User) {
+			User user = (User) o;
+			return this.uid.equals(user.uid) && this.name.equals(user.name);
+		}
+		return false;
+	}
 
+	@Override
+	public int hashCode() {
+		final int PRIME = 31;
+		int result = 1;
+		result = PRIME * result + (PRIME * getUid().hashCode()) + getName().hashCode();
+		return result;
+	}
 }

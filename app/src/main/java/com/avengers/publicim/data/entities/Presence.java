@@ -4,10 +4,12 @@ import android.database.Cursor;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by D-IT-MAX2 on 2016/3/9.
  */
-public class Presence {
+public class Presence implements Serializable {
 	public static final String PHOTO = "photo";
 
 	public static final String STATUS = "status";

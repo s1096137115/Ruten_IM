@@ -20,7 +20,7 @@ import java.util.List;
 public class RosterAdapter extends RecyclerView.Adapter<RosterAdapter.NormalTextViewHolder> {
 	private final LayoutInflater mLayoutInflater;
 	private final Context mContext;
-	public List<RosterEntry> mRosterEntries;
+	private List<RosterEntry> mRosterEntries;
 	private Handler mHandler = new Handler();
 
 	public RosterAdapter(Context context, List<RosterEntry> objects) {
@@ -36,12 +36,17 @@ public class RosterAdapter extends RecyclerView.Adapter<RosterAdapter.NormalText
 
 	@Override
 	public void onBindViewHolder(NormalTextViewHolder holder, int position) {
+		holder.mUserName = mRosterEntries.get(position).getUser().getName();
 		holder.mID.setText(mRosterEntries.get(position).getUser().getName());
 	}
 
 	@Override
 	public int getItemCount() {
 		return mRosterEntries == null ? 0 : mRosterEntries.size();
+	}
+
+	public RosterEntry getItem(int position){
+		return mRosterEntries.get(position);
 	}
 
 	public void refresh(){
@@ -53,7 +58,12 @@ public class RosterAdapter extends RecyclerView.Adapter<RosterAdapter.NormalText
 		});
 	}
 
+	public void update(List<RosterEntry> objects){
+		mRosterEntries = objects;
+	}
+
 	public static class NormalTextViewHolder extends RecyclerView.ViewHolder {
+		String mUserName;
 		ImageView mIcon;
 		TextView mID;
 

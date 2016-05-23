@@ -3,12 +3,17 @@ package com.avengers.publicim.data.entities;
 import android.content.ContentValues;
 import android.database.Cursor;
 
+import com.avengers.publicim.conponent.DbHelper;
+import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.utils.SystemUtils;
 import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/4.
  */
-public class Message {
+public class Message implements Serializable {
 	public static final String TABLE_NAME = "message";
 
 	public static final String MID = "mid";
@@ -27,20 +32,24 @@ public class Message {
 
 	public static final String DATE = "date";
 
+	public static final String READ = "read";
+
+
 	public static final String CHAT_ID = "chat_id";
 
 	public static final String CREATE_SQL =
 			"CREATE TABLE " + TABLE_NAME + "("
 					+ MID + " VARCHAR(30) PRIMARY KEY, "
-					+ FROM_ID + " VARCHAR(30), "
+					+ FROM_ID + " VARCHAR(50), "
 					+ FROM_NAME + " VARCHAR(30), "
 					+ TO_ID + " VARCHAR(30), "
-					+ TO_NAME + " VARCHAR(30), "
+					+ TO_NAME + " VARCHAR(50), "
 					+ TYPE + " VARCHAR(30), "
 					+ CONTENT + " TEXT, "
 					+ DATE + " VARCHAR(30), "
+					+ READ + " INTEGER, "
 					+ CHAT_ID + " VARCHAR(50), "
-					+ "FOREIGN KEY (" + CHAT_ID + ") REFERENCES " + ChatManager.TABLE_NAME + "(" + Chat.CID + ") "
+					+ "FOREIGN KEY (" + CHAT_ID + ") REFERENCES " + Chat.TABLE_NAME + "(" + Chat.CID + ") "
 					+ ") ";
 
 	@SerializedName("mid")// 可以讓你的field名稱與API不同
@@ -61,9 +70,12 @@ public class Message {
 	@SerializedName("date")
 	private String date;
 
+	private Integer read;
+
 	private String chatId;
 
-	public Message(String mid, User from, User to, String type, String content, String date, String chatId) {
+	public Message(String mid, User from, User to, String type, String content,
+	               String date, String chatId, int read) {
 		this.mid = mid;
 		this.from = from;
 		this.to = to;
@@ -71,6 +83,7 @@ public class Message {
 		this.content = content;
 		this.date = date;
 		this.chatId = chatId;
+		this.read = read;
 	}
 
 	public static Message newInstance(Cursor cursor){
@@ -90,7 +103,8 @@ public class Message {
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.TYPE)),
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTENT)),
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.DATE)),
-				cursor.getString(cursor.getColumnIndexOrThrow(Message.CHAT_ID))
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.CHAT_ID)),
+				cursor.getInt(cursor.getColumnIndexOrThrow(Message.READ))
 		);
 	}
 
@@ -104,7 +118,16 @@ public class Message {
 		values.put(Message.TYPE, getType());
 		values.put(Message.CONTENT, getContent());
 		values.put(Message.DATE, getDate());
+		values.put(Message.CHAT_ID, getChatId());
+		values.put(Message.READ, getRead());
 		return values;
+	}
+
+	public void fix(){
+		if(date == null) date = SystemUtils.getDateTime();
+		if(read == null) read = DbHelper.IntBoolean.FALSE;
+		if(chatId == null) chatId = from.getName().equals(IMApplication.getUser().getName())
+				? to.getName() : from.getName();
 	}
 
 	public String getContent() {
@@ -153,6 +176,22 @@ public class Message {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public String getChatId() {
+		return chatId;
+	}
+
+	public void setChatId(String chatId) {
+		this.chatId = chatId;
+	}
+
+	public Integer getRead() {
+		return read;
+	}
+
+	public void setRead(Integer read) {
+		this.read = read;
 	}
 
 	public class Type{

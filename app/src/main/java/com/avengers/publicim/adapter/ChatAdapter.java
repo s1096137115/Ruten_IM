@@ -6,9 +6,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
+import com.avengers.publicim.conponent.DbHelper;
+import com.avengers.publicim.conponent.IMApplication;
 import com.avengers.publicim.data.entities.Message;
 
 import java.util.ArrayList;
@@ -17,10 +20,10 @@ import java.util.List;
 /**
  * Created by D-IT-MAX2 on 2016/3/15.
  */
-public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.NormalTextViewHolder> {
+public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	private final LayoutInflater mLayoutInflater;
 	private final Context mContext;
-	public List<Message> mMessages = new ArrayList<>();
+	private List<Message> mMessages = new ArrayList<>();
 	private Handler mHandler = new Handler();
 
 	/**
@@ -39,24 +42,30 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.NormalTextView
 	}
 
 	@Override
-	public ChatAdapter.NormalTextViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-		NormalTextViewHolder holder = null;
+	public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+		RecyclerView.ViewHolder holder = null;
 		switch (viewType) {
 			case TYPE_RECEIVE:
-				holder = new NormalTextViewHolder(mLayoutInflater.inflate(R.layout.view_msg_item_left, parent, false));
+				holder = new TheOtherViewHolder(mLayoutInflater.inflate(R.layout.view_msg_item_left, parent, false));
 				break;
 			case TYPE_SEND:
-				holder = new NormalTextViewHolder(mLayoutInflater.inflate(R.layout.view_msg_item_right, parent, false));
+				holder = new SelfHolder(mLayoutInflater.inflate(R.layout.view_msg_item_right, parent, false));
 				break;
 		}
 		return holder;
 	}
 
 	@Override
-	public void onBindViewHolder(ChatAdapter.NormalTextViewHolder holder, int position) {
-		holder.mContent.setText(mMessages.get(position).getContent());
-		String eventTime = mMessages.get(position).getDate().replace(" ","\n");
-		holder.mDatetime.setText(eventTime);
+	public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+		if (holder instanceof TheOtherViewHolder) {
+			((TheOtherViewHolder) holder).mContent.setText(mMessages.get(position).getContent());
+			String eventTime = mMessages.get(position).getDate().replace(" ","\n");
+			((TheOtherViewHolder) holder).mDatetime.setText(eventTime);
+		} else if (holder instanceof SelfHolder) {
+			((SelfHolder) holder).mContent.setText(mMessages.get(position).getContent());
+			String eventTime = mMessages.get(position).getDate().replace(" ","\n");
+			((SelfHolder) holder).mDatetime.setText(eventTime);
+		}
 	}
 
 	@Override
@@ -64,11 +73,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.NormalTextView
 		return mMessages == null ? 0 : mMessages.size();
 	}
 
-//	@Override
-//	public int getItemViewType(int position) {
-		//todo if Message.from equals account ? TYPE_SEND : TYPE_RECEIVE
-//		return mMessages.get(position).replynick.equals(PreferenceHelper.LoginStatus.mUserId) ? TYPE_SEND : TYPE_RECEIVE;
-//	}
+	@Override
+	public int getItemViewType(int position) {
+		String from = mMessages.get(position).getFrom().getName();
+		String name = IMApplication.getUser().getName();
+		return mMessages.get(position).getFrom().getName().equals(IMApplication.getUser().getName())
+				? TYPE_SEND : TYPE_RECEIVE;
+	}
 
 	public void refresh(){
 		mHandler.post(new Runnable() {
@@ -79,14 +90,42 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.NormalTextView
 		});
 	}
 
-	public static class NormalTextViewHolder extends RecyclerView.ViewHolder {
-//		TextView mAccount;
+	public void update(List<Message> objects){
+		mMessages = objects;
+	}
+
+	public List<Message> getData(){
+		return mMessages;
+	}
+
+	public boolean hasUnread(){
+		for (Message message : mMessages){
+			if(message.getRead() == DbHelper.IntBoolean.FALSE){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static class TheOtherViewHolder extends RecyclerView.ViewHolder {
+		ImageView mImageView;
 		TextView mContent;
 		TextView mDatetime;
 
-		NormalTextViewHolder(View view) {
+		TheOtherViewHolder(View view) {
 			super(view);
-//			mAccount = (TextView)view.findViewById(R.id.account);
+			mImageView = (ImageView)view.findViewById(R.id.icon);
+			mContent = (TextView)view.findViewById(R.id.msg);
+			mDatetime = (TextView)view.findViewById(R.id.datetime);
+		}
+	}
+
+	public static class SelfHolder extends RecyclerView.ViewHolder {
+		TextView mContent;
+		TextView mDatetime;
+
+		SelfHolder(View view) {
+			super(view);
 			mContent = (TextView)view.findViewById(R.id.msg);
 			mDatetime = (TextView)view.findViewById(R.id.datetime);
 		}

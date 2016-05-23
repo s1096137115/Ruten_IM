@@ -1,12 +1,17 @@
 package com.avengers.publicim.utils;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.data.Constants;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -49,5 +54,19 @@ public class SystemUtils {
 		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 		boolean network = (activeNetwork != null && activeNetwork.isConnected());
 		return network;
+	}
+
+	public static String getDateTime(){
+		SimpleDateFormat sdf = new SimpleDateFormat(Constants.SAVE_DB_SIMPLE_DATETIME_FORMAT);
+		return sdf.format(System.currentTimeMillis());
+	}
+
+	public static void hideVirtualKeyboard(Activity activity) {
+		View view = activity.getCurrentFocus();
+		if (view != null) {
+			InputMethodManager imm = (InputMethodManager) IMApplication.getContext().
+					getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+		}
 	}
 }

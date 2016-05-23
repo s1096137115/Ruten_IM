@@ -1,14 +1,30 @@
 package com.avengers.publicim.data.entities;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by D-IT-MAX2 on 2016/3/3.
  */
-public class RosterEntry {
+public class RosterEntry implements Serializable {
+	public static final String TABLE_NAME = "roster";
+
 	public static final String RELATIONSHIP = "relationship";
+
+	public static final String CREATE_SQL =
+			"CREATE TABLE " + TABLE_NAME + "("
+					+ User.UID + " VARCHAR(50), "
+					+ User.NAME + " VARCHAR(30), "
+					+ Presence.DESCRIBE + " VARCHAR(30), "
+					+ Presence.PHOTO + " VARCHAR(30), "
+					+ Presence.STATUS + " VARCHAR(30), "
+					+ RELATIONSHIP + " VARCHAR(30), "
+					+ "PRIMARY KEY (" + User.UID + "," + User.NAME + ") "
+					+ ") ";
 
 	@SerializedName("relationship")// 可以讓你的field名稱與API不同
 	private Integer relationship;
@@ -30,6 +46,17 @@ public class RosterEntry {
 				User.newInstance(cursor), Presence.newInstance(cursor),
 				cursor.getInt(cursor.getColumnIndexOrThrow(RosterEntry.RELATIONSHIP))
 		);
+	}
+
+	public ContentValues getContentValues(){
+		ContentValues cv = new ContentValues();
+		cv.put(User.UID, user.getUid());
+		cv.put(User.NAME, user.getName());
+		cv.put(Presence.DESCRIBE, presence.getDescribe());
+		cv.put(Presence.PHOTO, presence.getPhoto());
+		cv.put(Presence.STATUS, presence.getStatus());
+		cv.put(RELATIONSHIP, relationship);
+		return cv;
 	}
 
 	public Presence getPresence() {
