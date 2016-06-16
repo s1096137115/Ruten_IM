@@ -26,6 +26,11 @@ public class RosterEntry implements Serializable {
 					+ "PRIMARY KEY (" + User.UID + "," + User.NAME + ") "
 					+ ") ";
 
+	public static final int RELATION_INVITE = 0;
+	public static final int RELATION_FRIEND = 1;
+	public static final int RELATION_BLACKLIST = 2;
+	public static final int RELATION_DELETE = 3;
+
 	@SerializedName("relationship")// 可以讓你的field名稱與API不同
 	private Integer relationship;
 

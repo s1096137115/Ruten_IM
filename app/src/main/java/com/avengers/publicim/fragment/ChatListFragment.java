@@ -80,7 +80,8 @@ public class ChatListFragment extends BaseFragment implements ChatListener{
 			@Override
 			public void onClick(View view) {
 				refresh();
-				getChatManager().setChats(mDB.getContentOfChats());
+//				getChatManager().setChats(mDB.getContentOfChats());
+				getChatManager().reload();
 			}
 		});
 	}

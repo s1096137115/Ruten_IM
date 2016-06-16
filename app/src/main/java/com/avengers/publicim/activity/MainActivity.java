@@ -1,12 +1,14 @@
 package com.avengers.publicim.activity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,6 +17,9 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.avengers.publicim.R;
+import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.data.entities.Invite;
+import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.fragment.ChatListFragment;
 import com.avengers.publicim.fragment.RosterFragment;
 
@@ -38,6 +43,14 @@ public class MainActivity extends BaseActivity {
 		setViewPager();
 		setToolBar();
 		setTabLayout();
+		mFragments.add(mRosterFragment);
+		mFragments.add(mChatListFragment);
+	}
+
+	@Override
+	protected void onDestroy() {
+		mFragments.clear();
+		super.onDestroy();
 	}
 
 	private void setViewPager(){
@@ -66,6 +79,12 @@ public class MainActivity extends BaseActivity {
 			}
 		}
 //        mTabLayout.setTabMode(TabLayout.MODE_FIXED);
+	}
+
+	@Override
+	protected void onBackendConnected() {
+		super.onBackendConnected();
+		mIMService.connect();
 	}
 
 	@Override
@@ -128,16 +147,32 @@ public class MainActivity extends BaseActivity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
+		switch (id){
+			case R.id.action_settings:
+				mIMService.connect();
+				break;
+			case R.id.action_invite_friend:
 
-		//noinspection SimplifiableIfStatement
-		if (id == R.id.action_settings) {
-//			mIMService.disconnect();
-			mIMService.connect();
-//			mIMService.sendMessage("hello");
-			return true;
+				final AppCompatEditText input = new AppCompatEditText(this);
+				getBuilder()
+						.setTitle("invite")
+						.setView(input)
+						.setPositiveButton("y", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								if(!input.getText().toString().isEmpty()){
+									Invite invite = new Invite(IMApplication.getUser(),
+											new User("", input.getText().toString()),
+											Invite.TYPE_FRIEND, null, null, Invite.RELATION_FRIEND);
+//							mIMService.sendInvite(invite);
+								}
+							}
+						}).show();
+//				InviteDialog dialog = new InviteDialog();
+//				dialog.show(getSupportFragmentManager(),"Invite");
+				break;
 		}
-
-		return super.onOptionsItemSelected(item);
+		return true;
 	}
 
 	/**

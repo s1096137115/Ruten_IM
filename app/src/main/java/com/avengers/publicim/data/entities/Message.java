@@ -48,8 +48,8 @@ public class Message implements Serializable {
 					+ CONTENT + " TEXT, "
 					+ DATE + " VARCHAR(30), "
 					+ READ + " INTEGER, "
-					+ CHAT_ID + " VARCHAR(50), "
-					+ "FOREIGN KEY (" + CHAT_ID + ") REFERENCES " + Chat.TABLE_NAME + "(" + Chat.CID + ") "
+					+ CHAT_ID + " VARCHAR(50) "
+//					+ "FOREIGN KEY (" + CHAT_ID + ") REFERENCES " + Chat.TABLE_NAME + "(" + Chat.CID + ") "
 					+ ") ";
 
 	@SerializedName("mid")// 可以讓你的field名稱與API不同
@@ -123,11 +123,15 @@ public class Message implements Serializable {
 		return values;
 	}
 
-	public void fix(){
+	public boolean fix(){
 		if(date == null) date = SystemUtils.getDateTime();
 		if(read == null) read = DbHelper.IntBoolean.FALSE;
 		if(chatId == null) chatId = from.getName().equals(IMApplication.getUser().getName())
 				? to.getName() : from.getName();
+		if(from.getName().equals("") || to.getName().equals("") || type.equals("") || content.equals("")){
+			return false;
+		}
+		return true;
 	}
 
 	public String getContent() {

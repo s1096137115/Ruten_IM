@@ -1,7 +1,9 @@
 package com.avengers.publicim.data.Manager;
 
+import android.content.Context;
 import android.database.Cursor;
 
+import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.listener.ChatListener;
 
@@ -14,14 +16,21 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * Created by D-IT-MAX2 on 2016/3/22.
  */
 public class ChatManager {
-	private List<Chat> chats = new ArrayList<>();
+	private DbHelper mDB;
 
-//	private ChatListener mChatListener = null;
+	private List<Chat> chats = new ArrayList<>();
 
 	private Set<ChatListener> mChatListeners = new CopyOnWriteArraySet<>();
 
-	public ChatManager(){
+	public ChatManager(Context context){
+		mDB = DbHelper.getInstance(context);
+	}
 
+	public void reload(){
+		setChats(mDB.getContentOfChats());
+		for(ChatListener listener : mChatListeners){
+			listener.onChatUpdate();
+		}
 	}
 
 	public void setChats(Cursor cursor){
@@ -31,9 +40,6 @@ public class ChatManager {
 			chat.setInfo(cursor);
 			chats.add(chat);
 		}
-		for(ChatListener listener : mChatListeners){
-			listener.onChatUpdate();
-		}
 	}
 
 	public List<Chat> getChats() {
@@ -42,9 +48,6 @@ public class ChatManager {
 
 	public void setChats(List<Chat> chats) {
 		this.chats = chats;
-		for(ChatListener listener : mChatListeners){
-			listener.onChatUpdate();
-		}
 	}
 
 	public Chat getChat(String cid){

@@ -2,14 +2,6 @@
 
 基於Socket.IO下的pchome & ruten所共同開發的IM程式
 
-## Notes
-
-#### 2016/03/24
-1.修改部分架構
-
-#### 2016/03/17
-1.目前此版本僅有初步架構，UI & 功能上尚未完成，但已可連線至server  
-**測試時可先用debug mode觀看資料，或print到console上*
 
 ## Installing
   

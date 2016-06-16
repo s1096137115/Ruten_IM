@@ -15,6 +15,7 @@ import com.avengers.publicim.adapter.RosterAdapter;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.listener.RosterListener;
 import com.avengers.publicim.utils.ItemClickSupport;
+import com.avengers.publicim.view.IMProgressDialogFragment;
 
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
@@ -71,6 +72,10 @@ public class RosterFragment extends BaseFragment implements RosterListener{
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
+//				((BaseActivity)getActivity()).getBuilder().show();
+//				((BaseActivity)getActivity()).getBuilder().getDialog().dismiss();
+				IMProgressDialogFragment dialog = new IMProgressDialogFragment();
+				dialog.show(getActivity().getSupportFragmentManager(),"");
 				refresh();
 			}
 		});

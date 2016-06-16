@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
+import com.avengers.publicim.activity.BaseActivity;
 import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMService;
 import com.avengers.publicim.data.listener.ChatListener;
@@ -32,7 +33,6 @@ public abstract class BaseFragment extends Fragment {
 	@Override
 	public void onStart() {
 		super.onStart();
-//		mIMService = ((BaseActivity)getActivity()).getIMService();
 		registerListeners();
 	}
 
@@ -40,6 +40,12 @@ public abstract class BaseFragment extends Fragment {
 	public void onStop() {
 		super.onStop();
 		unregisterListeners();
+	}
+
+	public void onBackendConnected() {
+		if(getActivity() != null){
+			mIMService = ((BaseActivity)getActivity()).getIMService();
+		}
 	}
 
 	public void registerListeners(){

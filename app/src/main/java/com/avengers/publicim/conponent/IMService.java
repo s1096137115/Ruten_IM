@@ -10,8 +10,11 @@ import android.widget.Toast;
 
 import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.entities.Chat;
+import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Message;
+import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.RosterEntry;
+import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.data.response.GetSyncData;
 import com.avengers.publicim.utils.GsonUtils;
 import com.avengers.publicim.utils.SystemUtils;
@@ -34,7 +37,6 @@ public class IMService extends Service {
 	private Socket mSocket;
 	private DbHelper mDB;
 	private Handler mHandler = new Handler();
-	private GetSyncData mGSD;
 
 	public IMService() {
 	}
@@ -46,13 +48,6 @@ public class IMService extends Service {
 		mDB = DbHelper.getInstance(this);
 		mSocket = app.getSocket();
 		setListener(mSocket);
-//		updateChat(new Chat("dog","dog", SystemUtils.getDateTime()));
-//		updateChat(new Chat("cat","cat", SystemUtils.getDateTime()));
-//		User user = new User("Android-2234", "dog");
-//		User user2 = new User("Android-1234", "cat");
-//		Message message = new Message(null, user, user2, Message.Type.TEXT, "test1", SystemUtils.getDateTime(),
-//				user2.getName(), DbHelper.IntBoolean.FALSE);
-//		mDB.insertMessage(message);
 	}
 
 	private void setListener(Socket socket){
@@ -68,6 +63,8 @@ public class IMService extends Service {
 		socket.on(Socket.EVENT_RECONNECTING, onConnectError);
 		socket.on(Constants.EVENT_RESPONSE, onResponse);
 		socket.on(Constants.EVENT_RECEIVE_MESSAGE, onReceiveMessage);
+		socket.on(Constants.EVENT_RECEIVE_PRESENCE, onReceivePresence);
+		socket.on(Constants.EVENT_RECEIVE_INVITE, onReceiveInvite);
 	}
 
 	public void connect(){
@@ -84,16 +81,14 @@ public class IMService extends Service {
 
 	public void sendMessage(final Message message){
 			final JSONObject obj = GsonUtils.toJSONObject(message);
-			Log.d("acho", "ack");
 
 			mSocket.emit(Constants.EVENT_SEND_MESSAGE, obj, new Ack() {
 				@Override
 				public void call(Object... args) {
-					Log.d("acho", "ack");
 					String errorMessage = (String) args[0];
 					String mid = String.valueOf(args[1]);
 					message.setMid(mid);
-					addMessage(message);
+
 
 					Chat chat;
 					if(getChatManager().contains(message.getChatId())){
@@ -103,9 +98,36 @@ public class IMService extends Service {
 								SystemUtils.getDateTime());
 					}
 					chat.setDate(message.getDate());
+					addMessage(message);
 					updateChat(chat);
 				}
 			});
+	}
+
+	public void sendPresence(Presence presence){
+		try {
+			final JSONObject obj = GsonUtils.toJSONObject(presence);
+			final JSONObject obj2 = GsonUtils.toJSONObject(IMApplication.getUser());
+			obj.put("from",obj2);
+			mSocket.emit(Constants.EVENT_SEND_PRESENCE, obj, new Ack() {
+				@Override
+				public void call(Object... args) {
+					String errorMessage = (String) args[0];
+				}
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void sendInvite(Invite invite){
+		final JSONObject obj = GsonUtils.toJSONObject(invite);
+		mSocket.emit(Constants.EVENT_SEND_INVITE, obj, new Ack() {
+			@Override
+			public void call(Object... args) {
+				String errorMessage = (String) args[0];
+			}
+		});
 	}
 
 	public void addMessage(Message message){
@@ -116,7 +138,7 @@ public class IMService extends Service {
 	public void addChat(Chat chat){
 		if(!getChatManager().contains(chat.getCid())){
 			mDB.insertChat(chat);
-			getChatManager().setChats(mDB.getContentOfChats());
+			getChatManager().reload();
 		}
 	}
 
@@ -138,8 +160,7 @@ public class IMService extends Service {
 				}
 			}
 		}
-//		getRosterManager().setEntries(listEntries);
-		getRosterManager().setEntries(mDB.getLocalRoster());
+		getRosterManager().reload();
 	}
 
 	public void updateChat(Chat chat){
@@ -148,7 +169,7 @@ public class IMService extends Service {
 		}else{
 			mDB.insertChat(chat);
 		}
-		getChatManager().setChats(mDB.getContentOfChats());
+		getChatManager().reload();
 	}
 
 	public void updateMessage(Message message){
@@ -156,12 +177,46 @@ public class IMService extends Service {
 		getMessageManager().change();
 	}
 
+	public void updateMessageOfRead(Chat chat, int read){
+		mDB.updateMessageofRead(chat, read);
+	}
+
 	public void updateMessageOfMid(){
 
 	}
 
-	public void updateMessageOfRead(Chat chat, int read){
-		mDB.updateMessageofRead(chat, read);
+	public void sendAddRoster(){
+
+	}
+
+	public void sendRemoveRoster(){
+
+	}
+
+	public void sendSyncData(){
+		try {
+			JSONObject obj = new JSONObject();
+			obj.put("action", Constants.EVENT_GET_SYNC_DATA);
+			mSocket.emit("request", obj);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void processSyncData(String data){
+		GetSyncData getSyncData = GsonUtils.fromJson(data, GetSyncData.class);
+		updateRoster(getSyncData.getRosterEntries());
+		for(Message message : getSyncData.getMessages()){
+			if(!message.fix()){
+				continue;
+			}
+			if(!getChatManager().contains(message.getChatId())){
+				addChat(new Chat(message.getChatId(),message.getChatId(),message.getDate()));
+			}
+			mDB.insertMessage(message);
+		}
+		getMessageManager().change();
+		getChatManager().reload();
 	}
 
 	@Override
@@ -183,34 +238,25 @@ public class IMService extends Service {
 	//Socket Listener start
 	//---------------------------------------------------------------------------------------------------------------------------------
 
+	/**
+	 * 登入事件
+	 */
 	private Emitter.Listener onConnect = new Emitter.Listener() {
 		@Override
 		public void call(final Object... args) {
 			Log.d("acho","connect");
-			//todo 取得帳號本身的User
-			JSONObject obj = new JSONObject();
-			try {
-				obj.put("name", "dog");
-				obj.put("identify", "Android-1234");
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			JSONObject obj = GsonUtils.toJSONObject(IMApplication.getUser());
 			try {
 				mSocket.emit(Constants.EVENT_JOIN, obj, new Ack() {
 					@Override
 					public void call(Object... args) {
 						Log.d("acho", "ack");
+						//todo handle errorMessage & state
 						String errorMessage = (String)args[0];
 						Boolean state = (Boolean)args[1];
-						//todo handle errorMessage & state
 
-						JSONObject obj = new JSONObject();
-						try {
-							obj.put("action", "getRoster");
-							mSocket.emit("request", obj);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+						sendSyncData();
+						sendPresence(IMApplication.getPresence());
 					}
 				});
 			} catch (Exception e) {
@@ -219,6 +265,9 @@ public class IMService extends Service {
 		}
 	};
 
+	/**
+	 * 登入錯誤事件
+	 */
 	private Emitter.Listener onConnectError = new Emitter.Listener() {
 		@Override
 		public void call(Object... args) {
@@ -233,31 +282,79 @@ public class IMService extends Service {
 		}
 	};
 
+	/**
+	 * socket所emit出的request的action所對應的回應事件
+	 */
 	private Emitter.Listener onResponse = new Emitter.Listener() {
 		@Override
 		public void call(final Object... args) {
-			Log.d("acho", "response");
 			try {
-				//todo 根據json的action對應class
-				mGSD = GsonUtils.fromJson(args[0].toString(), GetSyncData.class);
-				updateRoster(mGSD.getRosterEntries());
-				Log.d("acho","after");
+				JSONObject jsonObj  = new JSONObject(args[0].toString());
+				String action = jsonObj.get("action").toString();
+				if(action.equals(Constants.EVENT_GET_SYNC_DATA)){
+					processSyncData(args[0].toString());
+				}else if(action.equals(Constants.EVENT_CREATE_GROUP)){
+
+				}else if(action.equals(Constants.EVENT_SET_GROUP_MEMBER_ROLE)){
+
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	};
 
+	/**
+	 * 接收訊息事件
+	 */
 	private Emitter.Listener onReceiveMessage = new Emitter.Listener() {
 		@Override
 		public void call(final Object... args) {
 			Message message = GsonUtils.fromJson(args[0].toString(), Message.class);
 			if(!message.getFrom().equals(IMApplication.getUser())){
-				message.fix();
+				if(!message.fix()){
+					return;
+				}
+				Chat chat;
+				if(!getChatManager().contains(message.getChatId())){
+					chat = new Chat(message.getChatId(),message.getChatId(),message.getDate());
+					addChat(chat);
+				}else{
+					chat = getChatManager().getChat(message.getChatId());
+				}
+				chat.setDate(message.getDate());
 				addMessage(message);
-				Chat chat = new Chat(message.getChatId(),message.getChatId(),message.getDate());
 				updateChat(chat);
 			}
+		}
+	};
+
+	/**
+	 * 接收狀態事件
+	 */
+	private Emitter.Listener onReceivePresence = new Emitter.Listener() {
+		@Override
+		public void call(final Object... args) {
+			try {
+				JSONObject jsonObj = new JSONObject(args[0].toString());
+				String toStr = jsonObj.get("to").toString();
+				User to = GsonUtils.fromJson(toStr, User.class);
+				String fromStr = jsonObj.get("from").toString();
+				User from = GsonUtils.fromJson(fromStr, User.class);
+				Presence presence = GsonUtils.fromJson(args[0].toString(), Presence.class);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+	};
+
+	/**
+	 * 接收邀請事件
+	 */
+	private Emitter.Listener onReceiveInvite = new Emitter.Listener() {
+		@Override
+		public void call(final Object... args) {
+			Invite invite = GsonUtils.fromJson(args[0].toString(), Invite.class);
 		}
 	};
 

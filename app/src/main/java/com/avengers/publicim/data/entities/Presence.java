@@ -16,12 +16,26 @@ public class Presence implements Serializable {
 
 	public static final String DESCRIBE = "describe";
 
+	public static final int STATUS_OFFLINE = 0;
+	public static final int STATUS_ONLINE = 1;
+
+	/**
+	 * 使用者大頭照
+	 */
 	@SerializedName("photo")
 	private String photo;
 
+	/**
+	 * 使用者狀態
+	 * 0 offline
+	 * 1 online
+	 */
 	@SerializedName("status")
 	private Integer status;
 
+	/**
+	 * 使用者描述
+	 */
 	@SerializedName("describe")
 	private String describe;
 

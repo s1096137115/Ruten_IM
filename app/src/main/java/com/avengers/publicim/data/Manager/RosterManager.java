@@ -1,5 +1,8 @@
 package com.avengers.publicim.data.Manager;
 
+import android.content.Context;
+
+import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.data.listener.RosterListener;
@@ -19,13 +22,15 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * This is RosterEntry manager
  */
 public class RosterManager {
-	private Map<User, RosterEntry> entries = new ConcurrentHashMap<>();
+	private DbHelper mDB;
 
-//	private  RosterListener mRosterListener = null;
+	private Map<User, RosterEntry> entries = new ConcurrentHashMap<>();
 
 	private Set<RosterListener> mRosterListeners = new CopyOnWriteArraySet<>();
 
-//	public List<RosterEntry> entries = new ArrayList<>();
+	public RosterManager(Context context){
+		mDB = DbHelper.getInstance(context);
+	}
 
 	public boolean isEmpty(){
 		return entries.isEmpty();
@@ -88,13 +93,17 @@ public class RosterManager {
 		return entries.containsKey(user);
 	}
 
+	public void reload(){
+		setEntries(mDB.getLocalRoster());
+		for (RosterListener listener : mRosterListeners){
+			listener.onRosterUpdate();
+		}
+	}
+
 	public void setEntries(List<RosterEntry> listEntries) {
 		entries.clear();
 		for (RosterEntry entry : listEntries){
 			entries.put(entry.getUser(), entry);
-		}
-		for (RosterListener listener : mRosterListeners){
-			listener.onRosterUpdate();
 		}
 	}
 

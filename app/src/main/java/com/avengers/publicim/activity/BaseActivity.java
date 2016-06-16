@@ -6,6 +6,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 
 import com.avengers.publicim.conponent.DbHelper;
@@ -14,6 +15,11 @@ import com.avengers.publicim.conponent.IMService.IMBinder;
 import com.avengers.publicim.data.listener.ChatListener;
 import com.avengers.publicim.data.listener.MessageListener;
 import com.avengers.publicim.data.listener.RosterListener;
+import com.avengers.publicim.fragment.BaseFragment;
+import com.avengers.publicim.view.DialogBuilder;
+
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import static com.avengers.publicim.conponent.IMApplication.getChatManager;
 import static com.avengers.publicim.conponent.IMApplication.getMessageManager;
@@ -26,12 +32,17 @@ public abstract class BaseActivity extends AppCompatActivity {
 	protected IMService mIMService;
 	protected boolean mIsBind = false;
 	protected DbHelper mDB;
-	protected Handler mHandler = new Handler();
+	protected DialogBuilder mBuilder;
+	protected Handler mHandler;
+	protected Set<Fragment> mFragments;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDB = DbHelper.getInstance(this);
+		mBuilder = new DialogBuilder(this);
+		mHandler = new Handler();
+		mFragments = new CopyOnWriteArraySet<>();
 	}
 
 	@Override
@@ -45,7 +56,6 @@ public abstract class BaseActivity extends AppCompatActivity {
 			startService(intent);
 			bindService(intent,mSC,BIND_AUTO_CREATE);
 		}
-
 	}
 
 	@Override
@@ -56,6 +66,16 @@ public abstract class BaseActivity extends AppCompatActivity {
 			unregisterListeners();
 			mIsBind =false;
 		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		mBuilder.getDialog().dismiss();
+		super.onDestroy();
+	}
+
+	public DialogBuilder getBuilder(){
+		return mBuilder;
 	}
 
 	public IMService getIMService(){
@@ -87,6 +107,9 @@ public abstract class BaseActivity extends AppCompatActivity {
 	}
 
 	protected void onBackendConnected() {
+		for(Fragment fragment : mFragments){
+			((BaseFragment)fragment).onBackendConnected();
+		}
 	}
 
 	private ServiceConnection mSC = new ServiceConnection() {

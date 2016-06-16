@@ -52,10 +52,7 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 						Message.Type.TEXT, mTextInput.getText().toString(), SystemUtils.getDateTime(),
 						mEntry.getUser().getName(), DbHelper.IntBoolean.TRUE);
 
-				mChat.setDate(message.getDate());
-
 				mIMService.sendMessage(message);
-				mIMService.updateChat(mChat);
 
 				//adjust UI
 				mTextInput.getText().clear();
@@ -68,7 +65,11 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
 			String name = bundle.getString(ROSTER_NAME);
-			mEntry = getRosterManager().getEntry(name);
+			if(getRosterManager().contains(name)){
+				mEntry = getRosterManager().getEntry(name);
+			}else{
+				return;
+			}
 
 			if(getChatManager().contains(name)){
 				mChat = getChatManager().getChat(name);
@@ -84,7 +85,7 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		setSupportActionBar(toolbar);
 //		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 //		getSupportActionBar().setHomeButtonEnabled(true);
-		if(mEntry.getUser().getName() != null){
+		if(mEntry != null){
 			getSupportActionBar().setTitle(mEntry.getUser().getName());
 		}
 	}
@@ -98,12 +99,13 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 
 	@Override
 	protected void onBackendConnected() {
+		super.onBackendConnected();
 		if(mChat == null) return;
 		//有chat & 未讀訊息的情況下才更新chat
 		if(getChatManager().contains(mChat.getCid())){
 			if(mChatAdapter.hasUnread()){
 				mIMService.updateMessageOfRead(mChat, DbHelper.IntBoolean.TRUE);
-				mIMService.updateChat(mChat);
+				getChatManager().reload();
 			}
 		}else{
 			mIMService.addChat(mChat);
