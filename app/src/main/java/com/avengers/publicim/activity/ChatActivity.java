@@ -74,8 +74,7 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 			if(getChatManager().contains(name)){
 				mChat = getChatManager().getChat(name);
 			}else{
-				mChat = new Chat(mEntry.getUser().getName(),mEntry.getUser().getName(),
-						SystemUtils.getDateTime());
+				mChat = new Chat(mEntry.getUser().getName(),mEntry.getUser().getName());
 			}
 		}
 	}

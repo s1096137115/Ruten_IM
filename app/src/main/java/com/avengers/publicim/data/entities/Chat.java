@@ -25,8 +25,8 @@ public class Chat implements Serializable {
 	public static final String CREATE_SQL =
 			"CREATE TABLE " + TABLE_NAME + "("
 					+ CID + " VARCHAR(50) PRIMARY KEY, "
-					+ TITLE + " VARCHAR(50), "
-					+ DATE + " VARCHAR(30) "
+					+ TITLE + " VARCHAR(50) "
+//					+ DATE + " VARCHAR(30) "
 //					+ "FOREIGN KEY (" + Chat.CID + ") REFERENCES " + RosterManager.TABLE_NAME + "(" + User.NAME + ") "
 					+ ") ";
 
@@ -40,17 +40,15 @@ public class Chat implements Serializable {
 
 	private int unread;
 
-	public Chat(String cid, String title, String date) {
+	public Chat(String cid, String title) {
 		this.cid = cid;
 		this.title = title;
-		this.date = date;
 	}
 
 	public static Chat newInstance(Cursor cursor){
 		return new Chat(
 				cursor.getString(cursor.getColumnIndexOrThrow(CID)),
-				cursor.getString(cursor.getColumnIndexOrThrow(TITLE)),
-				cursor.getString(cursor.getColumnIndexOrThrow(DATE))
+				cursor.getString(cursor.getColumnIndexOrThrow(TITLE))
 		);
 	}
 
@@ -58,7 +56,6 @@ public class Chat implements Serializable {
 		ContentValues cv = new ContentValues();
 		cv.put(CID, cid);
 		cv.put(TITLE, title);
-		cv.put(DATE, date);
 		return cv;
 	}
 
@@ -108,7 +105,9 @@ public class Chat implements Serializable {
 	 */
 	public void setInfo(Cursor cursor){
 		setLastMsg(Message.newInstance(cursor));
-		int unread = cursor.getInt(cursor.getColumnIndex(UNREAD)) == -1 ? 0 : cursor.getInt(cursor.getColumnIndex(UNREAD));
+		int unread = cursor.getInt(cursor.getColumnIndex(UNREAD));
+		String date = cursor.getString(cursor.getColumnIndex(DATE)) == null ? "" : cursor.getString(cursor.getColumnIndex(DATE));
 		setUnread(unread);
+		setDate(date);
 	}
 }

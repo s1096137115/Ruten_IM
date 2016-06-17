@@ -65,13 +65,10 @@ public class DbHelper extends SQLiteOpenHelper{
 
 	public Cursor getContentOfChats(){
 		SQLiteDatabase db = getWritableDatabase();
-//		String SQL_SEL = String.format("SELECT * FROM (SELECT * , MAX(m.date) last, SUM(m.read) %s FROM %s m " +
-//				"GROUP BY m.to_name) j, %s c WHERE j.to_name = c.cid ORDER BY j.last DESC",
-//				Chat.UNREAD, Message.TABLE_NAME, Chat.TABLE_NAME);
-		String SQL_SEL = String.format("SELECT * FROM %s c LEFT JOIN (SELECT * , MAX(msg.date) last ," +
-				"SUM(msg.read = 0) unread FROM %s msg GROUP BY msg.chat_id)info ON info.chat_id = c.cid " +
-				"ORDER BY c.date DESC",
-				Chat.TABLE_NAME, Message.TABLE_NAME);
+		String SQL_SEL = String.format("SELECT * FROM (SELECT *,MAX(msg.date) last,SUM(msg.read = 0)unread " +
+				"FROM %s msg GROUP BY msg.chat_id)info, %s c " +
+				"WHERE info.chat_id = c.cid ORDER BY info.last DESC",
+				Message.TABLE_NAME, Chat.TABLE_NAME);
 		return db.rawQuery(SQL_SEL, null);
 	}
 

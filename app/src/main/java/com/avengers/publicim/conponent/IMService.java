@@ -17,7 +17,6 @@ import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.data.response.GetSyncData;
 import com.avengers.publicim.utils.GsonUtils;
-import com.avengers.publicim.utils.SystemUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -88,18 +87,8 @@ public class IMService extends Service {
 					String errorMessage = (String) args[0];
 					String mid = String.valueOf(args[1]);
 					message.setMid(mid);
-
-
-					Chat chat;
-					if(getChatManager().contains(message.getChatId())){
-						chat = getChatManager().getChat(message.getChatId());
-					}else{
-						chat = new Chat(message.getChatId(),message.getChatId(),
-								SystemUtils.getDateTime());
-					}
-					chat.setDate(message.getDate());
 					addMessage(message);
-					updateChat(chat);
+					getChatManager().reload();
 				}
 			});
 	}
@@ -196,7 +185,7 @@ public class IMService extends Service {
 	public void sendSyncData(){
 		try {
 			JSONObject obj = new JSONObject();
-			obj.put("action", Constants.EVENT_GET_SYNC_DATA);
+			obj.put("action", Constants.EVENT_GET_ROSTER);
 			mSocket.emit("request", obj);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -211,7 +200,7 @@ public class IMService extends Service {
 				continue;
 			}
 			if(!getChatManager().contains(message.getChatId())){
-				addChat(new Chat(message.getChatId(),message.getChatId(),message.getDate()));
+				addChat(new Chat(message.getChatId(),message.getChatId()));
 			}
 			mDB.insertMessage(message);
 		}
@@ -256,7 +245,7 @@ public class IMService extends Service {
 						Boolean state = (Boolean)args[1];
 
 						sendSyncData();
-						sendPresence(IMApplication.getPresence());
+//						sendPresence(IMApplication.getPresence());
 					}
 				});
 			} catch (Exception e) {
@@ -291,6 +280,7 @@ public class IMService extends Service {
 			try {
 				JSONObject jsonObj  = new JSONObject(args[0].toString());
 				String action = jsonObj.get("action").toString();
+				processSyncData(args[0].toString());
 				if(action.equals(Constants.EVENT_GET_SYNC_DATA)){
 					processSyncData(args[0].toString());
 				}else if(action.equals(Constants.EVENT_CREATE_GROUP)){
@@ -315,16 +305,12 @@ public class IMService extends Service {
 				if(!message.fix()){
 					return;
 				}
-				Chat chat;
 				if(!getChatManager().contains(message.getChatId())){
-					chat = new Chat(message.getChatId(),message.getChatId(),message.getDate());
+					Chat chat = new Chat(message.getChatId(),message.getChatId());
 					addChat(chat);
-				}else{
-					chat = getChatManager().getChat(message.getChatId());
 				}
-				chat.setDate(message.getDate());
 				addMessage(message);
-				updateChat(chat);
+				getChatManager().reload();
 			}
 		}
 	};

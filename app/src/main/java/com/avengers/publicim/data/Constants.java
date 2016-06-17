@@ -4,7 +4,7 @@ package com.avengers.publicim.data;
  * Created by D-IT-MAX2 on 2016/3/1.
  */
 public class Constants {
-	public static final String CHAT_SERVER_URL = "http://192.168.3.223:8000";
+	public static final String CHAT_SERVER_URL = "http://192.168.3.229:8000";
 //	public static final String CHAT_SERVER_URL = "http://172.25.5.201:8000";
 //	public static final String CHAT_SERVER_URL = "http://192.168.3.224:8000";
 //	public static final String CHAT_SERVER_URL = "http://10.0.1.88:8000";
