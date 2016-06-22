@@ -2,125 +2,81 @@ package com.avengers.publicim.data.Manager;
 
 import android.content.Context;
 
-import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.data.listener.RosterListener;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * Created by D-IT-MAX2 on 2016/3/18.<p>
- * This is RosterEntry manager
+ * Created by D-IT-MAX2 on 2016/6/22.
  */
-public class RosterManager {
-	private DbHelper mDB;
+public class RosterManager extends BaseManager<RosterEntry, RosterListener> {
 
-	private Map<User, RosterEntry> entries = new ConcurrentHashMap<>();
-
-	private Set<RosterListener> mRosterListeners = new CopyOnWriteArraySet<>();
-
-	public RosterManager(Context context){
-		mDB = DbHelper.getInstance(context);
+	public RosterManager(Context context) {
+		super(context);
 	}
 
-	public boolean isEmpty(){
-		return entries.isEmpty();
+
+	@Override
+	public List<RosterEntry> getList() {
+		return mList;
 	}
 
-	public List<RosterEntry> getEntries() {
-		List<RosterEntry> allEntries = new ArrayList<>();
-		Set<String> set = new HashSet<>();
-		for (RosterEntry entry : entries.values()) {
-			//用於過慮相同user name的user
-			if(set.add(entry.getUser().getName())){
-				allEntries.add(entry);
-			}
-		}
-		sort(allEntries);
-		return allEntries;
-	}
-
-	public RosterEntry getEntry(User user) {
-		if(entries.containsKey(user)){
-			return entries.get(user);
-		}
-		return null;
-	}
-
-	/**
-	 * 如果使用userName拿的話只會確定拿到相同{@link User#name}但不保證拿到相同{@link User#uid}的entry
-	 * @param userName
-	 * @return
-	 */
-	public RosterEntry getEntry(String userName) {
-		for (RosterEntry entry : entries.values()) {
-			if(entry.getUser().getName().equals(userName)){
+	@Override
+	public RosterEntry getItem(String value) {
+		for (RosterEntry entry : mList) {
+			if(entry.getUser().getName().equals(value)){
 				return entry;
 			}
 		}
 		return null;
 	}
 
-	public List<RosterEntry> sort(List<RosterEntry> entries){
-		Collections.sort(entries,
-				new Comparator<RosterEntry>() {
-					public int compare(RosterEntry o1, RosterEntry o2) {
-						return o1.getUser().getName().compareTo(o2.getUser().getName());
-					}
-				});
-		return entries;
+	@Override
+	public void setList(List<RosterEntry> list) {
+		mList = list;
 	}
 
-	public boolean contains(String userName) {
-		for (RosterEntry entry : entries.values()) {
-			if(entry.getUser().getName().equals(userName)){
+	@Override
+	public boolean contains(RosterEntry item) {
+		return contains(item.getUser());
+	}
+
+	public boolean contains(User user) {
+		for(RosterEntry entry : mList){
+			if(entry.getUser().equals(user)){
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public boolean contains(User user){
-		return entries.containsKey(user);
+	/**
+	 * 不完全比對，只比對名稱
+	 * @param value
+	 * @return
+	 */
+	@Override
+	public boolean contains(String value) {
+		for(RosterEntry entry : mList){
+			if(entry.getUser().getName().equals(value)){
+				return true;
+			}
+		}
+		return false;
 	}
 
-	public void reload(){
-		setEntries(mDB.getLocalRoster());
-		for (RosterListener listener : mRosterListeners){
+	@Override
+	public void sort() {
+
+	}
+
+	@Override
+	public void reload() {
+		setList(mDB.getLocalRoster());
+		for (RosterListener listener : mListeners){
 			listener.onRosterUpdate();
 		}
 	}
-
-	public void setEntries(List<RosterEntry> listEntries) {
-		entries.clear();
-		for (RosterEntry entry : listEntries){
-			entries.put(entry.getUser(), entry);
-		}
-	}
-
-	public void removeRosterListener(RosterListener listener) {
-		mRosterListeners.remove(listener);
-	}
-
-	public void addRosterListener(RosterListener listener) {
-		mRosterListeners.add(listener);
-	}
-
-//	public void setRosterListener(RosterListener listener){
-//		mRosterListener = listener;
-//	}
-//
-//	public RosterListener getRosterListener(){
-//		return mRosterListener;
-//	}
-
 }

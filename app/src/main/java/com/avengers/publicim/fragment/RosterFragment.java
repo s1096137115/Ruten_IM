@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.activity.BaseActivity;
 import com.avengers.publicim.activity.ChatActivity;
 import com.avengers.publicim.adapter.RosterAdapter;
 import com.avengers.publicim.data.entities.RosterEntry;
@@ -50,7 +49,7 @@ public class RosterFragment extends BaseFragment implements RosterListener{
 		View view = inflater.inflate(R.layout.fragment_roster, container, false);
 		mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
 		mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-		mRosterAdapter = new RosterAdapter(getContext(), getRosterManager().getEntries());
+		mRosterAdapter = new RosterAdapter(getContext(), getRosterManager().getList());
 		mRecyclerView.setAdapter(mRosterAdapter);
 //		mRecyclerView.addOnItemTouchListener(mOnItemTouchListener);
 		ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
@@ -72,15 +71,14 @@ public class RosterFragment extends BaseFragment implements RosterListener{
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-//				((BaseActivity)getActivity()).getBuilder().show();
-				((BaseActivity)getActivity()).getBuilder().getDialog().dismiss();
+				mIMService.sendGetSyncData();
 				refresh();
 			}
 		});
 	}
 
 	public void refresh(){
-		mRosterAdapter.update(getRosterManager().getEntries());
+		mRosterAdapter.update(getRosterManager().getList());
 		mRosterAdapter.refresh();
 	}
 

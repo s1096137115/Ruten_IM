@@ -3,85 +3,84 @@ package com.avengers.publicim.data.Manager;
 import android.content.Context;
 import android.database.Cursor;
 
-import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.listener.ChatListener;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * Created by D-IT-MAX2 on 2016/3/22.
+ * Created by D-IT-MAX2 on 2016/6/22.
  */
-public class ChatManager {
-	private DbHelper mDB;
+public class ChatManager extends BaseManager<Chat, ChatListener> {
 
-	private List<Chat> chats = new ArrayList<>();
-
-	private Set<ChatListener> mChatListeners = new CopyOnWriteArraySet<>();
-
-	public ChatManager(Context context){
-		mDB = DbHelper.getInstance(context);
+	public ChatManager(Context context) {
+		super(context);
 	}
 
-	public void reload(){
-		setChats(mDB.getContentOfChats());
-		for(ChatListener listener : mChatListeners){
-			listener.onChatUpdate();
-		}
+	@Override
+	public List<Chat> getList() {
+		return mList;
 	}
 
-	public void setChats(Cursor cursor){
-		chats.clear();
-		while(cursor.moveToNext()){
-			Chat chat = Chat.newInstance(cursor);
-			chat.setInfo(cursor);
-			chats.add(chat);
-		}
-	}
-
-	public List<Chat> getChats() {
-		return chats;
-	}
-
-	public void setChats(List<Chat> chats) {
-		this.chats = chats;
-	}
-
-	public Chat getChat(String cid){
-		for(Chat chat : chats){
-			if(chat.getCid().equals(cid)){
+	@Override
+	public Chat getItem(String value) {
+		for(Chat chat : mList){
+			if(chat.getCid().equals(value)){
 				return chat;
 			}
 		}
-//		return new Chat(cid, cid, SystemUtils.getDateTime());
 		return null;
 	}
 
-	public boolean contains(String cid){
-		for(Chat chat : chats){
-			if(chat.getCid().equals(cid)){
+	@Override
+	public void setList(List<Chat> list) {
+		mList = list;
+	}
+
+	public void setList(Cursor cursor){
+		mList.clear();
+		while(cursor.moveToNext()){
+			Chat chat = Chat.newInstance(cursor);
+			chat.setInfo(cursor);
+			mList.add(chat);
+		}
+	}
+
+	@Override
+	public boolean contains(Chat item) {
+		for(Chat chat : mList){
+			if(chat.equals(item)){
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public void addChatListener(ChatListener listener){
-		mChatListeners.add(listener);
+	/**
+	 * 不完全比對，只比對名稱
+	 * @param value
+	 * @return
+	 */
+	@Override
+	public boolean contains(String value) {
+		for(Chat chat : mList){
+			if(chat.getCid().equals(value)){
+				return true;
+			}
+		}
+		return false;
 	}
 
-	public void removeChatListener(ChatListener listener){
-		mChatListeners.remove(listener);
+	@Override
+	public void sort() {
+
 	}
 
-//	public void setChatListener(ChatListener listener){
-//		mChatListener = listener;
-//	}
-//
-//	public ChatListener getChatListener(){
-//		return mChatListener;
-//	}
+	@Override
+	public void reload() {
+		setList(mDB.getContentOfChats());
+		for(ChatListener listener : mListeners){
+			listener.onChatUpdate();
+		}
+	}
 }

@@ -50,10 +50,10 @@ public abstract class BaseFragment extends Fragment {
 
 	public void registerListeners(){
 		if (this instanceof ChatListener) {
-			getChatManager().addChatListener((ChatListener) this);
+			getChatManager().addListener((ChatListener) this);
 		}
 		if (this instanceof RosterListener) {
-			getRosterManager().addRosterListener((RosterListener) this);
+			getRosterManager().addListener((RosterListener) this);
 		}
 		if (this instanceof MessageListener) {
 			getMessageManager().addMessageListener((MessageListener) this);
@@ -62,10 +62,10 @@ public abstract class BaseFragment extends Fragment {
 
 	public void unregisterListeners(){
 		if (this instanceof ChatListener) {
-			getChatManager().removeChatListener((ChatListener) this);
+			getChatManager().removeListener((ChatListener) this);
 		}
 		if (this instanceof RosterListener) {
-			getRosterManager().removeRosterListener((RosterListener) this);
+			getRosterManager().removeListener((RosterListener) this);
 		}
 		if (this instanceof MessageListener) {
 			getMessageManager().removeMessageListener((MessageListener) this);

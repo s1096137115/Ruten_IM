@@ -49,7 +49,7 @@ public class ChatListFragment extends BaseFragment implements ChatListener{
 	                         Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
 		View view = inflater.inflate(R.layout.fragment_roster, container, false);
-		mChatListAdapter = new ChatListAdapter(getContext(), getChatManager().getChats());
+		mChatListAdapter = new ChatListAdapter(getContext(), getChatManager().getList());
 		mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
 		mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 		mRecyclerView.setAdapter(mChatListAdapter);
@@ -79,15 +79,14 @@ public class ChatListFragment extends BaseFragment implements ChatListener{
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				refresh();
-//				getChatManager().setChats(mDB.getContentOfChats());
 				getChatManager().reload();
+				mIMService.sendGetRoster();
 			}
 		});
 	}
 
 	public void refresh(){
-		mChatListAdapter.update(getChatManager().getChats());
+		mChatListAdapter.update(getChatManager().getList());
 		mChatListAdapter.refresh();
 	}
 

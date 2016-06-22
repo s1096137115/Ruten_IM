@@ -1,15 +1,14 @@
-package com.avengers.publicim.data.response;
+package com.avengers.publicim.data.action;
 
-import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
 /**
- * Created by D-IT-MAX2 on 2016/3/15.
+ * Created by D-IT-MAX2 on 2016/6/17.
  */
-public class GetSyncData{
+public class GetRoster {
 	@SerializedName("action")
 	private String action;
 
@@ -18,9 +17,6 @@ public class GetSyncData{
 
 	@SerializedName("roster")
 	private List<RosterEntry> rosterEntries;
-
-	@SerializedName("messages")
-	private List<Message> messages;
 
 	public String getAction() {
 		return action;
@@ -44,13 +40,5 @@ public class GetSyncData{
 
 	public void setRosterEntries(List<RosterEntry> rosterEntries) {
 		this.rosterEntries = rosterEntries;
-	}
-
-	public List<Message> getMessages() {
-		return messages;
-	}
-
-	public void setMessages(List<Message> messages) {
-		this.messages = messages;
 	}
 }

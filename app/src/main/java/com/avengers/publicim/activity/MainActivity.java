@@ -25,6 +25,9 @@ import com.avengers.publicim.fragment.RosterFragment;
 
 import io.socket.client.Socket;
 
+import static com.avengers.publicim.conponent.IMApplication.getBuilder;
+import static com.avengers.publicim.conponent.IMApplication.getProgress;
+
 public class MainActivity extends BaseActivity {
 	private Socket mSocket;
 	private Toolbar mToolbar;
@@ -147,13 +150,13 @@ public class MainActivity extends BaseActivity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
+		final AppCompatEditText input = new AppCompatEditText(this);
 		switch (id){
 			case R.id.action_settings:
 				mIMService.connect();
 				break;
 			case R.id.action_invite_friend:
 
-				final AppCompatEditText input = new AppCompatEditText(this);
 				getBuilder()
 						.setTitle("invite")
 						.setView(input)
@@ -164,12 +167,27 @@ public class MainActivity extends BaseActivity {
 									Invite invite = new Invite(IMApplication.getUser(),
 											new User("", input.getText().toString()),
 											Invite.TYPE_FRIEND, null, null, Invite.RELATION_FRIEND);
-//							mIMService.sendInvite(invite);
+							mIMService.sendInvite(invite);
 								}
 							}
 						}).show();
 //				InviteDialog dialog = new InviteDialog();
 //				dialog.show(getSupportFragmentManager(),"Invite");
+				break;
+			case R.id.action_create_group:
+				getBuilder()
+						.setTitle("createGroup")
+						.setView(input)
+						.setPositiveButton("y", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								if(!input.getText().toString().isEmpty()){
+									getProgress().setMessage("Waiting...");
+									getProgress().show();
+									mIMService.sendCreateGroup(input.getText().toString());
+								}
+							}
+						}).show();
 				break;
 		}
 		return true;

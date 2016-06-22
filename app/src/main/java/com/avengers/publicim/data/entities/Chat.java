@@ -15,6 +15,9 @@ public class Chat implements Serializable {
 
 	public static final String TITLE = "title";
 
+	/**
+	 * not stored in DB
+	 */
 	public static final String DATE = "date";
 
 	/**

@@ -66,13 +66,13 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		if (bundle != null) {
 			String name = bundle.getString(ROSTER_NAME);
 			if(getRosterManager().contains(name)){
-				mEntry = getRosterManager().getEntry(name);
+				mEntry = getRosterManager().getItem(name);
 			}else{
 				return;
 			}
 
 			if(getChatManager().contains(name)){
-				mChat = getChatManager().getChat(name);
+				mChat = getChatManager().getItem(name);
 			}else{
 				mChat = new Chat(mEntry.getUser().getName(),mEntry.getUser().getName());
 			}

@@ -17,6 +17,7 @@ import com.avengers.publicim.data.listener.MessageListener;
 import com.avengers.publicim.data.listener.RosterListener;
 import com.avengers.publicim.fragment.BaseFragment;
 import com.avengers.publicim.view.DialogBuilder;
+import com.avengers.publicim.view.IMProgressDialog;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -24,6 +25,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import static com.avengers.publicim.conponent.IMApplication.getChatManager;
 import static com.avengers.publicim.conponent.IMApplication.getMessageManager;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
+import static com.avengers.publicim.conponent.IMApplication.setBuilder;
+import static com.avengers.publicim.conponent.IMApplication.setIMProgress;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/1.
@@ -32,7 +35,8 @@ public abstract class BaseActivity extends AppCompatActivity {
 	protected IMService mIMService;
 	protected boolean mIsBind = false;
 	protected DbHelper mDB;
-	protected DialogBuilder mBuilder;
+//	protected DialogBuilder mBuilder;
+//	protected ProgressDialog mProgressDialog;
 	protected Handler mHandler;
 	protected Set<Fragment> mFragments;
 
@@ -40,7 +44,8 @@ public abstract class BaseActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDB = DbHelper.getInstance(this);
-		mBuilder = new DialogBuilder(this);
+		setBuilder(new DialogBuilder(this));
+		setIMProgress(new IMProgressDialog(this));
 		mHandler = new Handler();
 		mFragments = new CopyOnWriteArraySet<>();
 	}
@@ -70,13 +75,17 @@ public abstract class BaseActivity extends AppCompatActivity {
 
 	@Override
 	protected void onDestroy() {
-		mBuilder.getDialog().dismiss();
+//		mBuilder.getDialog().dismiss();
 		super.onDestroy();
 	}
 
-	public DialogBuilder getBuilder(){
-		return mBuilder;
-	}
+//	public DialogBuilder getBuilder(){
+//		return mBuilder;
+//	}
+//
+//	public ProgressDialog getProgress(){
+//		return mProgressDialog;
+//	}
 
 	public IMService getIMService(){
 		return mIMService;
@@ -84,10 +93,10 @@ public abstract class BaseActivity extends AppCompatActivity {
 
 	public void registerListeners(){
 		if (this instanceof ChatListener) {
-			getChatManager().addChatListener((ChatListener) this);
+			getChatManager().addListener((ChatListener) this);
 		}
 		if (this instanceof RosterListener) {
-			getRosterManager().addRosterListener((RosterListener) this);
+			getRosterManager().addListener((RosterListener) this);
 		}
 		if (this instanceof MessageListener) {
 			getMessageManager().addMessageListener((MessageListener) this);
@@ -96,10 +105,10 @@ public abstract class BaseActivity extends AppCompatActivity {
 
 	public void unregisterListeners(){
 		if (this instanceof ChatListener) {
-			getChatManager().removeChatListener((ChatListener) this);
+			getChatManager().removeListener((ChatListener) this);
 		}
 		if (this instanceof RosterListener) {
-			getRosterManager().removeRosterListener((RosterListener) this);
+			getRosterManager().removeListener((RosterListener) this);
 		}
 		if (this instanceof MessageListener) {
 			getMessageManager().removeMessageListener((MessageListener) this);

@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.avengers.publicim.data.entities.Chat;
+import com.avengers.publicim.data.entities.Group;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
@@ -43,6 +44,7 @@ public class DbHelper extends SQLiteOpenHelper{
 		db.execSQL(RosterEntry.CREATE_SQL);
 		db.execSQL(Chat.CREATE_SQL);
 		db.execSQL(Message.CREATE_SQL);
+		db.execSQL(Group.CREATE_SQL);
 	}
 
 	@Override
@@ -91,6 +93,19 @@ public class DbHelper extends SQLiteOpenHelper{
 		return list;
 	}
 
+	public ArrayList<Group> getGroups(){
+		SQLiteDatabase db = getWritableDatabase();
+		String SQL_SEL = String.format("SELECT * FROM %s GROUP BY %s ORDER BY %s ",
+				Group.TABLE_NAME, Group.NAME, Group.NAME);
+		Cursor cursor = db.rawQuery(SQL_SEL, null);
+		ArrayList<Group> list = new ArrayList<>();
+		while(cursor.moveToNext()){
+			list.add(Group.newInstance(cursor));
+		}
+		cursor.close();
+		return list;
+	}
+
 	public long insertRoster(RosterEntry entry){
 		SQLiteDatabase db = getWritableDatabase();
 		return db.insert(RosterEntry.TABLE_NAME, null, entry.getContentValues());
@@ -104,6 +119,11 @@ public class DbHelper extends SQLiteOpenHelper{
 	public void insertMessage(Message msg){
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.insert(Message.TABLE_NAME, null, msg.getContentValues());
+	}
+
+	public void insertGroup(Group group){
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.insert(Group.TABLE_NAME, null, group.getContentValues());
 	}
 
 	public void updateRoster(RosterEntry entry){
@@ -131,6 +151,12 @@ public class DbHelper extends SQLiteOpenHelper{
 		values.put(Message.READ, read);
 		String whereSql = String.format("%s = '%s'", Message.CHAT_ID, chat.getCid());
 		db.update(Message.TABLE_NAME, values, whereSql, null);
+	}
+
+	public void updateGroup(Group group){
+		SQLiteDatabase db = getWritableDatabase();
+		String whereSql = String.format("%s = '%s'", Group.GID, group.getGid());
+		db.update(Group.TABLE_NAME, group.getContentValues(), whereSql, null);
 	}
 
 }
