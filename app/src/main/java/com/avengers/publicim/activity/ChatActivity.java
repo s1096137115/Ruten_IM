@@ -1,10 +1,13 @@
 package com.avengers.publicim.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -14,21 +17,30 @@ import com.avengers.publicim.adapter.ChatAdapter;
 import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMApplication;
 import com.avengers.publicim.data.entities.Chat;
+import com.avengers.publicim.data.entities.Contact;
+import com.avengers.publicim.data.entities.Group;
+import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.RosterEntry;
+import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.data.listener.MessageListener;
 import com.avengers.publicim.utils.SystemUtils;
 
 import static com.avengers.publicim.conponent.IMApplication.getChatManager;
+import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
+import static com.avengers.publicim.conponent.IMApplication.getProgress;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
 public class ChatActivity extends BaseActivity implements MessageListener{
 	public static final String ROSTER_NAME = "roster_name";
+	public static final String GROUP_ID = "gid";
 	public static final String ROSTER = "roster";
 
 	private RecyclerView mRecyclerView;
 	private ChatAdapter mChatAdapter;
 	private RosterEntry mEntry;
+	private Group mGroup;
+	private Contact mContact;
 	private Chat mChat;
 
 	private ImageButton mSendButton;
@@ -42,17 +54,25 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		mTextInput = (EditText) findViewById(R.id.textInput);
 		getData();
 		setToolbar();
-		mChatAdapter = new ChatAdapter(ChatActivity.this, mDB.getMessages(mEntry));
+		mChatAdapter = new ChatAdapter(ChatActivity.this, mDB.getMessages(mContact));
 		setRecyclerView();
 
 		mSendButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Message message = new Message(null, IMApplication.getUser(), mEntry.getUser(),
-						Message.Type.TEXT, mTextInput.getText().toString(), SystemUtils.getDateTime(),
-						mEntry.getUser().getName(), DbHelper.IntBoolean.TRUE);
-
-				mIMService.sendMessage(message);
+				Message message = null;
+				if(mContact instanceof RosterEntry){
+					message = new Message(null, IMApplication.getUser(), ((RosterEntry)mContact).getUser(), "",
+							Message.Type.TEXT, mTextInput.getText().toString(), SystemUtils.getDateTime(),
+							((RosterEntry)mContact).getUser().getName(), DbHelper.IntBoolean.TRUE);
+				}else if(mContact instanceof Group){
+					message = new Message(null, IMApplication.getUser(), User.newInstance("",""), ((Group)mContact).getGid(),
+							Message.Type.TEXT, mTextInput.getText().toString(), SystemUtils.getDateTime(),
+							((Group)mContact).getGid(), DbHelper.IntBoolean.TRUE);
+				}
+				if(message != null){
+					mIMService.sendMessage(message);
+				}
 
 				//adjust UI
 				mTextInput.getText().clear();
@@ -64,17 +84,27 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 	public void getData(){
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
-			String name = bundle.getString(ROSTER_NAME);
-			if(getRosterManager().contains(name)){
-				mEntry = getRosterManager().getItem(name);
-			}else{
-				return;
+			String value = "";
+			if(bundle.getString(ROSTER_NAME) != null){
+				value = bundle.getString(ROSTER_NAME);
+				if(getRosterManager().contains(value)){
+					mContact = getRosterManager().getItem(value);
+				}
+			}else if(bundle.getString(GROUP_ID) != null){
+				value = bundle.getString(GROUP_ID);
+				if(getGroupManager().contains(value)){
+					mContact = getGroupManager().getItem(value);
+				}
 			}
 
-			if(getChatManager().contains(name)){
-				mChat = getChatManager().getItem(name);
+			if(getChatManager().contains(value)){
+				mChat = getChatManager().getItem(value);
 			}else{
-				mChat = new Chat(mEntry.getUser().getName(),mEntry.getUser().getName());
+				if(mContact instanceof RosterEntry){
+					mChat = new Chat(mContact.getName(),mContact.getName(), Chat.TYPE_ROSTER);
+				}else{
+					mChat = new Chat(mContact.getId(),mContact.getName(), Chat.TYPE_GROUP);
+				}
 			}
 		}
 	}
@@ -84,9 +114,10 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		setSupportActionBar(toolbar);
 //		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 //		getSupportActionBar().setHomeButtonEnabled(true);
-		if(mEntry != null){
-			getSupportActionBar().setTitle(mEntry.getUser().getName());
+		if(mContact != null){
+			getSupportActionBar().setTitle(mContact.getName());
 		}
+
 	}
 
 	public void setRecyclerView(){
@@ -113,7 +144,7 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 
 	@Override
 	public void onMessageUpdate() {
-		mChatAdapter.update(mDB.getMessages(mEntry));
+		mChatAdapter.update(mDB.getMessages(mContact));
 		mChatAdapter.refresh();
 		mHandler.post(new Runnable() {
 			@Override
@@ -122,5 +153,43 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 			}
 		});
 		Log.d("text", "onMessageUpdate: ");
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.menu_chat, menu);
+		final MenuItem inviteGroup = menu.findItem(R.id.action_invite_group);
+		final MenuItem exitGroup = menu.findItem(R.id.action_exit_group);
+		if(mContact instanceof Group){
+			inviteGroup.setVisible(true);
+			exitGroup.setVisible(true);
+		}else{
+			inviteGroup.setVisible(false);
+			exitGroup.setVisible(false);
+		}
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		switch (id){
+			case R.id.action_settings:
+				break;
+			case R.id.action_invite_group:
+				Intent intent = new Intent(this, InviteActivity.class);
+				intent.putExtra(ChatActivity.GROUP_ID, mContact.getId());
+				startActivity(intent);
+				break;
+			case R.id.action_exit_group:
+				getProgress().setMessage("Waiting...");
+				getProgress().show();
+				mIMService.sendSetGroupMemberRole((Group) mContact, Invite.ROLE_EXIT);
+				mDB.insertGroup((Group) mContact);
+				getGroupManager().reload();
+				finish();
+				break;
+		}
+		return true;
 	}
 }

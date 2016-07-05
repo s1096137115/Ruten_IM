@@ -9,14 +9,36 @@ import java.io.Serializable;
  */
 public class Invite implements Serializable {
 
+	/**
+	 *
+	 */
 	public static final String TYPE_FRIEND = "friend";
+	/**
+	 *
+	 */
 	public static final String TYPE_GROUP = "group";
 
-
+	//role使用在group，releation則使用在roster
+	/**
+	 * 已受邀
+	 */
 	public static final int ROLE_INVITEES = 0;
+	/**
+	 * 成員
+	 */
 	public static final int ROLE_MEMBER = 1;
+	/**
+	 * 離開
+	 */
+	public static final int ROLE_EXIT = 2;
 
-	public static final int RELATION_INVITE = 0;
+	/**
+	 * 已受邀
+	 */
+	public static final int RELATION_INVITEES = 0;
+	/**
+	 * 好友
+	 */
 	public static final int RELATION_FRIEND = 1;
 
 	/**

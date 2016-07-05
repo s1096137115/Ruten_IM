@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * Created by D-IT-MAX2 on 2016/3/3.
  */
-public class RosterEntry implements Serializable {
+public class RosterEntry implements Serializable, Contact {
 	public static final String TABLE_NAME = "roster";
 
 	public static final String RELATIONSHIP = "relationship";
@@ -86,5 +86,15 @@ public class RosterEntry implements Serializable {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	@Override
+	public String getId() {
+		return user.getUid();
+	}
+
+	@Override
+	public String getName() {
+		return user.getName();
 	}
 }

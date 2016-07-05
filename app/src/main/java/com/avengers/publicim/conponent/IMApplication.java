@@ -43,7 +43,7 @@ public class IMApplication extends Application {
 	}
 
 	private void initAccount(){
-		mEntry = new RosterEntry(new User("Android-1234", "ac09"),
+		mEntry = new RosterEntry(new User("Android-0704-1503", "ac02"),
 				new Presence("","",Presence.STATUS_ONLINE), 0);
 	}
 

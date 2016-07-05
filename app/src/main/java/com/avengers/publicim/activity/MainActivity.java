@@ -102,7 +102,6 @@ public class MainActivity extends BaseActivity {
 //				menuEdit.setVisible(false);
 //				menuUploadPhoto.setVisible(false);
 				int position = tab.getPosition();
-				tab.setCustomView(null);
 				tab.setCustomView(mViewPagerAdapter.getSelectedTabView(position));
 				mViewPager.setCurrentItem(position);
 				String label = "";
@@ -132,7 +131,6 @@ public class MainActivity extends BaseActivity {
 			public void onTabUnselected(TabLayout.Tab tab) {
 				int position = tab.getPosition();
 //                tab.setIcon(mViewPagerAdapter.getUnselectedTabIconId(position));
-				tab.setCustomView(null);
 				tab.setCustomView(mViewPagerAdapter.getUnselectedTabView(position));
 			}
 
@@ -153,10 +151,9 @@ public class MainActivity extends BaseActivity {
 		final AppCompatEditText input = new AppCompatEditText(this);
 		switch (id){
 			case R.id.action_settings:
-				mIMService.connect();
+//				mIMService.connect();
 				break;
 			case R.id.action_invite_friend:
-
 				getBuilder()
 						.setTitle("invite")
 						.setView(input)

@@ -24,9 +24,9 @@ public class RosterManager extends BaseManager<RosterEntry, RosterListener> {
 	}
 
 	@Override
-	public RosterEntry getItem(String value) {
+	public RosterEntry getItem(String name) {
 		for (RosterEntry entry : mList) {
-			if(entry.getUser().getName().equals(value)){
+			if(entry.getUser().getName().equals(name)){
 				return entry;
 			}
 		}
@@ -54,13 +54,13 @@ public class RosterManager extends BaseManager<RosterEntry, RosterListener> {
 
 	/**
 	 * 不完全比對，只比對名稱
-	 * @param value
+	 * @param name
 	 * @return
 	 */
 	@Override
-	public boolean contains(String value) {
+	public boolean contains(String name) {
 		for(RosterEntry entry : mList){
-			if(entry.getUser().getName().equals(value)){
+			if(entry.getUser().getName().equals(name)){
 				return true;
 			}
 		}

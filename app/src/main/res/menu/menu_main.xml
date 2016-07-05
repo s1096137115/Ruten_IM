@@ -14,7 +14,7 @@
 		app:showAsAction="never"/>
 	<item
 		android:id="@+id/action_create_group"
-		android:orderInCategory="200"
+		android:orderInCategory="300"
 		android:title="@string/action_create_group"
 		app:showAsAction="never"/>
 </menu>

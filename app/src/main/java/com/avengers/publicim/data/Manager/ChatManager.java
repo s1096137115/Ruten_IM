@@ -23,9 +23,9 @@ public class ChatManager extends BaseManager<Chat, ChatListener> {
 	}
 
 	@Override
-	public Chat getItem(String value) {
+	public Chat getItem(String cid) {
 		for(Chat chat : mList){
-			if(chat.getCid().equals(value)){
+			if(chat.getCid().equals(cid)){
 				return chat;
 			}
 		}
@@ -56,15 +56,10 @@ public class ChatManager extends BaseManager<Chat, ChatListener> {
 		return false;
 	}
 
-	/**
-	 * 不完全比對，只比對名稱
-	 * @param value
-	 * @return
-	 */
 	@Override
-	public boolean contains(String value) {
+	public boolean contains(String cid) {
 		for(Chat chat : mList){
-			if(chat.getCid().equals(value)){
+			if(chat.getCid().equals(cid)){
 				return true;
 			}
 		}

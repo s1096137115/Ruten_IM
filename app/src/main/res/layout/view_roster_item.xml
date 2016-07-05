@@ -2,6 +2,8 @@
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/view"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:layout_alignParentLeft="true"
@@ -22,9 +24,10 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_gravity="top"
-		android:background="@mipmap/ic_profile"
 		android:scaleType="fitXY"
-		android:layout_marginTop="0dp"/>
+		android:layout_marginTop="0dp"
+		android:src="@mipmap/ic_profile"
+		/>
 	<LinearLayout
 		android:id="@+id/linear_layout1"
 		android:layout_width="match_parent"
@@ -42,17 +45,24 @@
 				android:id="@+id/id"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_gravity="bottom"
 				android:text="id"
 				android:textColor="@android:color/black"
-				android:gravity="center_horizontal"
 				android:textSize="16sp"
-				android:orientation="horizontal"
 				android:layout_alignParentLeft="true"
 				android:layout_centerInParent="true"
-				android:layout_alignParentRight="false"
+				android:layout_alignParentBottom="true"/>
+
+			<CheckBox
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/checkBox"
+				android:layout_alignParentRight="true"
+				android:layout_centerInParent="true"
 				android:layout_alignParentBottom="true"
-				android:layout_alignParentTop="false"/>
+				android:clickable="false"
+				android:focusable="false"
+				android:focusableInTouchMode="false"
+				android:visibility="gone"/>
 		</RelativeLayout>
 	</LinearLayout>
 

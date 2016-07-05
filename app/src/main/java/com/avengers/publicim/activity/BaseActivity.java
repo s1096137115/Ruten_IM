@@ -13,6 +13,7 @@ import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMService;
 import com.avengers.publicim.conponent.IMService.IMBinder;
 import com.avengers.publicim.data.listener.ChatListener;
+import com.avengers.publicim.data.listener.GroupListener;
 import com.avengers.publicim.data.listener.MessageListener;
 import com.avengers.publicim.data.listener.RosterListener;
 import com.avengers.publicim.fragment.BaseFragment;
@@ -23,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import static com.avengers.publicim.conponent.IMApplication.getChatManager;
+import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
 import static com.avengers.publicim.conponent.IMApplication.getMessageManager;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 import static com.avengers.publicim.conponent.IMApplication.setBuilder;
@@ -98,6 +100,9 @@ public abstract class BaseActivity extends AppCompatActivity {
 		if (this instanceof RosterListener) {
 			getRosterManager().addListener((RosterListener) this);
 		}
+		if (this instanceof GroupListener) {
+			getGroupManager().addListener((GroupListener) this);
+		}
 		if (this instanceof MessageListener) {
 			getMessageManager().addMessageListener((MessageListener) this);
 		}
@@ -109,6 +114,9 @@ public abstract class BaseActivity extends AppCompatActivity {
 		}
 		if (this instanceof RosterListener) {
 			getRosterManager().removeListener((RosterListener) this);
+		}
+		if (this instanceof GroupListener) {
+			getGroupManager().removeListener((GroupListener) this);
 		}
 		if (this instanceof MessageListener) {
 			getMessageManager().removeMessageListener((MessageListener) this);

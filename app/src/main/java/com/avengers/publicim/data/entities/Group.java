@@ -10,8 +10,8 @@ import java.io.Serializable;
 /**
  * Created by D-IT-MAX2 on 2016/3/4.
  */
-public class Group implements Serializable {
-	public static final String TABLE_NAME = "group";
+public class Group implements Serializable, Contact {
+	public static final String TABLE_NAME = "group_data";
 
 	public static final String GID = "gid";
 
@@ -25,7 +25,6 @@ public class Group implements Serializable {
 					+ NAME + " VARCHAR(50), "
 					+ ROLE + " VARCHAR(5) "
 					+ ") ";
-
 
 	@SerializedName("gid")
 	private String gid;
@@ -67,6 +66,12 @@ public class Group implements Serializable {
 		this.gid = gid;
 	}
 
+	@Override
+	public String getId() {
+		return gid;
+	}
+
+	@Override
 	public String getName() {
 		return name;
 	}

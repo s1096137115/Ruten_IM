@@ -2,6 +2,7 @@
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:layout_alignParentLeft="true"
@@ -20,10 +21,11 @@
 		android:id="@+id/icon"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:background="@mipmap/ic_profile"
 		android:scaleType="fitXY"
 		android:layout_marginTop="0dp"
-		android:layout_gravity="center_vertical"/>
+		android:layout_gravity="center_vertical"
+		android:src="@mipmap/ic_profile"
+		/>
 	<LinearLayout
 		android:id="@+id/linear_layout1"
 		android:layout_width="match_parent"
@@ -42,19 +44,19 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_gravity="bottom"
-				android:text="TitleName"
 				android:textColor="@android:color/black"
 				android:gravity="center_horizontal"
 				android:textSize="16sp"
 				android:orientation="horizontal"
 				android:layout_alignParentLeft="true"
-				android:layout_centerInParent="true"/>
+				android:layout_centerInParent="true"
+				tools:text="TitleName"
+				/>
 			<TextView
 				android:id="@+id/unread"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_gravity="bottom"
-				android:text="99"
 				android:textColor="@android:color/holo_red_dark"
 				android:gravity="center_horizontal"
 				android:textSize="14sp"
@@ -64,28 +66,32 @@
 				android:layout_centerInParent="true"
 				android:layout_alignParentLeft="false"
 				android:layout_toLeftOf="@+id/datetime"
-				android:layout_marginRight="20sp"/>
+				android:layout_marginRight="20sp"
+				tools:text="99"
+				/>
 			<TextView
 				android:id="@+id/datetime"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_gravity="bottom"
-				android:text="2015-10-11\n04:11"
 				android:gravity="center_horizontal"
 				android:textSize="10sp"
 				android:orientation="horizontal"
 				android:layout_alignParentRight="true"
-				android:layout_centerInParent="true"/>
+				android:layout_centerInParent="true"
+				tools:text="2015-10-11\n04:11"
+				/>
 		</RelativeLayout>
 			<TextView
 				android:id="@+id/content"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				android:layout_centerHorizontal="true"
-				android:text="Agdddddddddddddddd\nAgdddddddddddddddddddd"
 				android:textSize="14sp"
 				android:orientation="horizontal"
-				android:layout_gravity="top"/>
+				android:layout_gravity="top"
+				tools:text="Agdddddddddddddddd\nAgdddddddddddddddddddd"
+				android:maxLines="2"/>
 	</LinearLayout>
 
 </LinearLayout>

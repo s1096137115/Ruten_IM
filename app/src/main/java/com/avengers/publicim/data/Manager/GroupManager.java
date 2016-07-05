@@ -24,7 +24,12 @@ public class GroupManager extends BaseManager<Group, GroupListener> {
 	}
 
 	@Override
-	public Group getItem(String value) {
+	public Group getItem(String gid) {
+		for (Group group: mList) {
+			if(group.getGid().equals(gid)){
+				return group;
+			}
+		}
 		return null;
 	}
 
@@ -43,15 +48,10 @@ public class GroupManager extends BaseManager<Group, GroupListener> {
 		return false;
 	}
 
-	/**
-	 * 不完全比對，只比對名稱
-	 * @param value
-	 * @return
-	 */
 	@Override
-	public boolean contains(String value) {
+	public boolean contains(String gid) {
 		for(Group group : mList){
-			if(group.getName().equals(value)){
+			if(group.getGid().equals(gid)){
 				return true;
 			}
 		}

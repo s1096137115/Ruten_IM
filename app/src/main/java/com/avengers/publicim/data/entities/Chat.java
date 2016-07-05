@@ -15,6 +15,11 @@ public class Chat implements Serializable {
 
 	public static final String TITLE = "title";
 
+	public static final String TYPE = "type";
+
+	public static final int TYPE_ROSTER = 0;
+	public static final int TYPE_GROUP = 1;
+
 	/**
 	 * not stored in DB
 	 */
@@ -28,7 +33,8 @@ public class Chat implements Serializable {
 	public static final String CREATE_SQL =
 			"CREATE TABLE " + TABLE_NAME + "("
 					+ CID + " VARCHAR(50) PRIMARY KEY, "
-					+ TITLE + " VARCHAR(50) "
+					+ TITLE + " VARCHAR(50), "
+					+ TYPE + " VARCHAR(5) "
 //					+ DATE + " VARCHAR(30) "
 //					+ "FOREIGN KEY (" + Chat.CID + ") REFERENCES " + RosterManager.TABLE_NAME + "(" + User.NAME + ") "
 					+ ") ";
@@ -37,21 +43,25 @@ public class Chat implements Serializable {
 
 	private String title;
 
+	private int type;
+
 	private String date;
 
 	private Message lastMsg;
 
 	private int unread;
 
-	public Chat(String cid, String title) {
+	public Chat(String cid, String title, int type) {
 		this.cid = cid;
 		this.title = title;
+		this.type = type;
 	}
 
 	public static Chat newInstance(Cursor cursor){
 		return new Chat(
 				cursor.getString(cursor.getColumnIndexOrThrow(CID)),
-				cursor.getString(cursor.getColumnIndexOrThrow(TITLE))
+				cursor.getString(cursor.getColumnIndexOrThrow(TITLE)),
+				cursor.getInt(cursor.getColumnIndexOrThrow(TYPE))
 		);
 	}
 
@@ -59,6 +69,7 @@ public class Chat implements Serializable {
 		ContentValues cv = new ContentValues();
 		cv.put(CID, cid);
 		cv.put(TITLE, title);
+		cv.put(TYPE, type);
 		return cv;
 	}
 
@@ -102,8 +113,16 @@ public class Chat implements Serializable {
 		this.unread = unread;
 	}
 
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
+	}
+
 	/**
-	 * 額外的資訊不會存取在chat的DB上
+	 * 額外的資訊來自Message，不會存取在chat的DB上
 	 * @param cursor
 	 */
 	public void setInfo(Cursor cursor){

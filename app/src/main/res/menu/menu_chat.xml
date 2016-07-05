@@ -1,0 +1,20 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".activity.MainActivity">
+	<item
+		android:id="@+id/action_settings"
+		android:orderInCategory="100"
+		android:title="@string/action_settings"
+		app:showAsAction="never"/>
+	<item
+		android:id="@+id/action_invite_group"
+		android:orderInCategory="200"
+		android:title="@string/action_invite_group"
+		app:showAsAction="never"/>
+	<item
+		android:id="@+id/action_exit_group"
+		android:orderInCategory="300"
+		android:title="@string/action_exit_group"
+		app:showAsAction="never"/>
+</menu>

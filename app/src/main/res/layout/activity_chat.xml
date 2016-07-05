@@ -22,7 +22,9 @@
 		android:layout_below="@+id/toolbar"
 		android:layout_above="@+id/sender"
 		android:layout_alignParentLeft="true"
-		android:layout_alignParentStart="true"/>
+		android:layout_alignParentStart="true"
+		tools:listitem="@layout/view_msg_item_left"
+		/>
 
 	<include
 		android:id="@+id/sender"

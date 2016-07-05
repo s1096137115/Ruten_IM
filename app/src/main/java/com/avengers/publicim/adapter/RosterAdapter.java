@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
+import com.avengers.publicim.data.entities.Contact;
+import com.avengers.publicim.data.entities.Group;
 import com.avengers.publicim.data.entities.RosterEntry;
 
 import java.util.List;
@@ -20,10 +22,10 @@ import java.util.List;
 public class RosterAdapter extends RecyclerView.Adapter<RosterAdapter.NormalTextViewHolder> {
 	private final LayoutInflater mLayoutInflater;
 	private final Context mContext;
-	private List<RosterEntry> mRosterEntries;
+	private List<? extends Contact> mRosterEntries;
 	private Handler mHandler = new Handler();
 
-	public RosterAdapter(Context context, List<RosterEntry> objects) {
+	public RosterAdapter(Context context, List<? extends Contact> objects) {
 		mRosterEntries = objects;
 		mContext = context;
 		mLayoutInflater = LayoutInflater.from(context);
@@ -36,8 +38,11 @@ public class RosterAdapter extends RecyclerView.Adapter<RosterAdapter.NormalText
 
 	@Override
 	public void onBindViewHolder(NormalTextViewHolder holder, int position) {
-		holder.mUserName = mRosterEntries.get(position).getUser().getName();
-		holder.mID.setText(mRosterEntries.get(position).getUser().getName());
+		if(mRosterEntries.get(position) instanceof RosterEntry){
+			holder.mID.setText(((RosterEntry) mRosterEntries.get(position)).getUser().getName());
+		}else if(mRosterEntries.get(position) instanceof Group){
+			holder.mID.setText(((Group) mRosterEntries.get(position)).getName());
+		}
 	}
 
 	@Override
@@ -45,7 +50,7 @@ public class RosterAdapter extends RecyclerView.Adapter<RosterAdapter.NormalText
 		return mRosterEntries == null ? 0 : mRosterEntries.size();
 	}
 
-	public RosterEntry getItem(int position){
+	public Contact getItem(int position){
 		return mRosterEntries.get(position);
 	}
 
@@ -58,12 +63,11 @@ public class RosterAdapter extends RecyclerView.Adapter<RosterAdapter.NormalText
 		});
 	}
 
-	public void update(List<RosterEntry> objects){
+	public void update(List<? extends Contact> objects){
 		mRosterEntries = objects;
 	}
 
 	public static class NormalTextViewHolder extends RecyclerView.ViewHolder {
-		String mUserName;
 		ImageView mIcon;
 		TextView mID;
 

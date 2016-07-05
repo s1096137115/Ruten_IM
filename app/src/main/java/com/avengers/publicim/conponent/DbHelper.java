@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.avengers.publicim.data.entities.Chat;
+import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Group;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.RosterEntry;
@@ -74,15 +75,13 @@ public class DbHelper extends SQLiteOpenHelper{
 		return db.rawQuery(SQL_SEL, null);
 	}
 
-	public ArrayList<Message> getMessages(RosterEntry rosterEntry){
+	public ArrayList<Message> getMessages(Contact contact){
 		SQLiteDatabase db = getWritableDatabase();
 		String SQL_SEL = String.format("SELECT * FROM %s WHERE %s = '%s' ORDER BY %s DESC",
-				Message.TABLE_NAME, Message.CHAT_ID, rosterEntry.getUser().getName(), Message.DATE);
+				Message.TABLE_NAME, Message.CHAT_ID,
+				contact instanceof RosterEntry ? contact.getName():contact.getId(), Message.DATE);
 		Cursor cursor = db.rawQuery(SQL_SEL, null);
 		ArrayList<Message> list = new ArrayList<>();
-//        while(cursor.moveToNext()){
-//            list.add(Message.newInstance(cursor));
-//        }
 		cursor.moveToLast();
 		if(!cursor.isBeforeFirst()){
 			do {
@@ -96,7 +95,7 @@ public class DbHelper extends SQLiteOpenHelper{
 	public ArrayList<Group> getGroups(){
 		SQLiteDatabase db = getWritableDatabase();
 		String SQL_SEL = String.format("SELECT * FROM %s GROUP BY %s ORDER BY %s ",
-				Group.TABLE_NAME, Group.NAME, Group.NAME);
+				Group.TABLE_NAME, Group.GID, Group.NAME);
 		Cursor cursor = db.rawQuery(SQL_SEL, null);
 		ArrayList<Group> list = new ArrayList<>();
 		while(cursor.moveToNext()){
@@ -157,6 +156,22 @@ public class DbHelper extends SQLiteOpenHelper{
 		SQLiteDatabase db = getWritableDatabase();
 		String whereSql = String.format("%s = '%s'", Group.GID, group.getGid());
 		db.update(Group.TABLE_NAME, group.getContentValues(), whereSql, null);
+	}
+
+	public void deleteRoster(RosterEntry entry){
+
+	}
+
+	public void deleteChat(Chat chat){
+
+	}
+
+	public void deleteMessage(Message message){
+
+	}
+
+	public void deleteGroup(Group group){
+
 	}
 
 }

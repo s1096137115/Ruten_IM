@@ -11,22 +11,23 @@ import android.view.ViewGroup;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.activity.ChatActivity;
-import com.avengers.publicim.adapter.RosterAdapter;
+import com.avengers.publicim.adapter.ContactAdapter;
+import com.avengers.publicim.data.entities.Contact;
+import com.avengers.publicim.data.entities.Group;
 import com.avengers.publicim.data.entities.RosterEntry;
+import com.avengers.publicim.data.listener.GroupListener;
 import com.avengers.publicim.data.listener.RosterListener;
 import com.avengers.publicim.utils.ItemClickSupport;
 
-import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
-
-public class RosterFragment extends BaseFragment implements RosterListener{
+public class RosterFragment extends BaseFragment implements RosterListener, GroupListener{
 	private static final String ARG_PARAM1 = "param1";
 	private static final String ARG_PARAM2 = "param2";
 
 	private String mParam1;
 	private String mParam2;
 	private RecyclerView mRecyclerView;
-	private RosterAdapter mRosterAdapter;
+	private ContactAdapter mContactAdapter;
 
 	public RosterFragment() {
 		// Required empty public constructor
@@ -49,16 +50,28 @@ public class RosterFragment extends BaseFragment implements RosterListener{
 		View view = inflater.inflate(R.layout.fragment_roster, container, false);
 		mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
 		mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-		mRosterAdapter = new RosterAdapter(getContext(), getRosterManager().getList());
-		mRecyclerView.setAdapter(mRosterAdapter);
+		mContactAdapter = new ContactAdapter(getContext());
+		mRecyclerView.setAdapter(mContactAdapter);
 //		mRecyclerView.addOnItemTouchListener(mOnItemTouchListener);
 		ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
 			@Override
 			public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-				RosterEntry entry = ((RosterAdapter)recyclerView.getAdapter()).getItem(position);
-				Intent intent = new Intent(getActivity(), ChatActivity.class);
-				intent.putExtra(ChatActivity.ROSTER_NAME, entry.getUser().getName());
-				startActivity(intent);
+				Contact item = ((ContactAdapter) recyclerView.getAdapter()).getItem(position);
+				if(item instanceof ContactAdapter.Header){
+					RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(position);
+					((ContactAdapter) recyclerView.getAdapter()).rotationView(holder, position);
+					((ContactAdapter) recyclerView.getAdapter()).expandHeader(position);
+				}else if(item instanceof RosterEntry){
+					String name = ((ContactAdapter)recyclerView.getAdapter()).getItem(position).getName();
+					Intent intent = new Intent(getActivity(), ChatActivity.class);
+					intent.putExtra(ChatActivity.ROSTER_NAME, name);
+					startActivity(intent);
+				}else if(item instanceof Group){
+					String gid = ((ContactAdapter)recyclerView.getAdapter()).getItem(position).getId();
+					Intent intent = new Intent(getActivity(), ChatActivity.class);
+					intent.putExtra(ChatActivity.GROUP_ID, gid);
+					startActivity(intent);
+				}
 			}
 		});
 		setFab(view);
@@ -71,19 +84,29 @@ public class RosterFragment extends BaseFragment implements RosterListener{
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				mIMService.sendGetSyncData();
 				refresh();
+				mIMService.sendGetSyncData();
 			}
 		});
 	}
 
 	public void refresh(){
-		mRosterAdapter.update(getRosterManager().getList());
-		mRosterAdapter.refresh();
+		mContactAdapter.update();
+		mContactAdapter.refresh();
 	}
 
 	@Override
 	public void onRosterUpdate() {
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				refresh();
+			}
+		});
+	}
+
+	@Override
+	public void onGroupListener() {
 		mHandler.post(new Runnable() {
 			@Override
 			public void run() {

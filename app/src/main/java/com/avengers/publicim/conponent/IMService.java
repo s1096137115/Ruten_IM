@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -12,6 +13,7 @@ import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.action.CreateGroup;
 import com.avengers.publicim.data.action.GetRoster;
 import com.avengers.publicim.data.action.GetSyncData;
+import com.avengers.publicim.data.action.SetGroupMemberRole;
 import com.avengers.publicim.data.action.SetRoster;
 import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.entities.Group;
@@ -32,6 +34,7 @@ import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
 import static com.avengers.publicim.conponent.IMApplication.getChatManager;
+import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
 import static com.avengers.publicim.conponent.IMApplication.getMessageManager;
 import static com.avengers.publicim.conponent.IMApplication.getProgress;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
@@ -68,6 +71,7 @@ public class IMService extends Service {
 		socket.on(Socket.EVENT_RECONNECTING, onConnectError);
 		socket.on(Constants.EVENT_RESPONSE, onResponse);
 		socket.on(Constants.EVENT_RECEIVE_MESSAGE, onReceiveMessage);
+		socket.on(Constants.EVENT_RECEIVE_GROUP_MESSAGE, onReceiveMessage);
 		socket.on(Constants.EVENT_RECEIVE_PRESENCE, onReceivePresence);
 		socket.on(Constants.EVENT_RECEIVE_INVITE, onReceiveInvite);
 	}
@@ -144,18 +148,19 @@ public class IMService extends Service {
 	}
 
 	public void sendMessage(final Message message){
-			final JSONObject obj = GsonUtils.toJSONObject(message);
+		final JSONObject obj = GsonUtils.toJSONObject(message);
+		String event = TextUtils.isEmpty(message.getGid()) ? Constants.EVENT_SEND_MESSAGE : Constants.EVENT_SEND_GROUP_MESSAGE;
 
-			mSocket.emit(Constants.EVENT_SEND_MESSAGE, obj, new Ack() {
-				@Override
-				public void call(Object... args) {
-					String errorMessage = (String) args[0];
-					String mid = String.valueOf(args[1]);
-					message.setMid(mid);
-					addMessage(message);
-					getChatManager().reload();
-				}
-			});
+		mSocket.emit(event, obj, new Ack() {
+			@Override
+			public void call(Object... args) {
+				String errorMessage = (String) args[0];
+				String mid = String.valueOf(args[1]);
+				message.setMid(mid);
+				addMessage(message);
+				getChatManager().reload();
+			}
+		});
 	}
 
 	public void sendPresence(Presence presence){
@@ -180,9 +185,20 @@ public class IMService extends Service {
 			@Override
 			public void call(Object... args) {
 				String errorMessage = (String) args[0];
-				sendSetRoster(invite.getTo());
+				if(invite.getType().equals(Invite.TYPE_FRIEND)){
+					sendSetRoster(invite.getTo());
+				}
 			}
 		});
+	}
+
+	public void sendSetGroupMemberRole(Group group, int role){
+		SetGroupMemberRole setGroupMemberRole = new SetGroupMemberRole();
+		setGroupMemberRole.setAction(Constants.EVENT_SET_GROUP_MEMBER_ROLE);
+		setGroupMemberRole.setGid(group.getGid());
+		setGroupMemberRole.setRole(role);
+		final JSONObject obj = GsonUtils.toJSONObject(setGroupMemberRole);
+		mSocket.emit("request", obj);
 	}
 
 	/**
@@ -191,9 +207,9 @@ public class IMService extends Service {
 	 */
 	public void sendSetRoster(User user){
 		SetRoster setRoster = new SetRoster();
-		setRoster.setAction("setRoster");
+		setRoster.setAction(Constants.EVENT_SET_ROSTER);
 		setRoster.setUser(user);
-		setRoster.setRelationship(1);
+		setRoster.setRelationship(Invite.RELATION_FRIEND);
 		final JSONObject obj = GsonUtils.toJSONObject(setRoster);
 		mSocket.emit("request", obj);
 	}
@@ -234,17 +250,41 @@ public class IMService extends Service {
 	public void processGetSyncData(String data){
 		GetSyncData getSyncData = GsonUtils.fromJson(data, GetSyncData.class);
 //		updateRoster(getSyncData.getRosterEntries());
+		//group的新增必須在message的新增之前
+		for(Group group : getSyncData.getGroups()){
+			mDB.insertGroup(group);
+		}
+		getGroupManager().reload();
+
+		//message的新增 & chat的新增
 		for(Message message : getSyncData.getMessages()){
-			if(!message.fix()){
-				continue;
-			}
+			if(!message.fix()) continue;
 			if(!getChatManager().contains(message.getChatId())){
-				addChat(new Chat(message.getChatId(),message.getChatId()));
+				Chat chat = null;
+				if(!message.getGid().isEmpty()){
+					Group group = getGroupManager().getItem(message.getGid());
+					chat = new Chat(message.getChatId(),group.getName(),Chat.TYPE_GROUP);
+				}else{
+					chat = new Chat(message.getChatId(),message.getChatId(),Chat.TYPE_ROSTER);
+				}
+				addChat(chat);
 			}
 			mDB.insertMessage(message);
 		}
 		getMessageManager().change();
-		getChatManager().reload();
+	}
+
+	public void processSetGroupMemberRole(String data){
+		SetGroupMemberRole setGroupMemberRole = GsonUtils.fromJson(data, SetGroupMemberRole.class);
+		if(setGroupMemberRole.getRole().equals(Invite.ROLE_MEMBER)){
+			mDB.insertGroup(mGroup);
+			mGroup = null;
+		}else if(setGroupMemberRole.getRole().equals(Invite.ROLE_EXIT)){
+			Group group = getGroupManager().getItem(setGroupMemberRole.getGid());
+			mDB.deleteGroup(group);
+		}
+		getGroupManager().reload();
+		getProgress().dismiss();
 	}
 
 	public void processGetRoster(String data){
@@ -262,10 +302,11 @@ public class IMService extends Service {
 		mGroup.setGid(createGroup.getGid());
 		if(createGroup.getError().isEmpty()){
 			//todo save to db
-
+			mDB.insertGroup(mGroup);
+			getGroupManager().reload();
 			//todo dismiss dialog
 			getProgress().dismiss();
-//	    	mGroup = null;
+	    	mGroup = null;
 		}
 	}
 
@@ -351,7 +392,7 @@ public class IMService extends Service {
 				}else if(action.equals(Constants.EVENT_CREATE_GROUP)){
 					processCreateGroup(args[0].toString());
 				}else if(action.equals(Constants.EVENT_SET_GROUP_MEMBER_ROLE)){
-
+					processSetGroupMemberRole(args[0].toString());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -366,17 +407,22 @@ public class IMService extends Service {
 		@Override
 		public void call(final Object... args) {
 			Message message = GsonUtils.fromJson(args[0].toString(), Message.class);
-			if(!message.getFrom().equals(IMApplication.getUser())){
-				if(!message.fix()){
-					return;
-				}
-				if(!getChatManager().contains(message.getChatId())){
-					Chat chat = new Chat(message.getChatId(),message.getChatId());
-					addChat(chat);
-				}
-				addMessage(message);
-				getChatManager().reload();
+			if(message.getFrom().equals(IMApplication.getUser())) return;
+
+			if(!message.fix()){
+				return;
 			}
+			if(!getChatManager().contains(message.getChatId())){
+				Chat chat = null;
+				if(!message.getGid().isEmpty()){
+					Group group = getGroupManager().getItem(message.getGid());
+					chat = new Chat(message.getChatId(),group.getName(),Chat.TYPE_GROUP);
+				}else{
+					chat = new Chat(message.getChatId(),message.getChatId(),Chat.TYPE_ROSTER);
+				}
+				addChat(chat);
+			}
+			addMessage(message);
 		}
 	};
 
@@ -406,7 +452,14 @@ public class IMService extends Service {
 		@Override
 		public void call(final Object... args) {
 			Invite invite = GsonUtils.fromJson(args[0].toString(), Invite.class);
-			sendSetRoster(invite.getFrom());
+//			if(invite.getFrom().equals(IMApplication.getUser())) return;
+
+			if(invite.getType().equals(Invite.TYPE_FRIEND)){
+				sendSetRoster(invite.getFrom());
+			}else if(invite.getType().equals(Invite.TYPE_GROUP)){
+				mGroup = invite.getGroup();
+				sendSetGroupMemberRole(invite.getGroup(), Invite.ROLE_MEMBER);
+			}
 		}
 	};
 

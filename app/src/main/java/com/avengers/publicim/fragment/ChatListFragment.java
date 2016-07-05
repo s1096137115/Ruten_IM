@@ -48,7 +48,7 @@ public class ChatListFragment extends BaseFragment implements ChatListener{
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
-		View view = inflater.inflate(R.layout.fragment_roster, container, false);
+		View view = inflater.inflate(R.layout.fragment_chat, container, false);
 		mChatListAdapter = new ChatListAdapter(getContext(), getChatManager().getList());
 		mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
 		mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -59,7 +59,8 @@ public class ChatListFragment extends BaseFragment implements ChatListener{
 			public void onItemClicked(RecyclerView recyclerView, int position, View v) {
 				Chat chat = ((ChatListAdapter)recyclerView.getAdapter()).getItem(position);
 				Intent intent = new Intent(getActivity(), ChatActivity.class);
-				intent.putExtra(ChatActivity.ROSTER_NAME, chat.getCid());
+				String chatType = chat.getType() == Chat.TYPE_GROUP ? ChatActivity.GROUP_ID : ChatActivity.ROSTER_NAME;
+				intent.putExtra(chatType, chat.getCid());
 				startActivity(intent);
 			}
 		});

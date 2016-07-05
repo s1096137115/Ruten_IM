@@ -1,10 +1,13 @@
 <resources>
 	<string name="app_name">PublicIM</string>
 	<string name="action_settings">Settings</string>
-	<string name="action_invite_friend">inviteFriend</string>
-	<string name="action_create_group">createGroup</string>
+	<string name="action_invite_friend">加入好友</string>
+	<string name="action_create_group">建立群組</string>
+	<string name="action_invite_group">邀請</string>
+	<string name="action_exit_group">退出群組</string>
 	<string name="title_activity_chat">ChatActivity</string>
 
 	<!-- TODO: Remove or change this placeholder text -->
 	<string name="hello_blank_fragment">Hello blank fragment</string>
+	<string name="title_activity_invite">InviteActivity</string>
 </resources>

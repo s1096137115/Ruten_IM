@@ -2,6 +2,7 @@ package com.avengers.publicim.data.entities;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.text.TextUtils;
 
 import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMApplication;
@@ -26,6 +27,8 @@ public class Message implements Serializable {
 
 	public static final String TO_NAME = "to_name";
 
+	public static final String GID = "gid";
+
 	public static final String TYPE = "type";
 
 	public static final String CONTENT = "content";
@@ -34,16 +37,16 @@ public class Message implements Serializable {
 
 	public static final String READ = "read";
 
-
 	public static final String CHAT_ID = "chat_id";
 
 	public static final String CREATE_SQL =
 			"CREATE TABLE " + TABLE_NAME + "("
 					+ MID + " VARCHAR(30) PRIMARY KEY, "
 					+ FROM_ID + " VARCHAR(50), "
-					+ FROM_NAME + " VARCHAR(30), "
-					+ TO_ID + " VARCHAR(30), "
+					+ FROM_NAME + " VARCHAR(50), "
+					+ TO_ID + " VARCHAR(50), "
 					+ TO_NAME + " VARCHAR(50), "
+					+ GID + " VARCHAR(50), "
 					+ TYPE + " VARCHAR(30), "
 					+ CONTENT + " TEXT, "
 					+ DATE + " VARCHAR(30), "
@@ -61,6 +64,9 @@ public class Message implements Serializable {
 	@SerializedName("to")
 	private User to;
 
+	@SerializedName("gid")
+	private String gid;
+
 	@SerializedName("type")
 	private String type;
 
@@ -74,11 +80,12 @@ public class Message implements Serializable {
 
 	private String chatId;
 
-	public Message(String mid, User from, User to, String type, String content,
+	public Message(String mid, User from, User to, String gid, String type, String content,
 	               String date, String chatId, int read) {
 		this.mid = mid;
 		this.from = from;
 		this.to = to;
+		this.gid = gid;
 		this.type = type;
 		this.content = content;
 		this.date = date;
@@ -100,6 +107,7 @@ public class Message implements Serializable {
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.MID)),
 				from,
 				to,
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.GID)),
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.TYPE)),
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTENT)),
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.DATE)),
@@ -115,6 +123,7 @@ public class Message implements Serializable {
 		values.put(Message.FROM_NAME, getFrom().getName());
 		values.put(Message.TO_ID, getTo().getUid());
 		values.put(Message.TO_NAME, getTo().getName());
+		values.put(Message.GID, getGid());
 		values.put(Message.TYPE, getType());
 		values.put(Message.CONTENT, getContent());
 		values.put(Message.DATE, getDate());
@@ -126,8 +135,16 @@ public class Message implements Serializable {
 	public boolean fix(){
 		if(date == null) date = SystemUtils.getDateTime();
 		if(read == null) read = DbHelper.IntBoolean.FALSE;
-		if(chatId == null) chatId = from.getName().equals(IMApplication.getUser().getName())
+		if(gid == null) gid ="";
+		if(to == null) to = User.newInstance("","");
+		if(chatId == null){
+			if(!TextUtils.isEmpty(gid)){
+				chatId = gid;
+			}else{
+				chatId = from.getName().equals(IMApplication.getUser().getName())
 				? to.getName() : from.getName();
+			}
+		}
 		if(from.getName().equals("") || to.getName().equals("") || type.equals("") || content.equals("")){
 			return false;
 		}
@@ -172,6 +189,14 @@ public class Message implements Serializable {
 
 	public void setTo(User to) {
 		this.to = to;
+	}
+
+	public String getGid() {
+		return gid;
+	}
+
+	public void setGid(String gid) {
+		this.gid = gid;
 	}
 
 	public String getType() {
