@@ -12,11 +12,12 @@ import android.view.ViewGroup;
 import com.avengers.publicim.R;
 import com.avengers.publicim.activity.ChatActivity;
 import com.avengers.publicim.adapter.ContactAdapter;
+import com.avengers.publicim.data.callback.GroupListener;
+import com.avengers.publicim.data.callback.RosterListener;
+import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Group;
 import com.avengers.publicim.data.entities.RosterEntry;
-import com.avengers.publicim.data.listener.GroupListener;
-import com.avengers.publicim.data.listener.RosterListener;
 import com.avengers.publicim.utils.ItemClickSupport;
 
 
@@ -78,6 +79,12 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 		return view;
 	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		refresh();
+	}
+
 	public void setFab(View view){
 		FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
 		assert fab != null;
@@ -113,5 +120,10 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 				refresh();
 			}
 		});
+	}
+
+	@Override
+	public void onServeiceResponse(ServiceEvent event) {
+
 	}
 }

@@ -19,7 +19,7 @@ public class SetGroupMemberRole {
 	@SerializedName("role")
 	private Integer role;
 
-	@SerializedName("target")
+	@SerializedName("user")
 	private User user;
 
 	public String getAction() {

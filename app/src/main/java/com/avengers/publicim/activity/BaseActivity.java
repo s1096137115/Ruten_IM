@@ -12,10 +12,11 @@ import android.support.v7.app.AppCompatActivity;
 import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMService;
 import com.avengers.publicim.conponent.IMService.IMBinder;
-import com.avengers.publicim.data.listener.ChatListener;
-import com.avengers.publicim.data.listener.GroupListener;
-import com.avengers.publicim.data.listener.MessageListener;
-import com.avengers.publicim.data.listener.RosterListener;
+import com.avengers.publicim.data.callback.ChatListener;
+import com.avengers.publicim.data.callback.GroupListener;
+import com.avengers.publicim.data.callback.MessageListener;
+import com.avengers.publicim.data.callback.RosterListener;
+import com.avengers.publicim.data.callback.ServiceListener;
 import com.avengers.publicim.fragment.BaseFragment;
 import com.avengers.publicim.view.DialogBuilder;
 import com.avengers.publicim.view.IMProgressDialog;
@@ -33,7 +34,7 @@ import static com.avengers.publicim.conponent.IMApplication.setIMProgress;
 /**
  * Created by D-IT-MAX2 on 2016/3/1.
  */
-public abstract class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity implements ServiceListener {
 	protected IMService mIMService;
 	protected boolean mIsBind = false;
 	protected DbHelper mDB;
@@ -94,6 +95,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 	}
 
 	public void registerListeners(){
+		mIMService.addListener(this);
 		if (this instanceof ChatListener) {
 			getChatManager().addListener((ChatListener) this);
 		}
@@ -109,6 +111,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 	}
 
 	public void unregisterListeners(){
+		mIMService.removeListener(this);
 		if (this instanceof ChatListener) {
 			getChatManager().removeListener((ChatListener) this);
 		}

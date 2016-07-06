@@ -15,8 +15,9 @@ import android.widget.Toast;
 import com.avengers.publicim.R;
 import com.avengers.publicim.activity.ChatActivity;
 import com.avengers.publicim.adapter.ChatListAdapter;
+import com.avengers.publicim.data.callback.ChatListener;
+import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Chat;
-import com.avengers.publicim.data.listener.ChatListener;
 import com.avengers.publicim.utils.ItemClickSupport;
 
 import static com.avengers.publicim.conponent.IMApplication.getChatManager;
@@ -145,4 +146,9 @@ public class ChatListFragment extends BaseFragment implements ChatListener{
 			Log.d("test", "onRequestDisallowInterceptTouchEvent:");
 		}
 	};
+
+	@Override
+	public void onServeiceResponse(ServiceEvent event) {
+
+	}
 }

@@ -18,6 +18,7 @@ import android.widget.ImageView;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.fragment.ChatListFragment;
@@ -188,6 +189,11 @@ public class MainActivity extends BaseActivity {
 				break;
 		}
 		return true;
+	}
+
+	@Override
+	public void onServeiceResponse(ServiceEvent event) {
+
 	}
 
 	/**

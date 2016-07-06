@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
-import com.avengers.publicim.data.listener.RosterListener;
+import com.avengers.publicim.data.callback.RosterListener;
 
 import java.util.List;
 

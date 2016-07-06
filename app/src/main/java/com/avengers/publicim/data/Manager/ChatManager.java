@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 
 import com.avengers.publicim.data.entities.Chat;
-import com.avengers.publicim.data.listener.ChatListener;
+import com.avengers.publicim.data.callback.ChatListener;
 
 import java.util.List;
 

@@ -10,6 +10,7 @@ import android.widget.Button;
 import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.InviteAdapter;
 import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Group;
 import com.avengers.publicim.data.entities.Invite;
@@ -18,6 +19,7 @@ import com.avengers.publicim.data.entities.RosterEntry;
 import java.util.List;
 
 import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
+import static com.avengers.publicim.conponent.IMApplication.getProgress;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
 public class InviteActivity extends BaseActivity{
@@ -40,6 +42,8 @@ public class InviteActivity extends BaseActivity{
             public void onClick(View v) {
                 List<RosterEntry> list = ((InviteAdapter) mRecyclerView.getAdapter()).getSelectedList();
                 for (RosterEntry entry: list) {
+                    getProgress().setMessage("Waiting...");
+                    getProgress().show();
                     Invite invite = new Invite(IMApplication.getUser(),entry.getUser(),
                             Invite.TYPE_GROUP, (Group)mContact, Invite.ROLE_INVITEES, null);
                     mIMService.sendInvite(invite);
@@ -76,6 +80,18 @@ public class InviteActivity extends BaseActivity{
                 if(getGroupManager().contains(value)){
                     mContact = getGroupManager().getItem(value);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void onServeiceResponse(ServiceEvent event) {
+        if(this == event.toListener()){
+            switch (event.getEvent()){
+                case ServiceEvent.EVENT_CLOSE_DIALOG:
+                    getProgress().dismiss();
+                    finish();
+                    break;
             }
         }
     }

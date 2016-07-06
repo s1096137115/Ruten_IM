@@ -8,10 +8,11 @@ import android.support.v4.app.Fragment;
 import com.avengers.publicim.activity.BaseActivity;
 import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMService;
-import com.avengers.publicim.data.listener.ChatListener;
-import com.avengers.publicim.data.listener.GroupListener;
-import com.avengers.publicim.data.listener.MessageListener;
-import com.avengers.publicim.data.listener.RosterListener;
+import com.avengers.publicim.data.callback.ChatListener;
+import com.avengers.publicim.data.callback.GroupListener;
+import com.avengers.publicim.data.callback.MessageListener;
+import com.avengers.publicim.data.callback.RosterListener;
+import com.avengers.publicim.data.callback.ServiceListener;
 
 import static com.avengers.publicim.conponent.IMApplication.getChatManager;
 import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
@@ -21,7 +22,7 @@ import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 /**
  * Created by D-IT-MAX2 on 2016/5/10.
  */
-public abstract class BaseFragment extends Fragment {
+public abstract class BaseFragment extends Fragment implements ServiceListener{
 	protected DbHelper mDB;
 	protected Handler mHandler = new Handler();
 	protected IMService mIMService;
@@ -35,7 +36,9 @@ public abstract class BaseFragment extends Fragment {
 	@Override
 	public void onStart() {
 		super.onStart();
-		registerListeners();
+		if(mIMService != null){
+			registerListeners();
+		}
 	}
 
 	@Override
@@ -47,10 +50,12 @@ public abstract class BaseFragment extends Fragment {
 	public void onBackendConnected() {
 		if(getActivity() != null){
 			mIMService = ((BaseActivity)getActivity()).getIMService();
+			registerListeners();
 		}
 	}
 
 	public void registerListeners(){
+		mIMService.addListener(this);
 		if (this instanceof ChatListener) {
 			getChatManager().addListener((ChatListener) this);
 		}
@@ -66,6 +71,7 @@ public abstract class BaseFragment extends Fragment {
 	}
 
 	public void unregisterListeners(){
+		mIMService.removeListener(this);
 		if (this instanceof ChatListener) {
 			getChatManager().removeListener((ChatListener) this);
 		}

@@ -3,7 +3,7 @@ package com.avengers.publicim.data.Manager;
 import android.content.Context;
 
 import com.avengers.publicim.data.entities.Group;
-import com.avengers.publicim.data.listener.GroupListener;
+import com.avengers.publicim.data.callback.GroupListener;
 
 import java.util.List;
 

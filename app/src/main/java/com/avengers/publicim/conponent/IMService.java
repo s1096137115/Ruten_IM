@@ -15,6 +15,8 @@ import com.avengers.publicim.data.action.GetRoster;
 import com.avengers.publicim.data.action.GetSyncData;
 import com.avengers.publicim.data.action.SetGroupMemberRole;
 import com.avengers.publicim.data.action.SetRoster;
+import com.avengers.publicim.data.callback.ServiceEvent;
+import com.avengers.publicim.data.callback.ServiceListener;
 import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.entities.Group;
 import com.avengers.publicim.data.entities.Invite;
@@ -27,6 +29,7 @@ import com.avengers.publicim.utils.GsonUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.socket.client.Ack;
@@ -45,6 +48,7 @@ public class IMService extends Service {
 	private DbHelper mDB;
 	private Handler mHandler = new Handler();
 	private Group mGroup;
+	private List<ServiceListener> mServiceListener = new ArrayList<>();
 
 	public IMService() {
 	}
@@ -55,10 +59,10 @@ public class IMService extends Service {
 		IMApplication app = (IMApplication) getApplication();
 		mDB = DbHelper.getInstance(this);
 		mSocket = app.getSocket();
-		setListener(mSocket);
+		setSocketListener(mSocket);
 	}
 
-	private void setListener(Socket socket){
+	private void setSocketListener(Socket socket){
 		socket.on(Socket.EVENT_CONNECT, onConnect);
 		socket.on(Socket.EVENT_DISCONNECT, onConnectError);
 		socket.on(Socket.EVENT_ERROR, onConnectError);
@@ -69,11 +73,19 @@ public class IMService extends Service {
 		socket.on(Socket.EVENT_RECONNECT_FAILED, onConnectError);
 		socket.on(Socket.EVENT_RECONNECT_ATTEMPT, onConnectError);
 		socket.on(Socket.EVENT_RECONNECTING, onConnectError);
-		socket.on(Constants.EVENT_RESPONSE, onResponse);
-		socket.on(Constants.EVENT_RECEIVE_MESSAGE, onReceiveMessage);
-		socket.on(Constants.EVENT_RECEIVE_GROUP_MESSAGE, onReceiveMessage);
-		socket.on(Constants.EVENT_RECEIVE_PRESENCE, onReceivePresence);
-		socket.on(Constants.EVENT_RECEIVE_INVITE, onReceiveInvite);
+		socket.on(Constants.Socket.EVENT_RESPONSE, onResponse);
+		socket.on(Constants.Socket.EVENT_RECEIVE_MESSAGE, onReceiveMessage);
+		socket.on(Constants.Socket.EVENT_RECEIVE_GROUP_MESSAGE, onReceiveMessage);
+		socket.on(Constants.Socket.EVENT_RECEIVE_PRESENCE, onReceivePresence);
+		socket.on(Constants.Socket.EVENT_RECEIVE_INVITE, onReceiveInvite);
+	}
+
+	public void addListener(ServiceListener listener){
+		mServiceListener.add(listener);
+	}
+
+	public void removeListener(ServiceListener listener){
+		mServiceListener.remove(listener);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -135,6 +147,32 @@ public class IMService extends Service {
 
 	}
 
+	public void deleteGroup(Group group){
+		if(group != null) deleteGroup(group.getGid());
+	}
+
+	public void deleteGroup(String gid){
+		mDB.deleteGroup(gid);
+		mDB.deleteChat(gid);
+		mDB.deleteMessage(gid);
+		getGroupManager().reload();
+		getChatManager().reload();
+		getMessageManager().change();
+	}
+
+	public void deleteRosterEntry(RosterEntry entry){
+		if(entry != null) deleteRosterEntry(entry.getName());
+	}
+
+	public void deleteRosterEntry(String name){
+		mDB.deleteRoster(name);
+		mDB.deleteChat(name);
+		mDB.deleteMessage(name);
+		getRosterManager().reload();
+		getChatManager().reload();
+		getMessageManager().change();
+	}
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//Send to Socket
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -149,7 +187,7 @@ public class IMService extends Service {
 
 	public void sendMessage(final Message message){
 		final JSONObject obj = GsonUtils.toJSONObject(message);
-		String event = TextUtils.isEmpty(message.getGid()) ? Constants.EVENT_SEND_MESSAGE : Constants.EVENT_SEND_GROUP_MESSAGE;
+		String event = TextUtils.isEmpty(message.getGid()) ? Constants.Socket.EVENT_SEND_MESSAGE : Constants.Socket.EVENT_SEND_GROUP_MESSAGE;
 
 		mSocket.emit(event, obj, new Ack() {
 			@Override
@@ -168,7 +206,7 @@ public class IMService extends Service {
 			final JSONObject obj = GsonUtils.toJSONObject(presence);
 			final JSONObject obj2 = GsonUtils.toJSONObject(IMApplication.getUser());
 			obj.put("from",obj2);
-			mSocket.emit(Constants.EVENT_SEND_PRESENCE, obj, new Ack() {
+			mSocket.emit(Constants.Socket.EVENT_SEND_PRESENCE, obj, new Ack() {
 				@Override
 				public void call(Object... args) {
 					String errorMessage = (String) args[0];
@@ -181,7 +219,7 @@ public class IMService extends Service {
 
 	public void sendInvite(final Invite invite){
 		final JSONObject obj = GsonUtils.toJSONObject(invite);
-		mSocket.emit(Constants.EVENT_SEND_INVITE, obj, new Ack() {
+		mSocket.emit(Constants.Socket.EVENT_SEND_INVITE, obj, new Ack() {
 			@Override
 			public void call(Object... args) {
 				String errorMessage = (String) args[0];
@@ -194,7 +232,7 @@ public class IMService extends Service {
 
 	public void sendSetGroupMemberRole(Group group, int role){
 		SetGroupMemberRole setGroupMemberRole = new SetGroupMemberRole();
-		setGroupMemberRole.setAction(Constants.EVENT_SET_GROUP_MEMBER_ROLE);
+		setGroupMemberRole.setAction(Constants.Socket.EVENT_SET_GROUP_MEMBER_ROLE);
 		setGroupMemberRole.setGid(group.getGid());
 		setGroupMemberRole.setRole(role);
 		final JSONObject obj = GsonUtils.toJSONObject(setGroupMemberRole);
@@ -207,7 +245,7 @@ public class IMService extends Service {
 	 */
 	public void sendSetRoster(User user){
 		SetRoster setRoster = new SetRoster();
-		setRoster.setAction(Constants.EVENT_SET_ROSTER);
+		setRoster.setAction(Constants.Socket.EVENT_SET_ROSTER);
 		setRoster.setUser(user);
 		setRoster.setRelationship(Invite.RELATION_FRIEND);
 		final JSONObject obj = GsonUtils.toJSONObject(setRoster);
@@ -217,7 +255,7 @@ public class IMService extends Service {
 	public void sendGetSyncData(){
 		try {
 			JSONObject obj = new JSONObject();
-			obj.put("action", Constants.EVENT_GET_SYNC_DATA);
+			obj.put("action", Constants.Socket.EVENT_GET_SYNC_DATA);
 			mSocket.emit("request", obj);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -227,7 +265,7 @@ public class IMService extends Service {
 	public void sendGetRoster(){
 		try {
 			JSONObject obj = new JSONObject();
-			obj.put("action", Constants.EVENT_GET_ROSTER);
+			obj.put("action", Constants.Socket.EVENT_GET_ROSTER);
 			mSocket.emit("request", obj);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -236,7 +274,7 @@ public class IMService extends Service {
 
 	public void sendCreateGroup(String name){
 		CreateGroup createGroup = new CreateGroup();
-		createGroup.setAction(Constants.EVENT_CREATE_GROUP);
+		createGroup.setAction(Constants.Socket.EVENT_CREATE_GROUP);
 		createGroup.setName(name);
 		mGroup = new Group("",name);
 		final JSONObject obj = GsonUtils.toJSONObject(createGroup);
@@ -281,10 +319,11 @@ public class IMService extends Service {
 			mGroup = null;
 		}else if(setGroupMemberRole.getRole().equals(Invite.ROLE_EXIT)){
 			Group group = getGroupManager().getItem(setGroupMemberRole.getGid());
-			mDB.deleteGroup(group);
+			deleteGroup(group);
 		}
-		getGroupManager().reload();
-		getProgress().dismiss();
+		for (ServiceListener listener : mServiceListener) {
+			listener.onServeiceResponse(new ServiceEvent(ServiceEvent.EVENT_CLOSE_DIALOG, listener));
+		}
 	}
 
 	public void processGetRoster(String data){
@@ -338,7 +377,7 @@ public class IMService extends Service {
 			Log.d("acho","connect");
 			JSONObject obj = GsonUtils.toJSONObject(IMApplication.getUser());
 			try {
-				mSocket.emit(Constants.EVENT_JOIN, obj, new Ack() {
+				mSocket.emit(Constants.Socket.EVENT_JOIN, obj, new Ack() {
 					@Override
 					public void call(Object... args) {
 						Log.d("acho", "ack");
@@ -383,15 +422,15 @@ public class IMService extends Service {
 			try {
 				JSONObject jsonObj  = new JSONObject(args[0].toString());
 				String action = jsonObj.get("action").toString();
-				if(action.equals(Constants.EVENT_GET_SYNC_DATA)){
+				if(action.equals(Constants.Socket.EVENT_GET_SYNC_DATA)){
 					processGetSyncData(args[0].toString());
-				}else if(action.equals(Constants.EVENT_GET_ROSTER)){
+				}else if(action.equals(Constants.Socket.EVENT_GET_ROSTER)){
 					processGetRoster(args[0].toString());
-				}else if(action.equals(Constants.EVENT_SET_ROSTER)){
+				}else if(action.equals(Constants.Socket.EVENT_SET_ROSTER)){
 					processSetRoster(args[0].toString());
-				}else if(action.equals(Constants.EVENT_CREATE_GROUP)){
+				}else if(action.equals(Constants.Socket.EVENT_CREATE_GROUP)){
 					processCreateGroup(args[0].toString());
-				}else if(action.equals(Constants.EVENT_SET_GROUP_MEMBER_ROLE)){
+				}else if(action.equals(Constants.Socket.EVENT_SET_GROUP_MEMBER_ROLE)){
 					processSetGroupMemberRole(args[0].toString());
 				}
 			} catch (Exception e) {

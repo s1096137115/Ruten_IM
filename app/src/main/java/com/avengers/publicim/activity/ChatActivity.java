@@ -16,6 +16,8 @@ import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.ChatAdapter;
 import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.data.callback.MessageListener;
+import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Group;
@@ -23,7 +25,6 @@ import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
-import com.avengers.publicim.data.listener.MessageListener;
 import com.avengers.publicim.utils.SystemUtils;
 
 import static com.avengers.publicim.conponent.IMApplication.getChatManager;
@@ -143,19 +144,6 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 	}
 
 	@Override
-	public void onMessageUpdate() {
-		mChatAdapter.update(mDB.getMessages(mContact));
-		mChatAdapter.refresh();
-		mHandler.post(new Runnable() {
-			@Override
-			public void run() {
-				mRecyclerView.scrollToPosition(mChatAdapter.getItemCount()-1);
-			}
-		});
-		Log.d("text", "onMessageUpdate: ");
-	}
-
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.menu_chat, menu);
 		final MenuItem inviteGroup = menu.findItem(R.id.action_invite_group);
@@ -185,11 +173,33 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 				getProgress().setMessage("Waiting...");
 				getProgress().show();
 				mIMService.sendSetGroupMemberRole((Group) mContact, Invite.ROLE_EXIT);
-				mDB.insertGroup((Group) mContact);
-				getGroupManager().reload();
-				finish();
 				break;
 		}
 		return true;
+	}
+
+	@Override
+	public void onMessageUpdate() {
+		mChatAdapter.update(mDB.getMessages(mContact));
+		mChatAdapter.refresh();
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				mRecyclerView.scrollToPosition(mChatAdapter.getItemCount()-1);
+			}
+		});
+		Log.d("text", "onMessageUpdate: ");
+	}
+
+	@Override
+	public void onServeiceResponse(ServiceEvent event) {
+		if(this == event.toListener()){
+			switch (event.getEvent()){
+				case ServiceEvent.EVENT_CLOSE_DIALOG:
+					getProgress().dismiss();
+					finish();
+					break;
+			}
+		}
 	}
 }

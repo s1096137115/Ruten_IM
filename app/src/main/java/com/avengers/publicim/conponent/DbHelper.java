@@ -158,20 +158,42 @@ public class DbHelper extends SQLiteOpenHelper{
 		db.update(Group.TABLE_NAME, group.getContentValues(), whereSql, null);
 	}
 
-	public void deleteRoster(RosterEntry entry){
-
+	public void deleteRoster(String userName){
+		SQLiteDatabase db = this.getReadableDatabase();
+		String where = String.format("%s = '%s'", User.NAME, userName);
+		db.delete(RosterEntry.TABLE_NAME, where, null);
 	}
 
-	public void deleteChat(Chat chat){
-
+	public void deleteChat(String chatId){
+		SQLiteDatabase db = this.getReadableDatabase();
+		String where = String.format("%s = '%s'", Chat.CID, chatId);
+		db.delete(Chat.TABLE_NAME, where, null);
 	}
 
+	/**
+	 * delete a message by mid
+	 * @param message
+	 */
 	public void deleteMessage(Message message){
-
+		SQLiteDatabase db = this.getReadableDatabase();
+		String where = String.format("%s = '%s'", Message.MID, message.getMid());
+		db.delete(Message.TABLE_NAME, where, null);
 	}
 
-	public void deleteGroup(Group group){
+	/**
+	 * delete messages of same chatId
+	 * @param chatId
+	 */
+	public void deleteMessage(String chatId){
+		SQLiteDatabase db = this.getReadableDatabase();
+		String where = String.format("%s = '%s'", Message.CHAT_ID, chatId);
+		db.delete(Message.TABLE_NAME, where, null);
+	}
 
+	public void deleteGroup(String gid){
+		SQLiteDatabase db = this.getReadableDatabase();
+		String where = String.format("%s = '%s'", Group.GID, gid);
+		db.delete(Group.TABLE_NAME, where, null);
 	}
 
 }

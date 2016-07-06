@@ -1,6 +1,6 @@
 package com.avengers.publicim.data.Manager;
 
-import com.avengers.publicim.data.listener.MessageListener;
+import com.avengers.publicim.data.callback.MessageListener;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
