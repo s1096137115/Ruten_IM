@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--by Elsa-->
+<!--此為新建立之selector-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" android:drawable="@mipmap/ic_action_sendbutton_after"/>
+    <item android:state_enabled="false" android:drawable="@mipmap/ic_action_sendbutton_disable" />
+    <item android:drawable="@mipmap/ic_action_sendbutton"/>
+</selector>

@@ -1,35 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<android.support.v4.widget.DrawerLayout
+	android:id="@+id/id_drawer_layout"
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:fitsSystemWindows="true"
-	tools:context="com.avengers.publicim.MainActivity">
+	>
 
-	<android.support.design.widget.AppBarLayout
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:theme="@style/AppTheme.AppBarOverlay">
+	<RelativeLayout android:layout_width="match_parent"
+	                android:layout_height="match_parent">
 
-		<android.support.v7.widget.Toolbar
-			android:id="@+id/toolbar"
+		<android.support.design.widget.AppBarLayout
+			android:id="@+id/appbar"
 			android:layout_width="match_parent"
-			android:layout_height="?attr/actionBarSize"
-			android:background="?attr/colorPrimary"
-			app:popupTheme="@style/AppTheme.PopupOverlay"/>
+			android:layout_height="wrap_content">
 
-	</android.support.design.widget.AppBarLayout>
+			<android.support.v7.widget.Toolbar
+				android:id="@+id/toolbar"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:background="?attr/colorPrimary"
+				android:minHeight="?attr/actionBarSize"
+				app:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+				app:layout_scrollFlags="scroll|enterAlways"
+				app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+			<!--<include-->
+			<!--layout="@layout/template_toolbar"-->
+			<!--android:layout_width="match_parent"-->
+			<!--android:layout_height="wrap_content" />-->
+			<!--<com.ruten.alert.fmx.view.SlidingTabLayout-->
+			<!--android:id="@+id/slidingTabs"-->
+			<!--android:layout_width="match_parent"-->
+			<!--android:layout_height="wrap_content"-->
+			<!--android:layout_below="@+id/toolbar"/>-->
+			<android.support.design.widget.TabLayout
+				android:id="@+id/tabLayout"
+				style="@style/MyCustomTabLayout"
+				app:tabGravity="fill"
+				app:tabMode="fixed"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:background="@color/colorPrimary"
+				android:minHeight="?attr/actionBarSize"
+				android:layout_below="@+id/toolbar"/>
 
-	<include layout="@layout/content_main"/>
+		</android.support.design.widget.AppBarLayout>
 
-	<android.support.design.widget.FloatingActionButton
-		android:id="@+id/fab"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_gravity="bottom|end"
-		android:layout_margin="@dimen/fab_margin"
-		android:src="@android:drawable/ic_dialog_email"/>
+		<android.support.v4.view.ViewPager
+			android:id="@+id/viewPager"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:background="@android:color/white"
+			android:layout_below="@+id/appbar"/>
+	</RelativeLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+	<!--<android.support.design.widget.NavigationView-->
+		<!--android:id="@+id/id_nv_menu"-->
+		<!--android:layout_width="match_parent"-->
+		<!--android:layout_height="match_parent"-->
+		<!--android:layout_gravity="left"-->
+		<!--app:itemBackground="@android:color/transparent"-->
+		<!--app:itemTextColor="@android:color/black"-->
+		<!--app:headerLayout="@layout/header_main"-->
+		<!--app:menu="@menu/menu_drawer"-->
+		<!--/>-->
+
+</android.support.v4.widget.DrawerLayout>
+

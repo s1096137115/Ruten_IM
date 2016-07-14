@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="colorPrimary">#3F51B5</color>
-	<color name="colorPrimaryDark">#303F9F</color>
-	<color name="colorAccent">#FF4081</color>
+	<color name="colorAccent">@color/colorPrimaryDark</color>
+	<color name="login_button">#FF8C00</color>
+	<color name="login_button_press">#FFBB33</color>
+	<color name="light_gray">#c8e0e0e0</color>
+	<color name="white_gray">#f2f2f2</color>
+	<color name="primarytext" type="color">#de000000</color>
+	<color name="darkbackground" type="color">#ff323232</color>
+	<color name="orange">#FFFF9800</color>
+	<color name="orange_light">#FFDCAB</color>
+	<color name="orange_middle_light">#FFFFDCAB</color>
+	<color name="divider">#1F000000</color>
+	<color name="blue_dark">#1977CA</color>
+	<color name="blue">#ff20beca</color>
+	<color name="orange_red">#FFFF6303</color>
+	<color name="colorPrimary">#ffffb615</color>
+	<color name="colorPrimaryDark">#F57C00</color>
+	<color name="red">#FF0000</color>
+	<color name="colorGray">#ff868686</color>
+	<color name="eventtype_press">#2451ebff</color>
 </resources>
