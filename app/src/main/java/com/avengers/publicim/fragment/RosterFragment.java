@@ -113,7 +113,7 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 	}
 
 	@Override
-	public void onGroupListener() {
+	public void onGroupUpdate() {
 		mHandler.post(new Runnable() {
 			@Override
 			public void run() {

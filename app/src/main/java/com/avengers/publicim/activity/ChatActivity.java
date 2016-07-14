@@ -21,7 +21,6 @@ import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Group;
-import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
@@ -172,7 +171,7 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 			case R.id.action_exit_group:
 				getProgress().setMessage("Waiting...");
 				getProgress().show();
-				mIMService.sendSetGroupMemberRole((Group) mContact, Invite.ROLE_EXIT);
+				mIMService.sendSetGroupMemberRole((Group) mContact, Group.ROLE_EXIT);
 				break;
 		}
 		return true;
@@ -180,6 +179,7 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 
 	@Override
 	public void onMessageUpdate() {
+		mIMService.updateMessageOfRead(mChat, DbHelper.IntBoolean.TRUE);
 		mChatAdapter.update(mDB.getMessages(mContact));
 		mChatAdapter.refresh();
 		mHandler.post(new Runnable() {

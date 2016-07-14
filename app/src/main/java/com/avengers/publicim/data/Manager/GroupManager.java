@@ -67,7 +67,7 @@ public class GroupManager extends BaseManager<Group, GroupListener> {
 	public void reload() {
 		setList(mDB.getGroups());
 		for (GroupListener listener : mListeners){
-			listener.onGroupListener();
+			listener.onGroupUpdate();
 		}
 	}
 }

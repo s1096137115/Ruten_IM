@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.avengers.publicim.R;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Group;
+import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.RosterEntry;
 
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
 	private static final int TYPE_HEADER = 0;
 	private static final int TYPE_CONTACT = 1;
+	private static final int TYPE_CONTACT_ADD = 2;
 
 	private static final int GROUPS = 0;
 	private static final int ROSTER = 1;
@@ -60,6 +62,9 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 			case TYPE_CONTACT:
 				holder = new ContactViewHolder(mLayoutInflater.inflate(R.layout.view_roster_item, parent, false));
 				break;
+			case TYPE_CONTACT_ADD:
+				holder = new ContactViewHolder(mLayoutInflater.inflate(R.layout.view_roster_item_add, parent, false));
+				break;
 		}
 		return holder;
 	}
@@ -71,6 +76,9 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 		}else if(holder instanceof ContactViewHolder) {
 			if(mContacts.get(position) instanceof RosterEntry){
 				((ContactViewHolder) holder).icon.setImageResource(R.drawable.ic_person_black_48dp);
+				int visibility = ((RosterEntry) mContacts.get(position)).getPresence()
+						.getStatus() == Presence.STATUS_ONLINE ? View.VISIBLE : View.GONE;
+				((ContactViewHolder) holder).status.setVisibility(visibility);
 			}else{
 				((ContactViewHolder) holder).icon.setImageResource(R.drawable.ic_group_black_48dp);
 			}
@@ -153,11 +161,13 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
 	public static class ContactViewHolder extends RecyclerView.ViewHolder {
 		ImageView icon;
+		ImageView status;
 		TextView id;
 
 		ContactViewHolder(View view) {
 			super(view);
 			icon = (ImageView)view.findViewById(R.id.icon);
+			status = (ImageView)view.findViewById(R.id.status);
 			id = (TextView)view.findViewById(R.id.id);
 		}
 	}

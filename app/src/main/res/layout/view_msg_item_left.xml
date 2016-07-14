@@ -10,37 +10,36 @@
 	android:paddingLeft="10.0dip"
 	android:paddingRight="10.0dip"
 	android:paddingTop="6.0dip"
-	android:orientation="vertical"
+	android:orientation="horizontal"
 	>
 
-	<TextView
+	<ImageView
+		android:id="@+id/icon"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:text="ac02"
-		android:id="@+id/account"
-		android:textColor="@android:color/black"
-		android:visibility="gone"/>
+		android:clickable="true"
+		android:focusable="true"
+		android:scaleType="fitXY"
+		android:src="@mipmap/ic_profile"
+		android:layout_gravity="top"/>
 
-	<LinearLayout
-		android:orientation="horizontal"
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent">
+	<RelativeLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
 
-		<ImageView
-			android:id="@+id/icon"
+		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:clickable="true"
-			android:focusable="true"
-			android:scaleType="fitXY"
-			android:src="@mipmap/ic_profile"
-			android:layout_gravity="top"/>
+			android:text="ac02"
+			android:id="@+id/id"
+			android:textColor="@android:color/black"
+			/>
 
 		<RelativeLayout
 			android:id="@+id/relative_layout1"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_gravity="center_vertical"
+			android:layout_below="@+id/id"
 			android:layout_marginRight="5dip"
 			android:background="@drawable/balloon_l_selector"
 			android:clickable="true"
@@ -65,12 +64,12 @@
 			android:id="@+id/datetime"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_centerHorizontal="true"
+			android:layout_toRightOf="@+id/relative_layout1"
+			android:layout_alignBottom="@+id/relative_layout1"
 			android:layout_gravity="bottom"
 			android:text="2015-10-10\n12:34"
-			android:gravity="center_horizontal"
 			android:textSize="12sp"/>
 
-	</LinearLayout>
+	</RelativeLayout>
 
 </LinearLayout>

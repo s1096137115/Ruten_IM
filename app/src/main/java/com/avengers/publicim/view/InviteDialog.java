@@ -9,6 +9,7 @@ import android.support.v7.widget.AppCompatEditText;
 
 import com.avengers.publicim.conponent.IMApplication;
 import com.avengers.publicim.data.entities.Invite;
+import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
 
 /**
@@ -28,7 +29,7 @@ public class InviteDialog extends AppCompatDialogFragment {
 				if(!input.getText().toString().isEmpty()){
 					Invite invite = new Invite(IMApplication.getUser(),
 							new User("", input.getText().toString()),
-							Invite.TYPE_FRIEND, null, null, Invite.RELATION_FRIEND);
+							Invite.TYPE_FRIEND, null, null, RosterEntry.RELATION_FRIEND);
 //							mIMService.sendInvite(invite);
 				}
 			}

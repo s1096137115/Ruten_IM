@@ -45,7 +45,7 @@ public class InviteActivity extends BaseActivity{
                     getProgress().setMessage("Waiting...");
                     getProgress().show();
                     Invite invite = new Invite(IMApplication.getUser(),entry.getUser(),
-                            Invite.TYPE_GROUP, (Group)mContact, Invite.ROLE_INVITEES, null);
+                            Invite.TYPE_GROUP, (Group)mContact, Group.ROLE_INVITEES, null);
                     mIMService.sendInvite(invite);
                 }
             }

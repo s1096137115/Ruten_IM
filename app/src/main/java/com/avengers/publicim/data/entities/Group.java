@@ -26,6 +26,19 @@ public class Group implements Serializable, Contact {
 					+ ROLE + " VARCHAR(5) "
 					+ ") ";
 
+	/**
+	 * 已受邀
+	 */
+	public static final int ROLE_INVITEES = 0;
+	/**
+	 * 成員
+	 */
+	public static final int ROLE_MEMBER = 1;
+	/**
+	 * 離開
+	 */
+	public static final int ROLE_EXIT = 2;
+
 	@SerializedName("gid")
 	private String gid;
 

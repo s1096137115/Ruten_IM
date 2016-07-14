@@ -5,5 +5,5 @@ package com.avengers.publicim.data.callback;
  */
 public interface GroupListener extends Listener{
 
-	void onGroupListener();
+	void onGroupUpdate();
 }

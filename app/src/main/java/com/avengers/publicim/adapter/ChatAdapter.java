@@ -58,6 +58,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	@Override
 	public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 		if (holder instanceof TheOtherViewHolder) {
+			((TheOtherViewHolder) holder).mID.setText(mMessages.get(position).getFrom().getName());
+			if(mMessages.get(position).getGid().isEmpty()){
+				((TheOtherViewHolder) holder).mID.setVisibility(View.GONE);
+			}else{
+				((TheOtherViewHolder) holder).mID.setVisibility(View.VISIBLE);
+			}
 			((TheOtherViewHolder) holder).mContent.setText(mMessages.get(position).getContent());
 			String eventTime = mMessages.get(position).getDate().replace(" ","\n");
 			((TheOtherViewHolder) holder).mDatetime.setText(eventTime);
@@ -109,12 +115,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
 	public static class TheOtherViewHolder extends RecyclerView.ViewHolder {
 		ImageView mImageView;
+		TextView mID;
 		TextView mContent;
 		TextView mDatetime;
 
 		TheOtherViewHolder(View view) {
 			super(view);
 			mImageView = (ImageView)view.findViewById(R.id.icon);
+			mID = (TextView)view.findViewById(R.id.id);
 			mContent = (TextView)view.findViewById(R.id.msg);
 			mDatetime = (TextView)view.findViewById(R.id.datetime);
 		}

@@ -27,8 +27,6 @@ public class Presence implements Serializable {
 
 	/**
 	 * 使用者狀態
-	 * 0 offline
-	 * 1 online
 	 */
 	@SerializedName("status")
 	private Integer status;
