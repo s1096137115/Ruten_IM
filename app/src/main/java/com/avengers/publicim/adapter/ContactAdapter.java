@@ -81,6 +81,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 				((ContactViewHolder) holder).status.setVisibility(visibility);
 			}else{
 				((ContactViewHolder) holder).icon.setImageResource(R.drawable.ic_group_black_48dp);
+				((ContactViewHolder) holder).status.setVisibility(View.GONE);
 			}
 			((ContactViewHolder) holder).id.setText((mContacts.get(position)).getName());
 		}

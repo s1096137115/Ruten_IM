@@ -3,8 +3,8 @@ package com.avengers.publicim.data.Manager;
 import android.content.Context;
 import android.database.Cursor;
 
-import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.callback.ChatListener;
+import com.avengers.publicim.data.entities.Chat;
 
 import java.util.List;
 
@@ -73,9 +73,21 @@ public class ChatManager extends BaseManager<Chat, ChatListener> {
 
 	@Override
 	public void reload() {
-		setList(mDB.getContentOfChats());
-		for(ChatListener listener : mListeners){
-			listener.onChatUpdate();
-		}
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				//background
+				setList(mDB.getContentOfChats());
+				//UI
+				mHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						for(ChatListener listener : mListeners){
+							listener.onChatUpdate();
+						}
+					}
+				});
+			}
+		}).start();
 	}
 }

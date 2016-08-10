@@ -74,4 +74,24 @@ public class Presence implements Serializable {
 	public void setStatus(Integer status) {
 		this.status = status;
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof Presence) {
+			Presence presence = (Presence) o;
+			return this.photo.equals(presence.photo)
+					&& this.status.equals(presence.status)
+					&& this.describe.equals(presence.describe);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		final int PRIME = 53;
+		int result = 1;
+		result = PRIME * result + (PRIME * getPhoto().hashCode())
+				+ getStatus().hashCode() + getDescribe().hashCode();
+		return result;
+	}
 }

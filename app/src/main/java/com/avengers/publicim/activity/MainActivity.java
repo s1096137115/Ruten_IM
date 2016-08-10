@@ -17,10 +17,8 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.conponent.IMApplication;
 import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Invite;
-import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.fragment.ChatListFragment;
 import com.avengers.publicim.fragment.RosterFragment;
@@ -163,15 +161,12 @@ public class MainActivity extends BaseActivity {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
 								if(!input.getText().toString().isEmpty()){
-									Invite invite = new Invite(IMApplication.getUser(),
-											new User("", input.getText().toString()),
-											Invite.TYPE_FRIEND, null, null, RosterEntry.RELATION_FRIEND);
-							mIMService.sendInvite(invite);
+									Invite invite = new Invite(
+											new User("", input.getText().toString()), Invite.TYPE_FRIEND);
+									mIMService.sendInvite(invite);
 								}
 							}
 						}).show();
-//				InviteDialog dialog = new InviteDialog();
-//				dialog.show(getSupportFragmentManager(),"Invite");
 				break;
 			case R.id.action_create_group:
 				getBuilder()

@@ -5,7 +5,10 @@ import android.database.Cursor;
 
 import com.google.gson.annotations.SerializedName;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/4.
@@ -22,22 +25,34 @@ public class Group implements Serializable, Contact {
 	public static final String CREATE_SQL =
 			"CREATE TABLE " + TABLE_NAME + "("
 					+ GID + " VARCHAR(50) PRIMARY KEY, "
-					+ NAME + " VARCHAR(50), "
-					+ ROLE + " VARCHAR(5) "
+					+ NAME + " VARCHAR(50) "
 					+ ") ";
 
 	/**
-	 * 已受邀
+	 * 黑名單
 	 */
-	public static final int ROLE_INVITEES = 0;
-	/**
-	 * 成員
-	 */
-	public static final int ROLE_MEMBER = 1;
+	public static final int ROLE_BLACKLIST = -1;
 	/**
 	 * 離開
 	 */
-	public static final int ROLE_EXIT = 2;
+	public static final int ROLE_EXIT = 0;
+	/**
+	 * 已受邀
+	 */
+	public static final int ROLE_INVITEES = 1;
+	/**
+	 * 禁止發言
+	 */
+	public static final int ROLE_BAN_SPEAK = 2;
+	/**
+	 * 成員
+	 */
+	public static final int ROLE_MEMBER = 3;
+	/**
+	 * 管理者
+	 */
+	public static final int ROLE_MANAGER = 4;
+
 
 	@SerializedName("gid")
 	private String gid;
@@ -45,11 +60,11 @@ public class Group implements Serializable, Contact {
 	@SerializedName("name")
 	private String name;
 
-	@SerializedName("role")
-	private String role;
+	@SerializedName("owner")
+	private String owner;
 
-	@SerializedName("invitor")
-	private User invitor;
+	@SerializedName("member")
+	private List<Member> members;
 
 	public Group(String gid, String name) {
 		this.gid = gid;
@@ -67,7 +82,6 @@ public class Group implements Serializable, Contact {
 		ContentValues values = new ContentValues();
 		values.put(Group.GID, getGid());
 		values.put(Group.NAME, getName());
-		values.put(Group.ROLE, getRole());
 		return values;
 	}
 
@@ -93,34 +107,36 @@ public class Group implements Serializable, Contact {
 		this.name = name;
 	}
 
-	public User getInvitor() {
-		return invitor;
+	public List<Member> getMembers() {
+		return members;
 	}
 
-	public void setInvitor(User invitor) {
-		this.invitor = invitor;
+	public void setMembers(List<Member> members) {
+		this.members = members;
 	}
 
-	public String getRole() {
-		return role;
+	public String getOwner() {
+		return owner;
 	}
 
-	public void setRole(String role) {
-		this.role = role;
+	public void setOwner(String owner) {
+		this.owner = owner;
 	}
 
 	@Override
 	public boolean equals(Object o) {
 		if(o instanceof Group) {
 			Group group = (Group) o;
-			return this.gid.equals(group.gid) && this.name.equals(group.name);
+			return this.gid.equals(group.gid)
+					&& this.name.equals(group.name) && this.name.equals(group.name)
+					&& CollectionUtils.isEqualCollection(this.members, group.members);
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		final int PRIME = 138;
+		final int PRIME = 121;
 		int result = 1;
 		result = PRIME * result + (PRIME * getGid().hashCode()) + getName().hashCode();
 		return result;

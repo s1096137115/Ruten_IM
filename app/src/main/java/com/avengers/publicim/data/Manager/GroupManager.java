@@ -2,8 +2,8 @@ package com.avengers.publicim.data.Manager;
 
 import android.content.Context;
 
-import com.avengers.publicim.data.entities.Group;
 import com.avengers.publicim.data.callback.GroupListener;
+import com.avengers.publicim.data.entities.Group;
 
 import java.util.List;
 
@@ -65,9 +65,24 @@ public class GroupManager extends BaseManager<Group, GroupListener> {
 
 	@Override
 	public void reload() {
-		setList(mDB.getGroups());
-		for (GroupListener listener : mListeners){
-			listener.onGroupUpdate();
-		}
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				//background
+				setList(mDB.getGroups());
+				for (Group group : mList) {
+					group.setMembers(mDB.getMembers(group));
+				}
+				//UI
+				mHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						for (GroupListener listener : mListeners){
+							listener.onGroupUpdate();
+						}
+					}
+				});
+			}
+		}).start();
 	}
 }

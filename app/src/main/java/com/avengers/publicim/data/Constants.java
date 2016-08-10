@@ -5,12 +5,8 @@ package com.avengers.publicim.data;
  */
 public class Constants {
 
-	//	public static final String CHAT_SERVER_URL = "http://172.25.5.201:8000";
-	//	public static final String CHAT_SERVER_URL = "http://192.168.3.224:8000";
-	//	public static final String CHAT_SERVER_URL = "http://10.0.1.88:8000";
-	//	public static final String CHAT_SERVER_URL = "http://172.30.0.177:8080";
-//	public static final String CHAT_SERVER_URL = "http://192.168.3.229:8000";
-	public static final String CHAT_SERVER_URL = "http://10.0.1.4:8000";
+	public static final String CHAT_SERVER_URL = "http://10.17.1.30:8000";
+//	public static final String CHAT_SERVER_URL = "http://10.0.1.7:8000";
 
 	public static final String SAVE_DB_SIMPLE_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
@@ -29,6 +25,7 @@ public class Constants {
 		public static final String EVENT_GET_ROSTER = "getRoster";
 		public static final String EVENT_SEND_INVITE = "SendInvite";
 		public static final String EVENT_RECEIVE_INVITE = "ReceiveInvite";
+		public static final String EVENT_GET_GROUP = "getGroup";
 		public static final String EVENT_CREATE_GROUP = "createGroup";
 		public static final String EVENT_SET_GROUP_MEMBER_ROLE = "setGroupMemberRole";
 	}

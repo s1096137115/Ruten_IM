@@ -94,6 +94,7 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 				value = bundle.getString(GROUP_ID);
 				if(getGroupManager().contains(value)){
 					mContact = getGroupManager().getItem(value);
+					((Group)mContact).setMembers(mDB.getMembers((Group)mContact));
 				}
 			}
 

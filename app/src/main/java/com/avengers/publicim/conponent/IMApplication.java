@@ -43,7 +43,7 @@ public class IMApplication extends Application {
 	}
 
 	private void initAccount(){
-		mEntry = new RosterEntry(new User("Android-0714-1414", "ac09"),
+		mEntry = new RosterEntry(new User("Android-0808-1652", "test01"),
 				new Presence("","",Presence.STATUS_ONLINE), 0);
 	}
 
@@ -75,7 +75,6 @@ public class IMApplication extends Application {
 		mGroupManager.reload();
 		mMessageManager = new MessageManager();
 	}
-
 
 	public Socket getSocket() {
 		return mSocket;

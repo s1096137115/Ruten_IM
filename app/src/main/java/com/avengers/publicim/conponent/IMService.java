@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.action.CreateGroup;
+import com.avengers.publicim.data.action.GetGroup;
 import com.avengers.publicim.data.action.GetRoster;
 import com.avengers.publicim.data.action.GetSyncData;
 import com.avengers.publicim.data.action.SetGroupMemberRole;
@@ -20,12 +21,16 @@ import com.avengers.publicim.data.callback.ServiceListener;
 import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.entities.Group;
 import com.avengers.publicim.data.entities.Invite;
+import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.GsonUtils;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Predicate;
+import org.apache.commons.collections4.PredicateUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,6 +48,7 @@ import static com.avengers.publicim.conponent.IMApplication.getProgress;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
 public class IMService extends Service {
+	private static final String TAG = "IMService";
 	private IMBinder mBinder = new IMBinder();
 	private Socket mSocket;
 	private DbHelper mDB;
@@ -110,33 +116,124 @@ public class IMService extends Service {
 	}
 
 	public void updateRosterEntry(RosterEntry entry){
-		if(getRosterManager().getList().isEmpty()){
-			mDB.insertRoster(entry);
-		}else{
-			if(getRosterManager().contains(entry.getUser())){
-				mDB.updateRoster(entry);
-			}else{
-				mDB.insertRoster(entry);
-			}
+		if(getRosterManager().contains(entry.getUser())){
+			mDB.updateRoster(entry);
 		}
 		getRosterManager().reload();
 	}
 
-	public void updateRoster(List<RosterEntry> listEntries){
-		if(getRosterManager().getList().isEmpty()){
-			for (RosterEntry entry : listEntries) {
-				mDB.insertRoster(entry);
+	//listNew為新名單
+	//listOld為舊名單
+	private final int MODIFY_NEW = 0; //modifyNew為有修改的新名單
+	private final int MODIFY_OLD = 1; //modifyOld為有修改的舊名單
+	private final int CHANGE_NEW = 2; //changeNew為需要更新的新名單
+	private final int CHANGE_OLD = 3; //changeOld為需要更新的舊名單
+	private final int ADD = 4;        //add為需要新增的名單
+	private final int REMOVE = 5;     //remove為需要移除的名單
+
+	//主要是利用新舊名單的差集取得有更動的名單
+	//再利用使用者名稱的異同區分出增刪或改
+	public void updateRoster(List<RosterEntry> listNew){
+		List<RosterEntry> listOld = getRosterManager().getList();
+		List<RosterEntry>[] list = categorize(listNew,listOld);
+		if(list[MODIFY_NEW].isEmpty() && list[MODIFY_OLD].isEmpty()) return;
+		for (RosterEntry entry: list[CHANGE_NEW]) {
+			mDB.updateRoster(entry);
+		}
+		for (RosterEntry entry: list[ADD]) {
+			mDB.insertRoster(entry);
+		}
+		for (RosterEntry entry: list[REMOVE]) {
+			mDB.deleteRoster(entry);
+		}
+		getRosterManager().reload();
+	}
+
+	public void updateGroup(List<Group> listNew){
+		List<Group> listOld = getGroupManager().getList();
+		List<Group>[] list = categorize(listNew,listOld);
+		if(list[MODIFY_NEW].isEmpty() && list[MODIFY_OLD].isEmpty()) return;
+		for (Group group: list[CHANGE_NEW]) {
+			mDB.updateGroup(group);
+			//在開始比較Member之前要先幫新的Member加上group_id
+			for (Member member: group.getMembers()) {
+				member.setGroupId(group.getGid());
 			}
-		}else{
-			for (RosterEntry entry : listEntries) {
-				if(getRosterManager().contains(entry.getUser())){
-					mDB.updateRoster(entry);
-				}else{
-					mDB.insertRoster(entry);
+			for (Group group2: list[CHANGE_OLD]) {
+				if(group.getGid().equals(group2.getGid())){
+					List<Member>[] list2 = categorize(group.getMembers(), group2.getMembers());
+					for (Member member: list2[CHANGE_NEW]) {
+						mDB.updateMember(member);
+					}
+					for (Member member: list2[ADD]) {
+						mDB.insertMember(member);
+					}
+					for (Member member: list2[REMOVE]) {
+						mDB.deleteMember(member);
+					}
 				}
 			}
 		}
-		getRosterManager().reload();
+		for (Group group: list[ADD]) {
+			mDB.insertGroup(group);
+			for (Member member:group.getMembers()) {
+				member.setGroupId(group.getGid());
+				mDB.insertMember(member);
+			}
+		}
+		for (Group group: list[REMOVE]) {
+			for (Member member:group.getMembers()) {
+				member.setGroupId(group.getGid());
+				mDB.deleteMember(member);
+			}
+			mDB.deleteGroup(group);
+			mDB.deleteChat(group.getGid());
+			mDB.deleteMessages(group.getGid());
+		}
+		getGroupManager().reload();
+		getChatManager().reload();
+		getMessageManager().change();
+	}
+
+	public <T> List[] categorize(List<T> listNew, List<T> listOld){
+		List[] list = new ArrayList[6];
+		list[MODIFY_NEW] = (List)CollectionUtils.subtract(listNew,listOld);
+		list[MODIFY_OLD] = (List)CollectionUtils.subtract(listOld,listNew);
+		list[CHANGE_NEW] = (List)CollectionUtils.select(list[MODIFY_NEW],
+				PredicateUtils.anyPredicate(filterCondition(listOld)));
+		list[CHANGE_OLD] = (List)CollectionUtils.select(list[MODIFY_OLD],
+				PredicateUtils.anyPredicate(filterCondition(listNew)));
+		list[ADD] = (List)CollectionUtils.subtract(list[MODIFY_NEW], list[CHANGE_NEW]);
+		list[REMOVE] = (List)CollectionUtils.subtract(list[MODIFY_OLD], list[CHANGE_OLD]);
+		return list;
+	}
+
+	/**
+	 * change的過濾條件
+	 * @param list
+	 * @param <T>
+	 * @return
+	 */
+	private <T> List<Predicate<T>> filterCondition(List<T> list){
+		List<Predicate<T>> predicates = new ArrayList<>();
+		for (final Object a:list) {
+			predicates.add(new Predicate<T>() {
+				@Override
+				public boolean evaluate(T b) {
+					if(b instanceof RosterEntry){
+						return ((RosterEntry)a).getName().equals(((RosterEntry)b).getName());
+					}else if(b instanceof Group) {
+						return ((Group) a).getId().equals(((Group) b).getId());
+					}else if(b instanceof Member) {
+						boolean c = ((Member) a).getUser().equals(((Member) b).getUser());
+						return ((Member) a).getUser().equals(((Member) b).getUser());
+					}else{
+						return false;
+					}
+				}
+			});
+		}
+		return predicates;
 	}
 
 	public void updateChat(Chat chat){
@@ -162,16 +259,13 @@ public class IMService extends Service {
 	}
 
 	public void deleteGroup(Group group){
-		if(group != null) deleteGroup(group.getGid());
-	}
-
-	public void deleteGroup(String gid){
-		mDB.deleteGroup(gid);
-		mDB.deleteChat(gid);
-		mDB.deleteMessage(gid);
-		getGroupManager().reload();
-		getChatManager().reload();
-		getMessageManager().change();
+		if(group == null) return;
+		for (Member member:group.getMembers()) {
+			mDB.deleteMember(member);
+		}
+		mDB.deleteGroup(group.getGid());
+		mDB.deleteChat(group.getGid());
+		mDB.deleteMessages(group.getGid());
 	}
 
 	public void deleteRosterEntry(RosterEntry entry){
@@ -181,7 +275,7 @@ public class IMService extends Service {
 	public void deleteRosterEntry(String name){
 		mDB.deleteRoster(name);
 		mDB.deleteChat(name);
-		mDB.deleteMessage(name);
+		mDB.deleteMessages(name);
 		getRosterManager().reload();
 		getChatManager().reload();
 		getMessageManager().change();
@@ -295,18 +389,28 @@ public class IMService extends Service {
 		mSocket.emit("request", obj);
 	}
 
+	public void sendGetGroup(){
+		try {
+			JSONObject obj = new JSONObject();
+			obj.put("action", Constants.Socket.EVENT_GET_GROUP);
+			mSocket.emit("request", obj);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//Receive from Socket
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	public void receiveGetSyncData(String data){
 		GetSyncData getSyncData = GsonUtils.fromJson(data, GetSyncData.class);
-//		updateRoster(getSyncData.getRosterEntries());
+//		updateContact(getSyncData.getRosterEntries());
 		//group的新增必須在message的新增之前
-		for(Group group : getSyncData.getGroups()){
-			mDB.insertGroup(group);
-		}
-		getGroupManager().reload();
+//		for(Group group : getSyncData.getGroups()){
+//			mDB.insertGroup(group);
+//		}
+//		getGroupManager().reload();
 
 		//message的新增 & chat的新增
 		for(Message message : getSyncData.getMessages()){
@@ -352,6 +456,11 @@ public class IMService extends Service {
 	public void receiveSetRoster(String data){
 		SetRoster setRoster = GsonUtils.fromJson(data, SetRoster.class);
 		sendGetRoster();
+	}
+
+	public void receiveGetGroup(String data){
+		GetGroup getGroup = GsonUtils.fromJson(data, GetGroup.class);
+		updateGroup(getGroup.getGroups());
 	}
 
 	public void receiveCreateGroup(String data){
@@ -438,6 +547,7 @@ public class IMService extends Service {
 		@Override
 		public void call(final Object... args) {
 			try {
+				Log.d(TAG, args[0].toString());
 				JSONObject jsonObj  = new JSONObject(args[0].toString());
 				String action = jsonObj.get("action").toString();
 				if(action.equals(Constants.Socket.EVENT_GET_SYNC_DATA)){
@@ -448,6 +558,8 @@ public class IMService extends Service {
 					receiveSetRoster(args[0].toString());
 				}else if(action.equals(Constants.Socket.EVENT_CREATE_GROUP)){
 					receiveCreateGroup(args[0].toString());
+				}else if(action.equals(Constants.Socket.EVENT_GET_GROUP)){
+					receiveGetGroup(args[0].toString());
 				}else if(action.equals(Constants.Socket.EVENT_SET_GROUP_MEMBER_ROLE)){
 					receiveSetGroupMemberRole(args[0].toString());
 				}
@@ -463,6 +575,7 @@ public class IMService extends Service {
 	private Emitter.Listener onReceiveMessage = new Emitter.Listener() {
 		@Override
 		public void call(final Object... args) {
+			Log.d(TAG, args[0].toString());
 			Message message = GsonUtils.fromJson(args[0].toString(), Message.class);
 			if(message.getFrom().equals(IMApplication.getUser())) return;
 
@@ -493,6 +606,7 @@ public class IMService extends Service {
 		@Override
 		public void call(final Object... args) {
 			try {
+				Log.d(TAG, args[0].toString());
 				JSONObject jsonObj = new JSONObject(args[0].toString());
 				String toStr = jsonObj.get("to").toString();
 				User to = GsonUtils.fromJson(toStr, User.class);
@@ -514,8 +628,9 @@ public class IMService extends Service {
 	private Emitter.Listener onReceiveInvite = new Emitter.Listener() {
 		@Override
 		public void call(final Object... args) {
+			Log.d(TAG, args[0].toString());
 			Invite invite = GsonUtils.fromJson(args[0].toString(), Invite.class);
-//			if(invite.getFrom().equals(IMApplication.getUser())) return;
+			if(!invite.getTo().getName().equals(IMApplication.getUser().getName())) return;
 
 			if(invite.getType().equals(Invite.TYPE_FRIEND)){
 				sendSetRoster(invite.getFrom(), RosterEntry.RELATION_INVITEES);

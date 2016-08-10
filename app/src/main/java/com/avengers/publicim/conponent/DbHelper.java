@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Group;
+import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
@@ -46,6 +47,7 @@ public class DbHelper extends SQLiteOpenHelper{
 		db.execSQL(Chat.CREATE_SQL);
 		db.execSQL(Message.CREATE_SQL);
 		db.execSQL(Group.CREATE_SQL);
+		db.execSQL(Member.CREATE_SQL);
 	}
 
 	@Override
@@ -105,6 +107,19 @@ public class DbHelper extends SQLiteOpenHelper{
 		return list;
 	}
 
+	public ArrayList<Member> getMembers(Group group){
+		SQLiteDatabase db = getWritableDatabase();
+		String SQL_SEL = String.format("SELECT * FROM %s WHERE %s = '%s' ORDER BY %s ",
+				Member.TABLE_NAME, Member.GROUP_ID, group.getGid(), Member.USER);
+		Cursor cursor = db.rawQuery(SQL_SEL, null);
+		ArrayList<Member> list = new ArrayList<>();
+		while(cursor.moveToNext()){
+			list.add(Member.newInstance(cursor));
+		}
+		cursor.close();
+		return list;
+	}
+
 	public long insertRoster(RosterEntry entry){
 		SQLiteDatabase db = getWritableDatabase();
 		return db.insert(RosterEntry.TABLE_NAME, null, entry.getContentValues());
@@ -123,6 +138,11 @@ public class DbHelper extends SQLiteOpenHelper{
 	public void insertGroup(Group group){
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.insert(Group.TABLE_NAME, null, group.getContentValues());
+	}
+
+	public void insertMember(Member member){
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.insert(Member.TABLE_NAME, null, member.getContentValues());
 	}
 
 	public void updateRoster(RosterEntry entry){
@@ -158,6 +178,17 @@ public class DbHelper extends SQLiteOpenHelper{
 		db.update(Group.TABLE_NAME, group.getContentValues(), whereSql, null);
 	}
 
+	public void updateMember(Member member){
+		SQLiteDatabase db = getWritableDatabase();
+		String whereSql = String.format("%s = '%s' AND %s = '%s'",
+				Member.USER, member.getUser(), Member.GROUP_ID, member.getGroupId());
+		db.update(Member.TABLE_NAME, member.getContentValues(), whereSql, null);
+	}
+
+	public void deleteRoster(RosterEntry entry){
+		deleteRoster(entry.getName());
+	}
+
 	public void deleteRoster(String userName){
 		SQLiteDatabase db = this.getReadableDatabase();
 		String where = String.format("%s = '%s'", User.NAME, userName);
@@ -184,16 +215,27 @@ public class DbHelper extends SQLiteOpenHelper{
 	 * delete messages of same chatId
 	 * @param chatId
 	 */
-	public void deleteMessage(String chatId){
+	public void deleteMessages(String chatId){
 		SQLiteDatabase db = this.getReadableDatabase();
 		String where = String.format("%s = '%s'", Message.CHAT_ID, chatId);
 		db.delete(Message.TABLE_NAME, where, null);
+	}
+
+	public void deleteGroup(Group group){
+		deleteGroup(group.getGid());
 	}
 
 	public void deleteGroup(String gid){
 		SQLiteDatabase db = this.getReadableDatabase();
 		String where = String.format("%s = '%s'", Group.GID, gid);
 		db.delete(Group.TABLE_NAME, where, null);
+	}
+
+	public void deleteMember(Member member){
+		SQLiteDatabase db = this.getReadableDatabase();
+		String where = String.format("%s = '%s' AND %s = '%s'",
+				Member.USER, member.getUser(), Member.GROUP_ID, member.getGroupId());
+		db.delete(Member.TABLE_NAME, where, null);
 	}
 
 }

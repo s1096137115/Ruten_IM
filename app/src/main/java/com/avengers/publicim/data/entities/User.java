@@ -63,7 +63,7 @@ public class User implements Serializable {
 
 	@Override
 	public int hashCode() {
-		final int PRIME = 31;
+		final int PRIME = 37;
 		int result = 1;
 		result = PRIME * result + (PRIME * getUid().hashCode()) + getName().hashCode();
 		return result;

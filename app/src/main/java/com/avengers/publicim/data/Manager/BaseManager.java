@@ -1,6 +1,7 @@
 package com.avengers.publicim.data.Manager;
 
 import android.content.Context;
+import android.os.Handler;
 
 import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.data.callback.Listener;
@@ -16,12 +17,15 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public abstract class BaseManager<T,E extends Listener> implements Manager<T>{
 	protected DbHelper mDB;
 
+	protected Handler mHandler;
+
 	protected List<T> mList = new ArrayList<>();
 
 	protected Set<E> mListeners = new CopyOnWriteArraySet<>();
 
 	public BaseManager(Context context) {
 		mDB = DbHelper.getInstance(context);
+		mHandler = new Handler();
 	}
 
 	public void addListener(E listener){

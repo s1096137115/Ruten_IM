@@ -83,6 +83,7 @@ public class ChatListFragment extends BaseFragment implements ChatListener{
 			public void onClick(View view) {
 				getChatManager().reload();
 				mIMService.sendGetRoster();
+				mIMService.sendGetGroup();
 			}
 		});
 	}

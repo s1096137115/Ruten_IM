@@ -27,21 +27,21 @@ public class RosterEntry implements Serializable, Contact {
 					+ ") ";
 
 	/**
+	 * 黑名單
+	 */
+	public static final int RELATION_BLACKLIST = -1;
+	/**
+	 * 陌生人/刪除好友
+	 */
+	public static final int RELATION_STRANGER = 0;
+	/**
 	 * 已受邀
 	 */
-	public static final int RELATION_INVITEES = 0;
+	public static final int RELATION_INVITEES = 1;
 	/**
 	 * 好友
 	 */
-	public static final int RELATION_FRIEND = 1;
-	/**
-	 * 黑名單
-	 */
-	public static final int RELATION_BLACKLIST = 2;
-	/**
-	 * 刪除
-	 */
-	public static final int RELATION_DELETE = 3;
+	public static final int RELATION_FRIEND = 2;
 
 	@SerializedName("relationship")// 可以讓你的field名稱與API不同
 	private Integer relationship;
@@ -108,5 +108,25 @@ public class RosterEntry implements Serializable, Contact {
 	@Override
 	public String getName() {
 		return user.getName();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof RosterEntry) {
+			RosterEntry entry = (RosterEntry) o;
+			return this.user.equals(entry.user)
+					&& this.presence.equals(entry.presence)
+					&& this.relationship.equals(entry.relationship);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		final int PRIME = 81;
+		int result = 1;
+		result = PRIME * result + (PRIME * getUser().hashCode())
+				+ getPresence().hashCode() + getRelationship().hashCode();
+		return result;
 	}
 }

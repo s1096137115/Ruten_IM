@@ -9,10 +9,8 @@ import android.widget.Button;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.InviteAdapter;
-import com.avengers.publicim.conponent.IMApplication;
 import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
-import com.avengers.publicim.data.entities.Group;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.RosterEntry;
 
@@ -44,8 +42,7 @@ public class InviteActivity extends BaseActivity{
                 for (RosterEntry entry: list) {
                     getProgress().setMessage("Waiting...");
                     getProgress().show();
-                    Invite invite = new Invite(IMApplication.getUser(),entry.getUser(),
-                            Invite.TYPE_GROUP, (Group)mContact, Group.ROLE_INVITEES, null);
+                    Invite invite = new Invite(entry.getUser(), Invite.TYPE_GROUP, mContact.getId());
                     mIMService.sendInvite(invite);
                 }
             }

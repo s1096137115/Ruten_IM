@@ -54,13 +54,41 @@ public class Invite implements Serializable {
 	@SerializedName("relationship")
 	private Integer relationship;
 
-	public Invite(User from, User to, String type, Group group, Integer role, Integer relationship) {
+	/**
+	 * 邀請群組的gid
+	 */
+	@SerializedName("gid")
+	private String gid;
+
+	public Invite(User from, User to, String type, String gid, Integer role, Integer relationship) {
 		this.from = from;
-		this.group = group;
+		this.gid = gid;
 		this.relationship = relationship;
 		this.role = role;
 		this.to = to;
 		this.type = type;
+	}
+
+	/**
+	 * 邀請好友
+	 * @param to
+	 * @param type
+	 */
+	public Invite(User to, String type){
+		this.to = to;
+		this.type = type;
+	}
+
+	/**
+	 * 邀請群組
+	 * @param to
+	 * @param type
+	 * @param gid
+	 */
+	public Invite(User to, String type, String gid){
+		this.to = to;
+		this.type = type;
+		this.gid = gid;
 	}
 
 	public User getFrom() {
