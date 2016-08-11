@@ -32,7 +32,7 @@ public class InviteActivity extends BaseActivity{
         setContentView(R.layout.activity_invite);
         mButton = (Button)findViewById(R.id.button);
         mInviteAdapter = new InviteAdapter(this , getRosterManager().getList());
-        getData();
+        getContact();
         setToolbar();
         setRecyclerView(mInviteAdapter);
         mButton.setOnClickListener(new View.OnClickListener() {
@@ -49,7 +49,7 @@ public class InviteActivity extends BaseActivity{
         });
     }
 
-    public void setToolbar(){
+    private void setToolbar(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if(mContact != null){
@@ -57,16 +57,16 @@ public class InviteActivity extends BaseActivity{
         }
     }
 
-    public void setRecyclerView(RecyclerView.Adapter adapter){
+    private void setRecyclerView(RecyclerView.Adapter adapter){
         mRecyclerView = (RecyclerView)findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(adapter);
     }
 
-    public void getData(){
+    private void getContact(){
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            String value = "";
+            String value;
             if(bundle.getString(ChatActivity.ROSTER_NAME) != null){
                 value = bundle.getString(ChatActivity.ROSTER_NAME);
                 if(getRosterManager().contains(value)){

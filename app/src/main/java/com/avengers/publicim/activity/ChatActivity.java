@@ -161,11 +161,15 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
+		Intent intent;
 		switch (id){
-			case R.id.action_settings:
+			case R.id.action_view_member:
+				intent = new Intent(this, MemberActivity.class);
+				intent.putExtra(ChatActivity.GROUP_ID, mContact.getId());
+				startActivity(intent);
 				break;
 			case R.id.action_invite_group:
-				Intent intent = new Intent(this, InviteActivity.class);
+				intent = new Intent(this, InviteActivity.class);
 				intent.putExtra(ChatActivity.GROUP_ID, mContact.getId());
 				startActivity(intent);
 				break;

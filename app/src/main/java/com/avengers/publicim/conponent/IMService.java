@@ -633,7 +633,7 @@ public class IMService extends Service {
 			if(!invite.getTo().getName().equals(IMApplication.getUser().getName())) return;
 
 			if(invite.getType().equals(Invite.TYPE_FRIEND)){
-				sendSetRoster(invite.getFrom(), RosterEntry.RELATION_INVITEES);
+				sendSetRoster(invite.getFrom(), RosterEntry.RELATION_FRIEND);
 			}else if(invite.getType().equals(Invite.TYPE_GROUP)){
 				mGroup = invite.getGroup();
 				sendSetGroupMemberRole(invite.getGroup(), Group.ROLE_MEMBER);

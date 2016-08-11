@@ -29,8 +29,8 @@ public class InviteAdapter extends RecyclerView.Adapter<InviteAdapter.NormalText
 	private List<RosterEntry> mRosterEntries;
 	private Handler mHandler = new Handler();
 
-	public InviteAdapter(Context context, List<RosterEntry> objects) {
-		mRosterEntries = objects;
+	public InviteAdapter(Context context, List<RosterEntry> list) {
+		mRosterEntries = list;
 		mContext = context;
 		mLayoutInflater = LayoutInflater.from(context);
 	}
