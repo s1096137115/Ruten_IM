@@ -4,7 +4,7 @@ apply plugin: 'checkstyle'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '24.0.0'
+    buildToolsVersion '24.0.1'
     defaultConfig {
         applicationId "com.avengers.publicim"
         minSdkVersion 15
@@ -67,4 +67,5 @@ dependencies {
     compile 'com.android.support:support-v4:24.1.1'
     compile 'org.apache.commons:commons-collections4:4.1'
     compile 'com.github.clans:fab:1.6.4'
+    compile 'com.squareup.okio:okio:1.9.0'
 }
