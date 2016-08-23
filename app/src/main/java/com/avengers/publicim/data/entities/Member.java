@@ -19,16 +19,15 @@ public class Member implements Serializable{
 
 	public static final String INVITOR = "invitor";
 
-	public static final String GROUP_ID = "group_id";
+	public static final String RID = "rid";
 
 	public static final String CREATE_SQL =
 			"CREATE TABLE " + TABLE_NAME + "("
 					+ ROLE + " VARCHAR(5), "
 					+ USER + " VARCHAR(30), "
 					+ INVITOR + " VARCHAR(30), "
-					+ GROUP_ID + " VARCHAR(50), "
-//					+ "FOREIGN KEY (" + GROUP_ID + ") REFERENCES " + Group.TABLE_NAME + "(" + Group.GID + ") "
-					+ "PRIMARY KEY (" + USER + "," + GROUP_ID + ") "
+					+ RID + " VARCHAR(50), "
+					+ "PRIMARY KEY (" + USER + "," + RID + ") "
 					+ ") ";
 
 
@@ -41,14 +40,13 @@ public class Member implements Serializable{
 	@SerializedName("invitor")
 	private String invitor;
 
+	private String rid;
 
-	private String groupId;
-
-	private Member(String user, String invitor, String role, String groupId) {
+	private Member(String user, String invitor, String role, String rid) {
 		this.user = user;
 		this.invitor = invitor;
 		this.role = role;
-		this.groupId = groupId;
+		this.rid = rid;
 	}
 
 	public static Member newInstance(Cursor cursor){
@@ -56,7 +54,7 @@ public class Member implements Serializable{
 				cursor.getString(cursor.getColumnIndexOrThrow(USER)),
 				cursor.getString(cursor.getColumnIndexOrThrow(INVITOR)),
 				cursor.getString(cursor.getColumnIndexOrThrow(ROLE)),
-				cursor.getString(cursor.getColumnIndexOrThrow(GROUP_ID))
+				cursor.getString(cursor.getColumnIndexOrThrow(RID))
 		);
 	}
 
@@ -65,16 +63,16 @@ public class Member implements Serializable{
 		values.put(ROLE, getRole());
 		values.put(USER, getUser());
 		values.put(INVITOR, getInvitor());
-		values.put(GROUP_ID, getGroupId());
+		values.put(RID, getRid());
 		return values;
 	}
 
-	public String getGroupId() {
-		return groupId;
+	public String getRid() {
+		return rid;
 	}
 
-	public void setGroupId(String groupId) {
-		this.groupId = groupId;
+	public void setRid(String rid) {
+		this.rid = rid;
 	}
 
 	public String getInvitor() {
@@ -104,7 +102,7 @@ public class Member implements Serializable{
 	@Override
 	public boolean equals(Object o) {
 		if(o instanceof Member) {
-			Member member = (Member) o;;
+			Member member = (Member) o;
 			return this.role.equals(member.role)
 					&& this.user.equals(member.user)
 					&& this.invitor.equals(member.invitor);

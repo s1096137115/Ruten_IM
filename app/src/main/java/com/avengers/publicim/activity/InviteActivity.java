@@ -12,7 +12,9 @@ import com.avengers.publicim.adapter.InviteAdapter;
 import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Invite;
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
+import com.avengers.publicim.data.entities.User;
 
 import java.util.List;
 
@@ -42,7 +44,7 @@ public class InviteActivity extends BaseActivity{
                 for (RosterEntry entry: list) {
                     getProgress().setMessage("Waiting...");
                     getProgress().show();
-                    Invite invite = new Invite(entry.getUser(), Invite.TYPE_GROUP, mContact.getId());
+                    Invite invite = new Invite(entry.getUser(), Invite.Type.ROOM, mContact.getId());
                     mIMService.sendInvite(invite);
                 }
             }
@@ -67,13 +69,13 @@ public class InviteActivity extends BaseActivity{
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             String value;
-            if(bundle.getString(ChatActivity.ROSTER_NAME) != null){
-                value = bundle.getString(ChatActivity.ROSTER_NAME);
+            if(bundle.getString(User.NAME) != null){
+                value = bundle.getString(User.NAME);
                 if(getRosterManager().contains(value)){
                     mContact = getRosterManager().getItem(value);
                 }
-            }else if(bundle.getString(ChatActivity.GROUP_ID) != null){
-                value = bundle.getString(ChatActivity.GROUP_ID);
+            }else if(bundle.getString(Room.RID) != null){
+                value = bundle.getString(Room.RID);
                 if(getGroupManager().contains(value)){
                     mContact = getGroupManager().getItem(value);
                 }

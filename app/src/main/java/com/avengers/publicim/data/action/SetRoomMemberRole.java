@@ -1,26 +1,30 @@
 package com.avengers.publicim.data.action;
 
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.User;
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by D-IT-MAX2 on 2016/7/1.
  */
-public class SetGroupMemberRole {
+public class SetRoomMemberRole {
 	@SerializedName("action")
 	private String action;
 
 	@SerializedName("error")
 	private String error;
 
-	@SerializedName("gid")
-	private String gid;
+	@SerializedName("rid")
+	private String rid;
 
 	@SerializedName("role")
 	private Integer role;
 
-	@SerializedName("user")
-	private User user;
+	@SerializedName("target")
+	private User target;
+
+	@SerializedName("room")
+	private Room room;
 
 	public String getAction() {
 		return action;
@@ -38,12 +42,12 @@ public class SetGroupMemberRole {
 		this.error = error;
 	}
 
-	public String getGid() {
-		return gid;
+	public String getRid() {
+		return rid;
 	}
 
-	public void setGid(String gid) {
-		this.gid = gid;
+	public void setRid(String rid) {
+		this.rid = rid;
 	}
 
 	public Integer getRole() {
@@ -54,11 +58,19 @@ public class SetGroupMemberRole {
 		this.role = role;
 	}
 
-	public User getUser() {
-		return user;
+	public User getTarget() {
+		return target;
 	}
 
-	public void setUser(User user) {
-		this.user = user;
+	public void setTarget(User target) {
+		this.target = target;
+	}
+
+	public Room getRoom() {
+		return room;
+	}
+
+	public void setRoom(Room room) {
+		this.room = room;
 	}
 }

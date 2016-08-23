@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.entities.Contact;
-import com.avengers.publicim.data.entities.Group;
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.RosterEntry;
@@ -46,7 +46,7 @@ public class DbHelper extends SQLiteOpenHelper{
 		db.execSQL(RosterEntry.CREATE_SQL);
 		db.execSQL(Chat.CREATE_SQL);
 		db.execSQL(Message.CREATE_SQL);
-		db.execSQL(Group.CREATE_SQL);
+		db.execSQL(Room.CREATE_SQL);
 		db.execSQL(Member.CREATE_SQL);
 	}
 
@@ -68,19 +68,19 @@ public class DbHelper extends SQLiteOpenHelper{
 		return roster;
 	}
 
-	public Cursor getContentOfChats(){
+	public Cursor getContentOfRooms(){
 		SQLiteDatabase db = getWritableDatabase();
 		String SQL_SEL = String.format("SELECT * FROM (SELECT *,MAX(msg.date) last,SUM(msg.read = 0)unread " +
-				"FROM %s msg GROUP BY msg.chat_id)info, %s c " +
-				"WHERE info.chat_id = c.cid ORDER BY info.last DESC",
-				Message.TABLE_NAME, Chat.TABLE_NAME);
+				"FROM %s msg GROUP BY msg.rid)info, %s c " +
+				"WHERE info.rid = c.rid ORDER BY info.last DESC",
+				Message.TABLE_NAME, Room.TABLE_NAME);
 		return db.rawQuery(SQL_SEL, null);
 	}
 
 	public ArrayList<Message> getMessages(Contact contact){
 		SQLiteDatabase db = getWritableDatabase();
 		String SQL_SEL = String.format("SELECT * FROM %s WHERE %s = '%s' ORDER BY %s DESC",
-				Message.TABLE_NAME, Message.CHAT_ID,
+				Message.TABLE_NAME, Message.RID,
 				contact instanceof RosterEntry ? contact.getName():contact.getId(), Message.DATE);
 		Cursor cursor = db.rawQuery(SQL_SEL, null);
 		ArrayList<Message> list = new ArrayList<>();
@@ -94,23 +94,23 @@ public class DbHelper extends SQLiteOpenHelper{
 		return list;
 	}
 
-	public ArrayList<Group> getGroups(){
+	public ArrayList<Room> getRooms(String type){
 		SQLiteDatabase db = getWritableDatabase();
-		String SQL_SEL = String.format("SELECT * FROM %s GROUP BY %s ORDER BY %s ",
-				Group.TABLE_NAME, Group.GID, Group.NAME);
+		String SQL_SEL = String.format("SELECT * FROM %s WHERE %s = '%s' GROUP BY %s ORDER BY %s ",
+				Room.TABLE_NAME, Room.TYPE, type, Room.RID, Room.NAME);
 		Cursor cursor = db.rawQuery(SQL_SEL, null);
-		ArrayList<Group> list = new ArrayList<>();
+		ArrayList<Room> list = new ArrayList<>();
 		while(cursor.moveToNext()){
-			list.add(Group.newInstance(cursor));
+			list.add(Room.newInstance(cursor));
 		}
 		cursor.close();
 		return list;
 	}
 
-	public ArrayList<Member> getMembers(Group group){
+	public ArrayList<Member> getMembers(Room room){
 		SQLiteDatabase db = getWritableDatabase();
 		String SQL_SEL = String.format("SELECT * FROM %s WHERE %s = '%s' ORDER BY %s ",
-				Member.TABLE_NAME, Member.GROUP_ID, group.getGid(), Member.USER);
+				Member.TABLE_NAME, Room.RID, room.getRid(), Member.USER);
 		Cursor cursor = db.rawQuery(SQL_SEL, null);
 		ArrayList<Member> list = new ArrayList<>();
 		while(cursor.moveToNext()){
@@ -135,9 +135,9 @@ public class DbHelper extends SQLiteOpenHelper{
 		db.insert(Message.TABLE_NAME, null, msg.getContentValues());
 	}
 
-	public void insertGroup(Group group){
+	public void insertRoom(Room room){
 		SQLiteDatabase db = this.getWritableDatabase();
-		db.insert(Group.TABLE_NAME, null, group.getContentValues());
+		db.insert(Room.TABLE_NAME, null, room.getContentValues());
 	}
 
 	public void insertMember(Member member){
@@ -164,24 +164,24 @@ public class DbHelper extends SQLiteOpenHelper{
 		db.update(Message.TABLE_NAME, message.getContentValues(), whereSql, null);
 	}
 
-	public void updateMessageofRead(Chat chat, int read){
+	public void updateMessageofRead(Room room, int read){
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
 		values.put(Message.READ, read);
-		String whereSql = String.format("%s = '%s'", Message.CHAT_ID, chat.getCid());
+		String whereSql = String.format("%s = '%s'", Message.RID, room.getRid());
 		db.update(Message.TABLE_NAME, values, whereSql, null);
 	}
 
-	public void updateGroup(Group group){
+	public void updateRoom(Room room){
 		SQLiteDatabase db = getWritableDatabase();
-		String whereSql = String.format("%s = '%s'", Group.GID, group.getGid());
-		db.update(Group.TABLE_NAME, group.getContentValues(), whereSql, null);
+		String whereSql = String.format("%s = '%s'", Room.RID, room.getRid());
+		db.update(Room.TABLE_NAME, room.getContentValues(), whereSql, null);
 	}
 
 	public void updateMember(Member member){
 		SQLiteDatabase db = getWritableDatabase();
 		String whereSql = String.format("%s = '%s' AND %s = '%s'",
-				Member.USER, member.getUser(), Member.GROUP_ID, member.getGroupId());
+				Member.USER, member.getUser(), Member.RID, member.getRid());
 		db.update(Member.TABLE_NAME, member.getContentValues(), whereSql, null);
 	}
 
@@ -202,7 +202,7 @@ public class DbHelper extends SQLiteOpenHelper{
 	}
 
 	/**
-	 * delete a message by mid
+	 * delete a message by {@link Message#MID}
 	 * @param message
 	 */
 	public void deleteMessage(Message message){
@@ -212,29 +212,29 @@ public class DbHelper extends SQLiteOpenHelper{
 	}
 
 	/**
-	 * delete messages of same chatId
-	 * @param chatId
+	 * delete messages of same {@link Message#RID}
+	 * @param rid
 	 */
-	public void deleteMessages(String chatId){
+	public void deleteMessages(String rid){
 		SQLiteDatabase db = this.getReadableDatabase();
-		String where = String.format("%s = '%s'", Message.CHAT_ID, chatId);
+		String where = String.format("%s = '%s'", Message.RID, rid);
 		db.delete(Message.TABLE_NAME, where, null);
 	}
 
-	public void deleteGroup(Group group){
-		deleteGroup(group.getGid());
+	public void deleteRoom(Room room){
+		deleteRoom(room.getRid());
 	}
 
-	public void deleteGroup(String gid){
+	public void deleteRoom(String gid){
 		SQLiteDatabase db = this.getReadableDatabase();
-		String where = String.format("%s = '%s'", Group.GID, gid);
-		db.delete(Group.TABLE_NAME, where, null);
+		String where = String.format("%s = '%s'", Room.RID, gid);
+		db.delete(Room.TABLE_NAME, where, null);
 	}
 
 	public void deleteMember(Member member){
 		SQLiteDatabase db = this.getReadableDatabase();
 		String where = String.format("%s = '%s' AND %s = '%s'",
-				Member.USER, member.getUser(), Member.GROUP_ID, member.getGroupId());
+				Member.USER, member.getUser(), Member.RID, member.getRid());
 		db.delete(Member.TABLE_NAME, where, null);
 	}
 

@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import com.avengers.publicim.R;
 import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Invite;
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.fragment.ChatListFragment;
 import com.avengers.publicim.fragment.RosterFragment;
@@ -162,7 +163,7 @@ public class MainActivity extends BaseActivity {
 							public void onClick(DialogInterface dialog, int which) {
 								if(!input.getText().toString().isEmpty()){
 									Invite invite = new Invite(
-											new User("", input.getText().toString()), Invite.TYPE_FRIEND);
+											new User("", input.getText().toString()), Invite.Type.FRIEND);
 									mIMService.sendInvite(invite);
 								}
 							}
@@ -178,7 +179,7 @@ public class MainActivity extends BaseActivity {
 								if(!input.getText().toString().isEmpty()){
 									getProgress().setMessage("Waiting...");
 									getProgress().show();
-									mIMService.sendCreateGroup(input.getText().toString());
+									mIMService.sendCreateRoom(input.getText().toString(), Room.Type.GROUP);
 								}
 							}
 						}).show();

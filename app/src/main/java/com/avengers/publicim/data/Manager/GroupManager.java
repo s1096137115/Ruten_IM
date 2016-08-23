@@ -3,7 +3,7 @@ package com.avengers.publicim.data.Manager;
 import android.content.Context;
 
 import com.avengers.publicim.data.callback.GroupListener;
-import com.avengers.publicim.data.entities.Group;
+import com.avengers.publicim.data.entities.Room;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by D-IT-MAX2 on 2016/6/21.
  */
-public class GroupManager extends BaseManager<Group, GroupListener> {
+public class GroupManager extends BaseManager<Room, GroupListener> {
 
 	public GroupManager(Context context) {
 		super(context);
@@ -19,29 +19,29 @@ public class GroupManager extends BaseManager<Group, GroupListener> {
 
 
 	@Override
-	public List<Group> getList() {
+	public List<Room> getList() {
 		return mList;
 	}
 
 	@Override
-	public Group getItem(String gid) {
-		for (Group group: mList) {
-			if(group.getGid().equals(gid)){
-				return group;
+	public Room getItem(String gid) {
+		for (Room room : mList) {
+			if(room.getRid().equals(gid)){
+				return room;
 			}
 		}
 		return null;
 	}
 
 	@Override
-	public void setList(List<Group> list) {
+	public void setList(List<Room> list) {
 		mList = list;
 	}
 
 	@Override
-	public boolean contains(Group item) {
-		for(Group group : mList){
-			if(group.equals(item)){
+	public boolean contains(Room item) {
+		for(Room room : mList){
+			if(room.equals(item)){
 				return true;
 			}
 		}
@@ -50,8 +50,8 @@ public class GroupManager extends BaseManager<Group, GroupListener> {
 
 	@Override
 	public boolean contains(String gid) {
-		for(Group group : mList){
-			if(group.getGid().equals(gid)){
+		for(Room room : mList){
+			if(room.getRid().equals(gid)){
 				return true;
 			}
 		}
@@ -69,9 +69,9 @@ public class GroupManager extends BaseManager<Group, GroupListener> {
 			@Override
 			public void run() {
 				//background
-				setList(mDB.getGroups());
-				for (Group group : mList) {
-					group.setMembers(mDB.getMembers(group));
+				setList(mDB.getRooms(Room.Type.GROUP));
+				for (Room room : mList) {
+					room.setMembers(mDB.getMembers(room));
 				}
 				//UI
 				mHandler.post(new Runnable() {

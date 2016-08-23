@@ -16,8 +16,9 @@ import com.avengers.publicim.data.callback.GroupListener;
 import com.avengers.publicim.data.callback.RosterListener;
 import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
-import com.avengers.publicim.data.entities.Group;
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
+import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.ItemClickSupport;
 
 
@@ -65,12 +66,12 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 				}else if(item instanceof RosterEntry){
 					String name = ((ContactAdapter)recyclerView.getAdapter()).getItem(position).getName();
 					Intent intent = new Intent(getActivity(), ChatActivity.class);
-					intent.putExtra(ChatActivity.ROSTER_NAME, name);
+					intent.putExtra(User.NAME, name);
 					startActivity(intent);
-				}else if(item instanceof Group){
+				}else if(item instanceof Room){
 					String gid = ((ContactAdapter)recyclerView.getAdapter()).getItem(position).getId();
 					Intent intent = new Intent(getActivity(), ChatActivity.class);
-					intent.putExtra(ChatActivity.GROUP_ID, gid);
+					intent.putExtra(Room.RID, gid);
 					startActivity(intent);
 				}
 			}

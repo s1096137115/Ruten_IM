@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * Created by D-IT-MAX2 on 2016/3/3.
  */
-public class RosterEntry implements Serializable, Contact {
+public class RosterEntry extends Contact implements Serializable {
 	public static final String TABLE_NAME = "roster";
 
 	public static final String RELATIONSHIP = "relationship";
@@ -26,22 +26,24 @@ public class RosterEntry implements Serializable, Contact {
 					+ "PRIMARY KEY (" + User.UID + "," + User.NAME + ") "
 					+ ") ";
 
-	/**
-	 * 黑名單
-	 */
-	public static final int RELATION_BLACKLIST = -1;
-	/**
-	 * 陌生人/刪除好友
-	 */
-	public static final int RELATION_STRANGER = 0;
-	/**
-	 * 已受邀
-	 */
-	public static final int RELATION_INVITEES = 1;
-	/**
-	 * 好友
-	 */
-	public static final int RELATION_FRIEND = 2;
+	public class Releationship{
+		/**
+		 * 黑名單
+		 */
+		public static final int BLACKLIST = -1;
+		/**
+		 * 陌生人/刪除好友
+		 */
+		public static final int STRANGER = 0;
+		/**
+		 * 已受邀
+		 */
+		public static final int INVITEES = 1;
+		/**
+		 * 好友
+		 */
+		public static final int FRIEND = 2;
+	}
 
 	@SerializedName("relationship")// 可以讓你的field名稱與API不同
 	private Integer relationship;

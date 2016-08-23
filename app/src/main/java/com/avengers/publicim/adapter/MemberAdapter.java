@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.data.entities.Group;
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.Member;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.NormalText
 		mLayoutInflater = LayoutInflater.from(context);
 		mMembers = new ArrayList<>();
 		for (Member member :list) {
-			if(Integer.valueOf(member.getRole()) >= Group.ROLE_MEMBER){
+			if(Integer.valueOf(member.getRole()) >= Room.Role.MEMBER){
 				mMembers.add(member);
 			}
 		}

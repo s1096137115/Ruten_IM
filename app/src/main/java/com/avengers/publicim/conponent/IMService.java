@@ -10,20 +10,19 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.avengers.publicim.data.Constants;
-import com.avengers.publicim.data.action.CreateGroup;
-import com.avengers.publicim.data.action.GetGroup;
+import com.avengers.publicim.data.action.CreateRoom;
+import com.avengers.publicim.data.action.GetRoom;
 import com.avengers.publicim.data.action.GetRoster;
-import com.avengers.publicim.data.action.GetSyncData;
-import com.avengers.publicim.data.action.SetGroupMemberRole;
+import com.avengers.publicim.data.action.SetRoomMemberRole;
 import com.avengers.publicim.data.action.SetRoster;
 import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.callback.ServiceListener;
 import com.avengers.publicim.data.entities.Chat;
-import com.avengers.publicim.data.entities.Group;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.Presence;
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.GsonUtils;
@@ -53,7 +52,6 @@ public class IMService extends Service {
 	private Socket mSocket;
 	private DbHelper mDB;
 	private Handler mHandler = new Handler();
-	private Group mGroup;
 	private List<ServiceListener> mServiceListener = new ArrayList<>();
 
 	public IMService() {
@@ -81,7 +79,7 @@ public class IMService extends Service {
 		socket.on(Socket.EVENT_RECONNECTING, onConnectError);
 		socket.on(Constants.Socket.EVENT_RESPONSE, onResponse);
 		socket.on(Constants.Socket.EVENT_RECEIVE_MESSAGE, onReceiveMessage);
-		socket.on(Constants.Socket.EVENT_RECEIVE_GROUP_MESSAGE, onReceiveMessage);
+		socket.on(Constants.Socket.EVENT_RECEIVE_ROOM_MESSAGE, onReceiveMessage);
 		socket.on(Constants.Socket.EVENT_RECEIVE_PRESENCE, onReceivePresence);
 		socket.on(Constants.Socket.EVENT_RECEIVE_INVITE, onReceiveInvite);
 	}
@@ -149,19 +147,19 @@ public class IMService extends Service {
 		getRosterManager().reload();
 	}
 
-	public void updateGroup(List<Group> listNew){
-		List<Group> listOld = getGroupManager().getList();
-		List<Group>[] list = categorize(listNew,listOld);
+	public void updateRoom(List<Room> listNew){
+		List<Room> listOld = getGroupManager().getList();
+		List<Room>[] list = categorize(listNew,listOld);
 		if(list[MODIFY_NEW].isEmpty() && list[MODIFY_OLD].isEmpty()) return;
-		for (Group group: list[CHANGE_NEW]) {
-			mDB.updateGroup(group);
+		for (Room room : list[CHANGE_NEW]) {
+			mDB.updateRoom(room);
 			//在開始比較Member之前要先幫新的Member加上group_id
-			for (Member member: group.getMembers()) {
-				member.setGroupId(group.getGid());
+			for (Member member: room.getMembers()) {
+				member.setRid(room.getRid());
 			}
-			for (Group group2: list[CHANGE_OLD]) {
-				if(group.getGid().equals(group2.getGid())){
-					List<Member>[] list2 = categorize(group.getMembers(), group2.getMembers());
+			for (Room room2 : list[CHANGE_OLD]) {
+				if(room.getRid().equals(room2.getRid())){
+					List<Member>[] list2 = categorize(room.getMembers(), room2.getMembers());
 					for (Member member: list2[CHANGE_NEW]) {
 						mDB.updateMember(member);
 					}
@@ -174,21 +172,21 @@ public class IMService extends Service {
 				}
 			}
 		}
-		for (Group group: list[ADD]) {
-			mDB.insertGroup(group);
-			for (Member member:group.getMembers()) {
-				member.setGroupId(group.getGid());
+		for (Room room : list[ADD]) {
+			mDB.insertRoom(room);
+			for (Member member: room.getMembers()) {
+				member.setRid(room.getRid());
 				mDB.insertMember(member);
 			}
 		}
-		for (Group group: list[REMOVE]) {
-			for (Member member:group.getMembers()) {
-				member.setGroupId(group.getGid());
+		for (Room room : list[REMOVE]) {
+			for (Member member: room.getMembers()) {
+				member.setRid(room.getRid());
 				mDB.deleteMember(member);
 			}
-			mDB.deleteGroup(group);
-			mDB.deleteChat(group.getGid());
-			mDB.deleteMessages(group.getGid());
+			mDB.deleteRoom(room);
+			mDB.deleteChat(room.getRid());
+			mDB.deleteMessages(room.getRid());
 		}
 		getGroupManager().reload();
 		getChatManager().reload();
@@ -222,8 +220,8 @@ public class IMService extends Service {
 				public boolean evaluate(T b) {
 					if(b instanceof RosterEntry){
 						return ((RosterEntry)a).getName().equals(((RosterEntry)b).getName());
-					}else if(b instanceof Group) {
-						return ((Group) a).getId().equals(((Group) b).getId());
+					}else if(b instanceof Room) {
+						return ((Room) a).getId().equals(((Room) b).getId());
 					}else if(b instanceof Member) {
 						boolean c = ((Member) a).getUser().equals(((Member) b).getUser());
 						return ((Member) a).getUser().equals(((Member) b).getUser());
@@ -250,22 +248,21 @@ public class IMService extends Service {
 		getMessageManager().change();
 	}
 
-	public void updateMessageOfRead(Chat chat, int read){
-		mDB.updateMessageofRead(chat, read);
+	public void updateMessageOfRead(Room room, int read){
+		mDB.updateMessageofRead(room, read);
 	}
 
 	public void updateMessageOfMid(){
 
 	}
 
-	public void deleteGroup(Group group){
-		if(group == null) return;
-		for (Member member:group.getMembers()) {
+	public void deleteRoom(Room room){
+		if(room == null) return;
+		for (Member member: room.getMembers()) {
 			mDB.deleteMember(member);
 		}
-		mDB.deleteGroup(group.getGid());
-		mDB.deleteChat(group.getGid());
-		mDB.deleteMessages(group.getGid());
+		mDB.deleteRoom(room.getRid());
+		mDB.deleteMessages(room.getRid());
 	}
 
 	public void deleteRosterEntry(RosterEntry entry){
@@ -295,9 +292,7 @@ public class IMService extends Service {
 
 	public void sendMessage(final Message message){
 		final JSONObject obj = GsonUtils.toJSONObject(message);
-		String event = TextUtils.isEmpty(message.getGid()) ? Constants.Socket.EVENT_SEND_MESSAGE : Constants.Socket.EVENT_SEND_GROUP_MESSAGE;
-
-		mSocket.emit(event, obj, new Ack() {
+		mSocket.emit(Constants.Socket.EVENT_SEND_MESSAGE, obj, new Ack() {
 			@Override
 			public void call(Object... args) {
 				String errorMessage = (String) args[0];
@@ -330,24 +325,28 @@ public class IMService extends Service {
 			@Override
 			public void call(Object... args) {
 				String errorMessage = (String) args[0];
-				if(invite.getType().equals(Invite.TYPE_FRIEND)){
-					sendSetRoster(invite.getTo(), invite.getRelationship());
-				}
 			}
 		});
 	}
 
-	public void sendSetGroupMemberRole(Group group, int role){
-		SetGroupMemberRole setGroupMemberRole = new SetGroupMemberRole();
-		setGroupMemberRole.setAction(Constants.Socket.EVENT_SET_GROUP_MEMBER_ROLE);
-		setGroupMemberRole.setGid(group.getGid());
-		setGroupMemberRole.setRole(role);
-		final JSONObject obj = GsonUtils.toJSONObject(setGroupMemberRole);
+	/**
+	 * 加入聊天室、離開聊天室、踢人
+	 * @param room
+	 * @param target
+	 * @param role
+	 */
+	public void sendSetRoomMemberRole(Room room, User target, int role){
+		SetRoomMemberRole setRoomMemberRole = new SetRoomMemberRole();
+		setRoomMemberRole.setAction(Constants.Socket.EVENT_SET_ROOM_MEMBER_ROLE);
+		setRoomMemberRole.setRid(room.getRid());
+		setRoomMemberRole.setTarget(target);
+		setRoomMemberRole.setRole(role);
+		final JSONObject obj = GsonUtils.toJSONObject(setRoomMemberRole);
 		mSocket.emit("request", obj);
 	}
 
 	/**
-	 * 加入好友
+	 * 改變Roster狀態(加入好友改為使用{@link #sendInvite(Invite)})
 	 * @param user
 	 * @param relationship
 	 */
@@ -358,6 +357,13 @@ public class IMService extends Service {
 		setRoster.setRelationship(relationship);
 		final JSONObject obj = GsonUtils.toJSONObject(setRoster);
 		mSocket.emit("request", obj);
+	}
+
+	/**
+	 * 更改房間屬性
+	 */
+	public void sendSetRoom(){
+
 	}
 
 	public void sendGetSyncData(){
@@ -380,19 +386,19 @@ public class IMService extends Service {
 		}
 	}
 
-	public void sendCreateGroup(String name){
-		CreateGroup createGroup = new CreateGroup();
-		createGroup.setAction(Constants.Socket.EVENT_CREATE_GROUP);
-		createGroup.setName(name);
-		mGroup = new Group("",name);
-		final JSONObject obj = GsonUtils.toJSONObject(createGroup);
+	public void sendCreateRoom(String name, String type){
+		CreateRoom createRoom = new CreateRoom();
+		createRoom.setAction(Constants.Socket.EVENT_CREATE_ROOM);
+		createRoom.setName(name);
+		createRoom.setType(type);
+		final JSONObject obj = GsonUtils.toJSONObject(createRoom);
 		mSocket.emit("request", obj);
 	}
 
-	public void sendGetGroup(){
+	public void sendGetRoom(){
 		try {
 			JSONObject obj = new JSONObject();
-			obj.put("action", Constants.Socket.EVENT_GET_GROUP);
+			obj.put("action", Constants.Socket.EVENT_GET_ROOM);
 			mSocket.emit("request", obj);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -403,45 +409,14 @@ public class IMService extends Service {
 	//Receive from Socket
 	//---------------------------------------------------------------------------------------------------------------------------------
 
-	public void receiveGetSyncData(String data){
-		GetSyncData getSyncData = GsonUtils.fromJson(data, GetSyncData.class);
-//		updateContact(getSyncData.getRosterEntries());
-		//group的新增必須在message的新增之前
-//		for(Group group : getSyncData.getGroups()){
-//			mDB.insertGroup(group);
-//		}
-//		getGroupManager().reload();
-
-		//message的新增 & chat的新增
-		for(Message message : getSyncData.getMessages()){
-			if(!message.fix()) continue;
-			if(!getChatManager().contains(message.getChatId())){
-				Chat chat = null;
-				if(!message.getGid().isEmpty()){
-					Group group = getGroupManager().getItem(message.getGid());
-					chat = new Chat(message.getChatId(),group.getName(),Chat.TYPE_GROUP);
-				}else{
-					chat = new Chat(message.getChatId(),message.getChatId(),Chat.TYPE_ROSTER);
-				}
-//				addChat(chat);
-				if(!getChatManager().contains(chat.getCid())){
-					mDB.insertChat(chat);
-				}
-			}
-			mDB.insertMessage(message);
-		}
-		getMessageManager().change();
-		getChatManager().reload();
-	}
-
-	public void receiveSetGroupMemberRole(String data){
-		SetGroupMemberRole setGroupMemberRole = GsonUtils.fromJson(data, SetGroupMemberRole.class);
-		if(setGroupMemberRole.getRole().equals(Group.ROLE_MEMBER)){
-			mDB.insertGroup(mGroup);
-			mGroup = null;
-		}else if(setGroupMemberRole.getRole().equals(Group.ROLE_EXIT)){
-			Group group = getGroupManager().getItem(setGroupMemberRole.getGid());
-			deleteGroup(group);
+	public void receiveSetRoomMemberRole(String data){
+		SetRoomMemberRole setRoomMemberRole = GsonUtils.fromJson(data, SetRoomMemberRole.class);
+		if(setRoomMemberRole.getRole().equals(Room.Role.MEMBER)){
+//			mDB.insertRoom(mRoom);
+//			mRoom = null;
+		}else if(setRoomMemberRole.getRole().equals(Room.Role.EXIT)){
+			Room room = getGroupManager().getItem(setRoomMemberRole.getRid());
+			deleteRoom(room);
 		}
 		for (ServiceListener listener : mServiceListener) {
 			listener.onServeiceResponse(new ServiceEvent(ServiceEvent.EVENT_CLOSE_DIALOG, listener));
@@ -458,21 +433,17 @@ public class IMService extends Service {
 		sendGetRoster();
 	}
 
-	public void receiveGetGroup(String data){
-		GetGroup getGroup = GsonUtils.fromJson(data, GetGroup.class);
-		updateGroup(getGroup.getGroups());
+	public void receiveGetRoom(String data){
+		GetRoom getRoom = GsonUtils.fromJson(data, GetRoom.class);
+		updateRoom(getRoom.getRooms());
 	}
 
-	public void receiveCreateGroup(String data){
-		CreateGroup createGroup = GsonUtils.fromJson(data, CreateGroup.class);
-		mGroup.setGid(createGroup.getGid());
-		if(createGroup.getError().isEmpty()){
-			//todo save to db
-			mDB.insertGroup(mGroup);
+	public void receiveCreateRoom(String data){
+		CreateRoom createRoom = GsonUtils.fromJson(data, CreateRoom.class);
+		if(TextUtils.isEmpty(createRoom.getError())){
+			mDB.insertRoom(createRoom.getRoom());
 			getGroupManager().reload();
-			//todo dismiss dialog
 			getProgress().dismiss();
-	    	mGroup = null;
 		}
 	}
 
@@ -551,17 +522,17 @@ public class IMService extends Service {
 				JSONObject jsonObj  = new JSONObject(args[0].toString());
 				String action = jsonObj.get("action").toString();
 				if(action.equals(Constants.Socket.EVENT_GET_SYNC_DATA)){
-					receiveGetSyncData(args[0].toString());
+//					receiveGetSyncData(args[0].toString());
 				}else if(action.equals(Constants.Socket.EVENT_GET_ROSTER)){
 					receiveGetRoster(args[0].toString());
 				}else if(action.equals(Constants.Socket.EVENT_SET_ROSTER)){
 					receiveSetRoster(args[0].toString());
-				}else if(action.equals(Constants.Socket.EVENT_CREATE_GROUP)){
-					receiveCreateGroup(args[0].toString());
-				}else if(action.equals(Constants.Socket.EVENT_GET_GROUP)){
-					receiveGetGroup(args[0].toString());
-				}else if(action.equals(Constants.Socket.EVENT_SET_GROUP_MEMBER_ROLE)){
-					receiveSetGroupMemberRole(args[0].toString());
+				}else if(action.equals(Constants.Socket.EVENT_CREATE_ROOM)){
+					receiveCreateRoom(args[0].toString());
+				}else if(action.equals(Constants.Socket.EVENT_GET_ROOM)){
+					receiveGetRoom(args[0].toString());
+				}else if(action.equals(Constants.Socket.EVENT_SET_ROOM_MEMBER_ROLE)){
+					receiveSetRoomMemberRole(args[0].toString());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -578,23 +549,6 @@ public class IMService extends Service {
 			Log.d(TAG, args[0].toString());
 			Message message = GsonUtils.fromJson(args[0].toString(), Message.class);
 			if(message.getFrom().equals(IMApplication.getUser())) return;
-
-			if(!message.fix()){
-				return;
-			}
-			if(!getChatManager().contains(message.getChatId())){
-				Chat chat = null;
-				if(!message.getGid().isEmpty()){
-					Group group = getGroupManager().getItem(message.getGid());
-					chat = new Chat(message.getChatId(),group.getName(),Chat.TYPE_GROUP);
-				}else{
-					chat = new Chat(message.getChatId(),message.getChatId(),Chat.TYPE_ROSTER);
-				}
-//				addChat(chat);
-				if(!getChatManager().contains(chat.getCid())){
-					mDB.insertChat(chat);
-				}
-			}
 			addMessage(message);
 		}
 	};
@@ -632,11 +586,13 @@ public class IMService extends Service {
 			Invite invite = GsonUtils.fromJson(args[0].toString(), Invite.class);
 			if(!invite.getTo().getName().equals(IMApplication.getUser().getName())) return;
 
-			if(invite.getType().equals(Invite.TYPE_FRIEND)){
-				sendSetRoster(invite.getFrom(), RosterEntry.RELATION_FRIEND);
-			}else if(invite.getType().equals(Invite.TYPE_GROUP)){
-				mGroup = invite.getGroup();
-				sendSetGroupMemberRole(invite.getGroup(), Group.ROLE_MEMBER);
+			//目前預設的行為接收到邀請即接受(好友、群組)
+			if(invite.getType().equals(Invite.Type.FRIEND)){
+				sendSetRoster(invite.getFrom(), RosterEntry.Releationship.FRIEND);
+			}else if(invite.getType().equals(Invite.Type.ROOM)){
+				//todo add a room
+
+				sendSetRoomMemberRole(invite.getRoom(), invite.getFrom(), Room.Role.MEMBER);
 			}
 		}
 	};

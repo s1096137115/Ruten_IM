@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.data.entities.Chat;
+import com.avengers.publicim.data.entities.Contact;
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 	@Override
 	public void onBindViewHolder(ChatListViewHolder holder, int position) {
 		holder.mCid = mChats.get(position).getCid();
-		int resId = mChats.get(position).getType() == Chat.TYPE_GROUP ?
+		int resId = mChats.get(position).getType() == Contact.TYPE_GROUP ?
 				R.drawable.ic_group_black_48dp : R.drawable.ic_person_black_48dp;
 		holder.mIcon.setImageResource(resId);
 		holder.mTitle.setText(mChats.get(position).getTitle());

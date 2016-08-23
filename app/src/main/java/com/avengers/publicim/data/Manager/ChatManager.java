@@ -77,7 +77,7 @@ public class ChatManager extends BaseManager<Chat, ChatListener> {
 			@Override
 			public void run() {
 				//background
-				setList(mDB.getContentOfChats());
+				setList(mDB.getContentOfRooms());
 				//UI
 				mHandler.post(new Runnable() {
 					@Override

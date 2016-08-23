@@ -18,6 +18,9 @@ import com.avengers.publicim.adapter.ChatListAdapter;
 import com.avengers.publicim.data.callback.ChatListener;
 import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Chat;
+import com.avengers.publicim.data.entities.Contact;
+import com.avengers.publicim.data.entities.Room;
+import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.ItemClickSupport;
 
 import static com.avengers.publicim.conponent.IMApplication.getChatManager;
@@ -60,7 +63,7 @@ public class ChatListFragment extends BaseFragment implements ChatListener{
 			public void onItemClicked(RecyclerView recyclerView, int position, View v) {
 				Chat chat = ((ChatListAdapter)recyclerView.getAdapter()).getItem(position);
 				Intent intent = new Intent(getActivity(), ChatActivity.class);
-				String chatType = chat.getType() == Chat.TYPE_GROUP ? ChatActivity.GROUP_ID : ChatActivity.ROSTER_NAME;
+				String chatType = chat.getType() == Contact.TYPE_GROUP ? Room.RID : User.NAME;
 				intent.putExtra(chatType, chat.getCid());
 				startActivity(intent);
 			}
@@ -83,7 +86,7 @@ public class ChatListFragment extends BaseFragment implements ChatListener{
 			public void onClick(View view) {
 				getChatManager().reload();
 				mIMService.sendGetRoster();
-				mIMService.sendGetGroup();
+				mIMService.sendGetRoom();
 			}
 		});
 	}
@@ -130,7 +133,7 @@ public class ChatListFragment extends BaseFragment implements ChatListener{
 					ChatListAdapter.ChatListViewHolder item =
 							(ChatListAdapter.ChatListViewHolder)rv.findContainingViewHolder(view);
 					Intent intent = new Intent(getActivity(), ChatActivity.class);
-					intent.putExtra(ChatActivity.ROSTER_NAME, item.getmCid());
+					intent.putExtra(User.NAME, item.getmCid());
 					startActivity(intent);
 					break;
 			}

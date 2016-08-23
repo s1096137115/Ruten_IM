@@ -14,14 +14,12 @@ import android.widget.ImageButton;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.ChatAdapter;
-import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMApplication;
 import com.avengers.publicim.data.callback.MessageListener;
 import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.entities.Contact;
-import com.avengers.publicim.data.entities.Group;
-import com.avengers.publicim.data.entities.Message;
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.SystemUtils;
@@ -32,14 +30,10 @@ import static com.avengers.publicim.conponent.IMApplication.getProgress;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
 public class ChatActivity extends BaseActivity implements MessageListener{
-	public static final String ROSTER_NAME = "roster_name";
-	public static final String GROUP_ID = "gid";
-	public static final String ROSTER = "roster";
-
 	private RecyclerView mRecyclerView;
 	private ChatAdapter mChatAdapter;
 	private RosterEntry mEntry;
-	private Group mGroup;
+	private Room mRoom;
 	private Contact mContact;
 	private Chat mChat;
 
@@ -60,19 +54,19 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		mSendButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Message message = null;
-				if(mContact instanceof RosterEntry){
-					message = new Message(null, IMApplication.getUser(), ((RosterEntry)mContact).getUser(), "",
-							Message.Type.TEXT, mTextInput.getText().toString(), SystemUtils.getDateTime(),
-							((RosterEntry)mContact).getUser().getName(), DbHelper.IntBoolean.TRUE);
-				}else if(mContact instanceof Group){
-					message = new Message(null, IMApplication.getUser(), User.newInstance("",""), ((Group)mContact).getGid(),
-							Message.Type.TEXT, mTextInput.getText().toString(), SystemUtils.getDateTime(),
-							((Group)mContact).getGid(), DbHelper.IntBoolean.TRUE);
-				}
-				if(message != null){
-					mIMService.sendMessage(message);
-				}
+//				Message message = null;
+//				if(mContact instanceof RosterEntry){
+//					message = new Message(null, IMApplication.getUser(), ((RosterEntry)mContact).getUser(), "",
+//							Message.Type.TEXT, mTextInput.getText().toString(), SystemUtils.getDateTime(),
+//							((RosterEntry)mContact).getUser().getName(), DbHelper.IntBoolean.TRUE);
+//				}else if(mContact instanceof Room){
+//					message = new Message(null, IMApplication.getUser(), User.newInstance("",""), ((Room)mContact).getRid(),
+//							Message.Type.TEXT, mTextInput.getText().toString(), SystemUtils.getDateTime(),
+//							((Room)mContact).getRid(), DbHelper.IntBoolean.TRUE);
+//				}
+//				if(message != null){
+//					mIMService.sendMessage(message);
+//				}
 
 				//adjust UI
 				mTextInput.getText().clear();
@@ -85,16 +79,16 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
 			String value = "";
-			if(bundle.getString(ROSTER_NAME) != null){
-				value = bundle.getString(ROSTER_NAME);
+			if(bundle.getString(User.NAME) != null){
+				value = bundle.getString(User.NAME);
 				if(getRosterManager().contains(value)){
 					mContact = getRosterManager().getItem(value);
 				}
-			}else if(bundle.getString(GROUP_ID) != null){
-				value = bundle.getString(GROUP_ID);
+			}else if(bundle.getString(Room.RID) != null){
+				value = bundle.getString(Room.RID);
 				if(getGroupManager().contains(value)){
 					mContact = getGroupManager().getItem(value);
-					((Group)mContact).setMembers(mDB.getMembers((Group)mContact));
+					((Room)mContact).setMembers(mDB.getMembers((Room)mContact));
 				}
 			}
 
@@ -102,9 +96,9 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 				mChat = getChatManager().getItem(value);
 			}else{
 				if(mContact instanceof RosterEntry){
-					mChat = new Chat(mContact.getName(),mContact.getName(), Chat.TYPE_ROSTER);
+					mChat = new Chat(mContact.getName(),mContact.getName(), Contact.TYPE_ROSTER);
 				}else{
-					mChat = new Chat(mContact.getId(),mContact.getName(), Chat.TYPE_GROUP);
+					mChat = new Chat(mContact.getId(),mContact.getName(), Contact.TYPE_GROUP);
 				}
 			}
 		}
@@ -135,7 +129,7 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		//有chat & 未讀訊息的情況下才更新chat
 		if(getChatManager().contains(mChat.getCid())){
 			if(mChatAdapter.hasUnread()){
-				mIMService.updateMessageOfRead(mChat, DbHelper.IntBoolean.TRUE);
+//				mIMService.updateMessageOfRead(mChat, DbHelper.IntBoolean.TRUE);
 				getChatManager().reload();
 			}
 		}else{
@@ -148,7 +142,7 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		getMenuInflater().inflate(R.menu.menu_chat, menu);
 		final MenuItem inviteGroup = menu.findItem(R.id.action_invite_group);
 		final MenuItem exitGroup = menu.findItem(R.id.action_exit_group);
-		if(mContact instanceof Group){
+		if(mContact instanceof Room){
 			inviteGroup.setVisible(true);
 			exitGroup.setVisible(true);
 		}else{
@@ -165,18 +159,18 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		switch (id){
 			case R.id.action_view_member:
 				intent = new Intent(this, MemberActivity.class);
-				intent.putExtra(ChatActivity.GROUP_ID, mContact.getId());
+				intent.putExtra(Room.RID, mContact.getId());
 				startActivity(intent);
 				break;
 			case R.id.action_invite_group:
 				intent = new Intent(this, InviteActivity.class);
-				intent.putExtra(ChatActivity.GROUP_ID, mContact.getId());
+				intent.putExtra(Room.RID, mContact.getId());
 				startActivity(intent);
 				break;
 			case R.id.action_exit_group:
 				getProgress().setMessage("Waiting...");
 				getProgress().show();
-				mIMService.sendSetGroupMemberRole((Group) mContact, Group.ROLE_EXIT);
+				mIMService.sendSetRoomMemberRole((Room) mContact, IMApplication.getUser(), Room.Role.EXIT);
 				break;
 		}
 		return true;
@@ -184,7 +178,7 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 
 	@Override
 	public void onMessageUpdate() {
-		mIMService.updateMessageOfRead(mChat, DbHelper.IntBoolean.TRUE);
+//		mIMService.updateMessageOfRead(mChat, DbHelper.IntBoolean.TRUE);
 		mChatAdapter.update(mDB.getMessages(mContact));
 		mChatAdapter.refresh();
 		mHandler.post(new Runnable() {

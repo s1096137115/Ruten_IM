@@ -9,7 +9,8 @@ import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.MemberAdapter;
 import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
-import com.avengers.publicim.data.entities.Group;
+import com.avengers.publicim.data.entities.Room;
+import com.avengers.publicim.data.entities.User;
 
 import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
@@ -25,7 +26,7 @@ public class MemberActivity extends BaseActivity {
 		setContentView(R.layout.activity_member);
 		getContact();
 		setToolbar();
-		mMemberAdapter = new MemberAdapter(this, ((Group)mContact).getMembers());
+		mMemberAdapter = new MemberAdapter(this, ((Room)mContact).getMembers());
 		setRecyclerView(mMemberAdapter);
 	}
 
@@ -47,13 +48,13 @@ public class MemberActivity extends BaseActivity {
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
 			String value;
-			if(bundle.getString(ChatActivity.ROSTER_NAME) != null){
-				value = bundle.getString(ChatActivity.ROSTER_NAME);
+			if(bundle.getString(User.NAME) != null){
+				value = bundle.getString(User.NAME);
 				if(getRosterManager().contains(value)){
 					mContact = getRosterManager().getItem(value);
 				}
-			}else if(bundle.getString(ChatActivity.GROUP_ID) != null){
-				value = bundle.getString(ChatActivity.GROUP_ID);
+			}else if(bundle.getString(Room.RID) != null){
+				value = bundle.getString(Room.RID);
 				if(getGroupManager().contains(value)){
 					mContact = getGroupManager().getItem(value);
 				}

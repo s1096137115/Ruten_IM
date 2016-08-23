@@ -59,7 +59,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 		if (holder instanceof TheOtherViewHolder) {
 			((TheOtherViewHolder) holder).mID.setText(mMessages.get(position).getFrom().getName());
-			if(mMessages.get(position).getGid().isEmpty()){
+			if(mMessages.get(position).getRid().isEmpty()){
 				((TheOtherViewHolder) holder).mID.setVisibility(View.GONE);
 			}else{
 				((TheOtherViewHolder) holder).mID.setVisibility(View.VISIBLE);

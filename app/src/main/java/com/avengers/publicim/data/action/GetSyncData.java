@@ -1,6 +1,6 @@
 package com.avengers.publicim.data.action;
 
-import com.avengers.publicim.data.entities.Group;
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.google.gson.annotations.SerializedName;
@@ -24,7 +24,7 @@ public class GetSyncData{
 	private List<Message> messages;
 
 	@SerializedName("group")
-	private List<Group> groups;
+	private List<Room> rooms;
 
 	public String getAction() {
 		return action;
@@ -58,11 +58,11 @@ public class GetSyncData{
 		this.messages = messages;
 	}
 
-	public List<Group> getGroups() {
-		return groups;
+	public List<Room> getRooms() {
+		return rooms;
 	}
 
-	public void setGroups(List<Group> groups) {
-		this.groups = groups;
+	public void setRooms(List<Room> rooms) {
+		this.rooms = rooms;
 	}
 }
