@@ -162,6 +162,8 @@ public class MainActivity extends BaseActivity {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
 								if(!input.getText().toString().isEmpty()){
+									getProgress().setMessage("Waiting...");
+									getProgress().show();
 									Invite invite = new Invite(
 											new User("", input.getText().toString()), Invite.Type.FRIEND);
 									mIMService.sendInvite(invite);
@@ -190,7 +192,13 @@ public class MainActivity extends BaseActivity {
 
 	@Override
 	public void onServeiceResponse(ServiceEvent event) {
-
+		if(this == event.toListener()){
+			switch (event.getEvent()){
+				case ServiceEvent.EVENT_CLOSE_DIALOG:
+					getProgress().dismiss();
+					break;
+			}
+		}
 	}
 
 	/**

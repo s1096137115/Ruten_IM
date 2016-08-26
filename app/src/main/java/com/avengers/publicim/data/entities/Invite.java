@@ -81,6 +81,14 @@ public class Invite implements Serializable {
 		this.rid = rid;
 	}
 
+	public String getRidOfInvite() {
+		return rid;
+	}
+
+	public void setRidOfInvite(String rid) {
+		this.rid = rid;
+	}
+
 	public User getFrom() {
 		return from;
 	}
@@ -127,5 +135,13 @@ public class Invite implements Serializable {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public Presence getPresence() {
+		return presence;
+	}
+
+	public void setPresence(Presence presence) {
+		this.presence = presence;
 	}
 }

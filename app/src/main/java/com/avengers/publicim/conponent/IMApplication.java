@@ -7,12 +7,16 @@ import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.Manager.ChatManager;
 import com.avengers.publicim.data.Manager.GroupManager;
 import com.avengers.publicim.data.Manager.MessageManager;
+import com.avengers.publicim.data.Manager.RoomManager;
 import com.avengers.publicim.data.Manager.RosterManager;
 import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
+import com.avengers.publicim.utils.AndroidLoggingHandler;
 import com.avengers.publicim.view.DialogBuilder;
 import com.avengers.publicim.view.IMProgressDialog;
+
+import java.util.logging.Level;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -25,6 +29,7 @@ public class IMApplication extends Application {
 	private Socket mSocket;
 	private static RosterManager mRosterManager;
 	private static ChatManager mChatManager;
+	private static RoomManager mRoomManager;
 	private static GroupManager mGroupManager;
 	private static MessageManager mMessageManager;
 	private static IMProgressDialog mProgressDialog;
@@ -37,6 +42,8 @@ public class IMApplication extends Application {
 		super.onCreate();
 		mContext = getApplicationContext();
 		mDB = DbHelper.getInstance(this);
+		AndroidLoggingHandler.reset(new AndroidLoggingHandler());
+		java.util.logging.Logger.getLogger("my.category").setLevel(Level.FINEST);
 		initSocket();
 		initManager();
 		initAccount();
@@ -69,8 +76,10 @@ public class IMApplication extends Application {
 	private void initManager(){
 		mRosterManager = new RosterManager(mContext);
 		mRosterManager.reload();
-		mChatManager = new ChatManager(mContext);
-		mChatManager.reload();
+//		mChatManager = new ChatManager(mContext);
+//		mChatManager.reload();
+		mRoomManager = new RoomManager(mContext);
+		mRoomManager.reload();
 		mGroupManager = new GroupManager(mContext);
 		mGroupManager.reload();
 		mMessageManager = new MessageManager();
@@ -86,6 +95,10 @@ public class IMApplication extends Application {
 
 	public static ChatManager getChatManager(){
 		return mChatManager;
+	}
+
+	public static RoomManager getRoomManager(){
+		return mRoomManager;
 	}
 
 	public static GroupManager getGroupManager(){

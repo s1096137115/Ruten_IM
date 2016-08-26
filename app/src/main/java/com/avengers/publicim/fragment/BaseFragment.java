@@ -8,15 +8,15 @@ import android.support.v4.app.Fragment;
 import com.avengers.publicim.activity.BaseActivity;
 import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMService;
-import com.avengers.publicim.data.callback.ChatListener;
 import com.avengers.publicim.data.callback.GroupListener;
 import com.avengers.publicim.data.callback.MessageListener;
+import com.avengers.publicim.data.callback.RoomListener;
 import com.avengers.publicim.data.callback.RosterListener;
 import com.avengers.publicim.data.callback.ServiceListener;
 
-import static com.avengers.publicim.conponent.IMApplication.getChatManager;
 import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
 import static com.avengers.publicim.conponent.IMApplication.getMessageManager;
+import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
 /**
@@ -56,8 +56,8 @@ public abstract class BaseFragment extends Fragment implements ServiceListener{
 
 	public void registerListeners(){
 		mIMService.addListener(this);
-		if (this instanceof ChatListener) {
-			getChatManager().addListener((ChatListener) this);
+		if (this instanceof RoomListener) {
+			getRoomManager().addListener((RoomListener) this);
 		}
 		if (this instanceof RosterListener) {
 			getRosterManager().addListener((RosterListener) this);
@@ -72,8 +72,8 @@ public abstract class BaseFragment extends Fragment implements ServiceListener{
 
 	public void unregisterListeners(){
 		mIMService.removeListener(this);
-		if (this instanceof ChatListener) {
-			getChatManager().removeListener((ChatListener) this);
+		if (this instanceof RoomListener) {
+			getRoomManager().removeListener((RoomListener) this);
 		}
 		if (this instanceof RosterListener) {
 			getRosterManager().removeListener((RosterListener) this);

@@ -35,7 +35,7 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 	private RosterEntry mEntry;
 	private Room mRoom;
 	private Contact mContact;
-	private Chat mChat;
+//	private Chat mChat;
 
 	private ImageButton mSendButton;
 	private EditText mTextInput;

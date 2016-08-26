@@ -13,6 +13,7 @@ import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.action.CreateRoom;
 import com.avengers.publicim.data.action.GetRoom;
 import com.avengers.publicim.data.action.GetRoster;
+import com.avengers.publicim.data.action.GetUser;
 import com.avengers.publicim.data.action.SetRoomMemberRole;
 import com.avengers.publicim.data.action.SetRoster;
 import com.avengers.publicim.data.callback.ServiceEvent;
@@ -43,7 +44,7 @@ import io.socket.emitter.Emitter;
 import static com.avengers.publicim.conponent.IMApplication.getChatManager;
 import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
 import static com.avengers.publicim.conponent.IMApplication.getMessageManager;
-import static com.avengers.publicim.conponent.IMApplication.getProgress;
+import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
 public class IMService extends Service {
@@ -99,7 +100,7 @@ public class IMService extends Service {
 	public void addMessage(Message message){
 		mDB.insertMessage(message);
 		getMessageManager().change();
-		getChatManager().reload();
+		getRoomManager().reload();
 	}
 
 	public void addChat(Chat chat){
@@ -109,15 +110,23 @@ public class IMService extends Service {
 		}
 	}
 
+	public void addRoom(Room room){
+		mDB.insertRoom(room);
+		if(room.getType().equals(Room.Type.GROUP)){
+			getGroupManager().reload();
+		}
+	}
+
 	public void addRoster(RosterEntry entry){
 		mDB.insertRoster(entry);
+		getRosterManager().reload();
 	}
 
 	public void updateRosterEntry(RosterEntry entry){
 		if(getRosterManager().contains(entry.getUser())){
 			mDB.updateRoster(entry);
+			getRosterManager().reload();
 		}
-		getRosterManager().reload();
 	}
 
 	//listNew為新名單
@@ -153,7 +162,7 @@ public class IMService extends Service {
 		if(list[MODIFY_NEW].isEmpty() && list[MODIFY_OLD].isEmpty()) return;
 		for (Room room : list[CHANGE_NEW]) {
 			mDB.updateRoom(room);
-			//在開始比較Member之前要先幫新的Member加上group_id
+			//在開始比較Member之前要先幫新的Member加上room_id
 			for (Member member: room.getMembers()) {
 				member.setRid(room.getRid());
 			}
@@ -189,7 +198,7 @@ public class IMService extends Service {
 			mDB.deleteMessages(room.getRid());
 		}
 		getGroupManager().reload();
-		getChatManager().reload();
+		getRoomManager().reload();
 		getMessageManager().change();
 	}
 
@@ -324,7 +333,18 @@ public class IMService extends Service {
 		mSocket.emit(Constants.Socket.EVENT_SEND_INVITE, obj, new Ack() {
 			@Override
 			public void call(Object... args) {
-				String errorMessage = (String) args[0];
+				if(args[0] != null){
+					String errorMessage = args[0].toString();
+					return;
+				}
+				if(invite.getType().equals(Invite.Type.FRIEND)){
+//					addRoster(new RosterEntry(invite.getFrom(), invite.getPresence(), invite.getRelationship()));
+					Room room = GsonUtils.fromJson(args[1].toString(), Room.class);
+					addRoom(room);
+				}
+				for (ServiceListener listener : mServiceListener) {
+					listener.onServeiceResponse(new ServiceEvent(ServiceEvent.EVENT_CLOSE_DIALOG, listener));
+				}
 			}
 		});
 	}
@@ -364,6 +384,27 @@ public class IMService extends Service {
 	 */
 	public void sendSetRoom(){
 
+	}
+
+	public void sendGetUser(String type, String key){
+		GetUser getUser = new GetUser();
+		getUser.setAction(Constants.Socket.EVENT_GET_USER);
+		getUser.setType(type);
+		getUser.setKey(key);
+		final JSONObject obj = GsonUtils.toJSONObject(getUser);
+		mSocket.emit("request", obj);
+	}
+
+	public void sendGetUser2(String type, String key){
+		try {
+			JSONObject obj = new JSONObject();
+			obj.put("action", Constants.Socket.EVENT_GET_USER);
+//			obj.put("type", type);
+			obj.put("key", key);
+			mSocket.emit("request", obj);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void sendGetSyncData(){
@@ -433,6 +474,11 @@ public class IMService extends Service {
 		sendGetRoster();
 	}
 
+	public void receiveGetUser(String data){
+		GetUser getUser = GsonUtils.fromJson(data, GetUser.class);
+		String a = "";
+	}
+
 	public void receiveGetRoom(String data){
 		GetRoom getRoom = GsonUtils.fromJson(data, GetRoom.class);
 		updateRoom(getRoom.getRooms());
@@ -443,7 +489,11 @@ public class IMService extends Service {
 		if(TextUtils.isEmpty(createRoom.getError())){
 			mDB.insertRoom(createRoom.getRoom());
 			getGroupManager().reload();
-			getProgress().dismiss();
+			if(!createRoom.getType().equals(Room.Type.SINGLE)){
+				for (ServiceListener listener : mServiceListener) {
+					listener.onServeiceResponse(new ServiceEvent(ServiceEvent.EVENT_CLOSE_DIALOG, listener));
+				}
+			}
 		}
 	}
 
@@ -519,6 +569,9 @@ public class IMService extends Service {
 		public void call(final Object... args) {
 			try {
 				Log.d(TAG, args[0].toString());
+				if(0 == 0){
+					return;
+				}
 				JSONObject jsonObj  = new JSONObject(args[0].toString());
 				String action = jsonObj.get("action").toString();
 				if(action.equals(Constants.Socket.EVENT_GET_SYNC_DATA)){
@@ -533,6 +586,8 @@ public class IMService extends Service {
 					receiveGetRoom(args[0].toString());
 				}else if(action.equals(Constants.Socket.EVENT_SET_ROOM_MEMBER_ROLE)){
 					receiveSetRoomMemberRole(args[0].toString());
+				}else if(action.equals(Constants.Socket.EVENT_GET_USER)){
+					receiveGetUser(args[0].toString());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -584,15 +639,14 @@ public class IMService extends Service {
 		public void call(final Object... args) {
 			Log.d(TAG, args[0].toString());
 			Invite invite = GsonUtils.fromJson(args[0].toString(), Invite.class);
-			if(!invite.getTo().getName().equals(IMApplication.getUser().getName())) return;
+			//不處理由自己發出的invite
+			if(invite.getFrom().getName().equals(IMApplication.getUser().getName())) return;
 
-			//目前預設的行為接收到邀請即接受(好友、群組)
 			if(invite.getType().equals(Invite.Type.FRIEND)){
-				sendSetRoster(invite.getFrom(), RosterEntry.Releationship.FRIEND);
+				addRoster(new RosterEntry(invite.getFrom(), invite.getPresence(), invite.getRelationship()));
+				addRoom(invite.getRoom());
 			}else if(invite.getType().equals(Invite.Type.ROOM)){
-				//todo add a room
-
-				sendSetRoomMemberRole(invite.getRoom(), invite.getFrom(), Room.Role.MEMBER);
+				addRoom(invite.getRoom());
 			}
 		}
 	};

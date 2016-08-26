@@ -14,7 +14,7 @@ import java.util.List;
  * Created by D-IT-MAX2 on 2016/3/4.
  */
 public class Room extends Contact implements Serializable {
-	public static final String TABLE_NAME = "group_data";
+	public static final String TABLE_NAME = "room";
 
 	public static final String RID = "rid";
 
@@ -87,7 +87,8 @@ public class Room extends Contact implements Serializable {
 	@SerializedName("member")
 	private List<Member> members;
 
-	private int type;
+	@SerializedName("type")
+	private String type;
 
 	private String date;
 
@@ -98,6 +99,7 @@ public class Room extends Contact implements Serializable {
 	public Room(String rid, String name, String type) {
 		this.rid = rid;
 		this.name = name;
+		this.type = type;
 	}
 
 	public static Room newInstance(Cursor cursor){
@@ -178,11 +180,11 @@ public class Room extends Contact implements Serializable {
 		this.unread = unread;
 	}
 
-	public int getType() {
+	public String getType() {
 		return type;
 	}
 
-	public void setType(int type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 

@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import com.avengers.publicim.R;
 import com.avengers.publicim.activity.ChatActivity;
 import com.avengers.publicim.adapter.ContactAdapter;
+import com.avengers.publicim.data.action.GetUser;
 import com.avengers.publicim.data.callback.GroupListener;
 import com.avengers.publicim.data.callback.RosterListener;
 import com.avengers.publicim.data.callback.ServiceEvent;
@@ -93,7 +94,7 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 			@Override
 			public void onClick(View view) {
 				refresh();
-				mIMService.sendGetSyncData();
+				mIMService.sendGetUser2(GetUser.Type.ID, "test02");
 			}
 		});
 	}
