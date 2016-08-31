@@ -14,26 +14,23 @@ import android.widget.ImageButton;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.ChatAdapter;
+import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMApplication;
 import com.avengers.publicim.data.callback.MessageListener;
 import com.avengers.publicim.data.callback.ServiceEvent;
-import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
-import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.SystemUtils;
 
-import static com.avengers.publicim.conponent.IMApplication.getChatManager;
-import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
 import static com.avengers.publicim.conponent.IMApplication.getProgress;
-import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
+import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 
 public class ChatActivity extends BaseActivity implements MessageListener{
 	private RecyclerView mRecyclerView;
 	private ChatAdapter mChatAdapter;
 	private RosterEntry mEntry;
-	private Room mRoom;
+//	private Room mRoom;
 	private Contact mContact;
 //	private Chat mChat;
 
@@ -46,7 +43,7 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		setContentView(R.layout.activity_chat);
 		mSendButton = (ImageButton) findViewById(R.id.textSendButton);
 		mTextInput = (EditText) findViewById(R.id.textInput);
-		getData();
+		getContact();
 		setToolbar();
 		mChatAdapter = new ChatAdapter(ChatActivity.this, mDB.getMessages(mContact));
 		setRecyclerView();
@@ -75,32 +72,10 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		});
 	}
 
-	public void getData(){
+	public void getContact(){
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
-			String value = "";
-			if(bundle.getString(User.NAME) != null){
-				value = bundle.getString(User.NAME);
-				if(getRosterManager().contains(value)){
-					mContact = getRosterManager().getItem(value);
-				}
-			}else if(bundle.getString(Room.RID) != null){
-				value = bundle.getString(Room.RID);
-				if(getGroupManager().contains(value)){
-					mContact = getGroupManager().getItem(value);
-					((Room)mContact).setMembers(mDB.getMembers((Room)mContact));
-				}
-			}
-
-			if(getChatManager().contains(value)){
-				mChat = getChatManager().getItem(value);
-			}else{
-				if(mContact instanceof RosterEntry){
-					mChat = new Chat(mContact.getName(),mContact.getName(), Contact.TYPE_ROSTER);
-				}else{
-					mChat = new Chat(mContact.getId(),mContact.getName(), Contact.TYPE_GROUP);
-				}
-			}
+			mContact = (Contact)bundle.getSerializable(Contact.Type.CONTACT);
 		}
 	}
 
@@ -125,15 +100,9 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 	@Override
 	protected void onBackendConnected() {
 		super.onBackendConnected();
-		if(mChat == null) return;
-		//有chat & 未讀訊息的情況下才更新chat
-		if(getChatManager().contains(mChat.getCid())){
-			if(mChatAdapter.hasUnread()){
-//				mIMService.updateMessageOfRead(mChat, DbHelper.IntBoolean.TRUE);
-				getChatManager().reload();
-			}
-		}else{
-			mIMService.addChat(mChat);
+		if(mChatAdapter.hasUnread()){
+				mIMService.updateMessageOfRead((Room)mContact, DbHelper.IntBoolean.TRUE);
+			getRoomManager().reload();
 		}
 	}
 
@@ -159,12 +128,12 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		switch (id){
 			case R.id.action_view_member:
 				intent = new Intent(this, MemberActivity.class);
-				intent.putExtra(Room.RID, mContact.getId());
+				intent.putExtra(Room.RID, mContact.getRid());
 				startActivity(intent);
 				break;
 			case R.id.action_invite_group:
 				intent = new Intent(this, InviteActivity.class);
-				intent.putExtra(Room.RID, mContact.getId());
+				intent.putExtra(Room.RID, mContact.getRid());
 				startActivity(intent);
 				break;
 			case R.id.action_exit_group:
@@ -178,7 +147,7 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 
 	@Override
 	public void onMessageUpdate() {
-//		mIMService.updateMessageOfRead(mChat, DbHelper.IntBoolean.TRUE);
+		mIMService.updateMessageOfRead((Room)mContact, DbHelper.IntBoolean.TRUE);
 		mChatAdapter.update(mDB.getMessages(mContact));
 		mChatAdapter.refresh();
 		mHandler.post(new Runnable() {

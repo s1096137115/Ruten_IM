@@ -13,8 +13,8 @@ import android.widget.TextView;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.data.entities.Contact;
-import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.Presence;
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
 
 import java.util.ArrayList;
@@ -186,7 +186,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 		}
 	}
 
-	public static class Header extends Contact{
+	public static class Header extends Contact {
 		public boolean toggle;
 		public String title;
 
@@ -196,7 +196,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 		}
 
 		@Override
-		public String getId() {
+		public String getRid() {
 			return null;
 		}
 

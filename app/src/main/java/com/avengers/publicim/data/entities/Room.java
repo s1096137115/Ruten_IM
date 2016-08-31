@@ -74,7 +74,6 @@ public class Room extends Contact implements Serializable {
 		public static final String MULTIPLE = "multiple";
 	}
 
-
 	@SerializedName("rid")
 	private String rid;
 
@@ -118,17 +117,13 @@ public class Room extends Contact implements Serializable {
 		return values;
 	}
 
+	@Override
 	public String getRid() {
 		return rid;
 	}
 
 	public void setRid(String rid) {
 		this.rid = rid;
-	}
-
-	@Override
-	public String getId() {
-		return rid;
 	}
 
 	@Override
@@ -206,6 +201,7 @@ public class Room extends Contact implements Serializable {
 			Room room = (Room) o;
 			return this.rid.equals(room.rid)
 					&& this.name.equals(room.name) && this.name.equals(room.name)
+					&& this.owner.equals(room.owner) && this.type.equals(room.type)
 					&& CollectionUtils.isEqualCollection(this.members, room.members);
 		}
 		return false;
@@ -215,7 +211,8 @@ public class Room extends Contact implements Serializable {
 	public int hashCode() {
 		final int PRIME = 121;
 		int result = 1;
-		result = PRIME * result + (PRIME * getRid().hashCode()) + getName().hashCode();
+		result = PRIME * result + (PRIME * getRid().hashCode()) + getName().hashCode()
+				+ getOwner().hashCode() + getType().hashCode() + getMembers().hashCode();
 		return result;
 	}
 }

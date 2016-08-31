@@ -12,15 +12,12 @@ import android.view.ViewGroup;
 import com.avengers.publicim.R;
 import com.avengers.publicim.activity.ChatActivity;
 import com.avengers.publicim.adapter.ContactAdapter;
-import com.avengers.publicim.data.action.GetUser;
 import com.avengers.publicim.data.callback.GroupListener;
 import com.avengers.publicim.data.callback.RosterListener;
 import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
-import com.avengers.publicim.data.entities.Room;
-import com.avengers.publicim.data.entities.RosterEntry;
-import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.ItemClickSupport;
+import com.avengers.publicim.utils.PreferenceHelper;
 
 
 public class RosterFragment extends BaseFragment implements RosterListener, GroupListener{
@@ -60,19 +57,13 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 			@Override
 			public void onItemClicked(RecyclerView recyclerView, int position, View v) {
 				Contact item = ((ContactAdapter) recyclerView.getAdapter()).getItem(position);
-				if(item instanceof ContactAdapter.Header){
+				if(item instanceof ContactAdapter.Header) {
 					RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(position);
 					((ContactAdapter) recyclerView.getAdapter()).rotationView(holder, position);
 					((ContactAdapter) recyclerView.getAdapter()).expandHeader(position);
-				}else if(item instanceof RosterEntry){
-					String name = ((ContactAdapter)recyclerView.getAdapter()).getItem(position).getName();
+				}else{
 					Intent intent = new Intent(getActivity(), ChatActivity.class);
-					intent.putExtra(User.NAME, name);
-					startActivity(intent);
-				}else if(item instanceof Room){
-					String gid = ((ContactAdapter)recyclerView.getAdapter()).getItem(position).getId();
-					Intent intent = new Intent(getActivity(), ChatActivity.class);
-					intent.putExtra(Room.RID, gid);
+					intent.putExtra(Contact.Type.CONTACT, ((ContactAdapter)recyclerView.getAdapter()).getItem(position));
 					startActivity(intent);
 				}
 			}
@@ -94,7 +85,8 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 			@Override
 			public void onClick(View view) {
 				refresh();
-				mIMService.sendGetUser2(GetUser.Type.ID, "test02");
+//				mIMService.sendGetUser2(GetUser.Type.ID, "test02");
+				mIMService.sendGetMessage(PreferenceHelper.UpdateStatus.getUpdateTime(), null);
 			}
 		});
 	}

@@ -13,6 +13,7 @@ import com.avengers.publicim.R;
 import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMApplication;
 import com.avengers.publicim.data.entities.Message;
+import com.avengers.publicim.utils.SystemUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,12 +65,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 			}else{
 				((TheOtherViewHolder) holder).mID.setVisibility(View.VISIBLE);
 			}
-			((TheOtherViewHolder) holder).mContent.setText(mMessages.get(position).getContent());
-			String eventTime = mMessages.get(position).getDate().replace(" ","\n");
+			((TheOtherViewHolder) holder).mContent.setText(mMessages.get(position).getContext());
+
+			String eventTime = SystemUtils.getDate(mMessages.get(position).getDate()).replace(" ","\n");
 			((TheOtherViewHolder) holder).mDatetime.setText(eventTime);
 		} else if (holder instanceof SelfHolder) {
-			((SelfHolder) holder).mContent.setText(mMessages.get(position).getContent());
-			String eventTime = mMessages.get(position).getDate().replace(" ","\n");
+			((SelfHolder) holder).mContent.setText(mMessages.get(position).getContext());
+			String eventTime = SystemUtils.getDate(mMessages.get(position).getDate()).replace(" ","\n");
 			((SelfHolder) holder).mDatetime.setText(eventTime);
 		}
 	}

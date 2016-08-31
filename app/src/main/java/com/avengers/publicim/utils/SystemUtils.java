@@ -13,8 +13,10 @@ import com.avengers.publicim.data.Constants;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -56,11 +58,6 @@ public class SystemUtils {
 		return network;
 	}
 
-	public static String getDateTime(){
-		SimpleDateFormat sdf = new SimpleDateFormat(Constants.SAVE_DB_SIMPLE_DATETIME_FORMAT);
-		return sdf.format(System.currentTimeMillis());
-	}
-
 	public static void hideVirtualKeyboard(Activity activity) {
 		View view = activity.getCurrentFocus();
 		if (view != null) {
@@ -68,5 +65,10 @@ public class SystemUtils {
 					getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 		}
+	}
+
+	public static String getDate(long timestamp){
+		SimpleDateFormat sdf = new SimpleDateFormat(Constants.SAVE_DB_SIMPLE_DATETIME_FORMAT, Locale.TAIWAN);
+		return sdf.format(new Date(timestamp));
 	}
 }

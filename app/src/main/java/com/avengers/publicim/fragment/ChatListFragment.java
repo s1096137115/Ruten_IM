@@ -14,6 +14,7 @@ import com.avengers.publicim.activity.ChatActivity;
 import com.avengers.publicim.adapter.ChatListAdapter;
 import com.avengers.publicim.data.callback.RoomListener;
 import com.avengers.publicim.data.callback.ServiceEvent;
+import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.utils.ItemClickSupport;
 
@@ -21,11 +22,6 @@ import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 
 
 public class ChatListFragment extends BaseFragment implements RoomListener {
-	private static final String ARG_PARAM1 = "param1";
-	private static final String ARG_PARAM2 = "param2";
-
-	private String mParam1;
-	private String mParam2;
 	private RecyclerView mRecyclerView;
 	private ChatListAdapter mChatListAdapter;
 
@@ -36,10 +32,6 @@ public class ChatListFragment extends BaseFragment implements RoomListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (getArguments() != null) {
-			mParam1 = getArguments().getString(ARG_PARAM1);
-			mParam2 = getArguments().getString(ARG_PARAM2);
-		}
 	}
 
 	@Override
@@ -57,7 +49,7 @@ public class ChatListFragment extends BaseFragment implements RoomListener {
 			public void onItemClicked(RecyclerView recyclerView, int position, View v) {
 				Room room = ((ChatListAdapter)recyclerView.getAdapter()).getItem(position);
 				Intent intent = new Intent(getActivity(), ChatActivity.class);
-				intent.putExtra(Room.RID, room.getRid());
+				intent.putExtra(Contact.Type.CONTACT, room);
 				startActivity(intent);
 			}
 		});
@@ -78,7 +70,7 @@ public class ChatListFragment extends BaseFragment implements RoomListener {
 			@Override
 			public void onClick(View view) {
 				mIMService.sendGetRoster();
-//				mIMService.sendGetRoom();
+				mIMService.sendGetRoom();
 			}
 		});
 	}

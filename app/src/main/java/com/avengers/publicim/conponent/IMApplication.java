@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 
 import com.avengers.publicim.data.Constants;
-import com.avengers.publicim.data.Manager.ChatManager;
 import com.avengers.publicim.data.Manager.GroupManager;
 import com.avengers.publicim.data.Manager.MessageManager;
 import com.avengers.publicim.data.Manager.RoomManager;
@@ -28,7 +27,6 @@ public class IMApplication extends Application {
 	private static Context mContext;
 	private Socket mSocket;
 	private static RosterManager mRosterManager;
-	private static ChatManager mChatManager;
 	private static RoomManager mRoomManager;
 	private static GroupManager mGroupManager;
 	private static MessageManager mMessageManager;
@@ -50,8 +48,8 @@ public class IMApplication extends Application {
 	}
 
 	private void initAccount(){
-		mEntry = new RosterEntry(new User("Android-0808-1652", "test01"),
-				new Presence("","",Presence.STATUS_ONLINE), 0);
+		mEntry = new RosterEntry(new User("Android-0830", "test01"),
+				new Presence("","",Presence.STATUS_ONLINE), 0, "");
 	}
 
 	public static User getUser(){
@@ -76,8 +74,6 @@ public class IMApplication extends Application {
 	private void initManager(){
 		mRosterManager = new RosterManager(mContext);
 		mRosterManager.reload();
-//		mChatManager = new ChatManager(mContext);
-//		mChatManager.reload();
 		mRoomManager = new RoomManager(mContext);
 		mRoomManager.reload();
 		mGroupManager = new GroupManager(mContext);
@@ -91,10 +87,6 @@ public class IMApplication extends Application {
 
 	public static RosterManager getRosterManager(){
 		return mRosterManager;
-	}
-
-	public static ChatManager getChatManager(){
-		return mChatManager;
 	}
 
 	public static RoomManager getRoomManager(){

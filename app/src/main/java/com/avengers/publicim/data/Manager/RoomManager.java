@@ -77,6 +77,7 @@ public class RoomManager extends BaseManager<Room, RoomListener>  {
 			@Override
 			public void run() {
 				//background
+//				setList(mDB.getRooms());
 				setList(mDB.getContentOfRooms());
 				for (Room room : mList) {
 					room.setMembers(mDB.getMembers(room));

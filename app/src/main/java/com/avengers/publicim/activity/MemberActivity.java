@@ -10,10 +10,6 @@ import com.avengers.publicim.adapter.MemberAdapter;
 import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Room;
-import com.avengers.publicim.data.entities.User;
-
-import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
-import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
 public class MemberActivity extends BaseActivity {
 	private RecyclerView mRecyclerView;
@@ -47,18 +43,7 @@ public class MemberActivity extends BaseActivity {
 	private void getContact(){
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
-			String value;
-			if(bundle.getString(User.NAME) != null){
-				value = bundle.getString(User.NAME);
-				if(getRosterManager().contains(value)){
-					mContact = getRosterManager().getItem(value);
-				}
-			}else if(bundle.getString(Room.RID) != null){
-				value = bundle.getString(Room.RID);
-				if(getGroupManager().contains(value)){
-					mContact = getGroupManager().getItem(value);
-				}
-			}
+			mContact = (Contact)bundle.getSerializable(Contact.Type.CONTACT);
 		}
 	}
 

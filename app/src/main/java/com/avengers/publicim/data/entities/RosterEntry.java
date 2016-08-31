@@ -5,15 +5,15 @@ import android.database.Cursor;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
-
 /**
  * Created by D-IT-MAX2 on 2016/3/3.
  */
-public class RosterEntry extends Contact implements Serializable {
+public class RosterEntry extends Contact{
 	public static final String TABLE_NAME = "roster";
 
 	public static final String RELATIONSHIP = "relationship";
+
+	public static final String RID = "rid";
 
 	public static final String CREATE_SQL =
 			"CREATE TABLE " + TABLE_NAME + "("
@@ -23,6 +23,7 @@ public class RosterEntry extends Contact implements Serializable {
 					+ Presence.PHOTO + " VARCHAR(30), "
 					+ Presence.STATUS + " VARCHAR(30), "
 					+ RELATIONSHIP + " VARCHAR(30), "
+					+ RID + " VARCHAR(50), "
 					+ "PRIMARY KEY (" + User.UID + "," + User.NAME + ") "
 					+ ") ";
 
@@ -54,16 +55,21 @@ public class RosterEntry extends Contact implements Serializable {
 	@SerializedName("user")
 	private User user;
 
-	public RosterEntry(User user, Presence presence, Integer relationship) {
+	@SerializedName("rid")
+	private String rid;
+
+	public RosterEntry(User user, Presence presence, Integer relationship, String rid) {
+		this.user = user;
 		this.presence = presence;
 		this.relationship = relationship;
-		this.user = user;
+		this.rid = rid;
 	}
 
 	public static RosterEntry newInstance(Cursor cursor){
 		return new RosterEntry(
 				User.newInstance(cursor), Presence.newInstance(cursor),
-				cursor.getInt(cursor.getColumnIndexOrThrow(RosterEntry.RELATIONSHIP))
+				cursor.getInt(cursor.getColumnIndexOrThrow(RosterEntry.RELATIONSHIP)),
+				cursor.getString(cursor.getColumnIndexOrThrow(RosterEntry.RID))
 		);
 	}
 
@@ -75,6 +81,7 @@ public class RosterEntry extends Contact implements Serializable {
 		cv.put(Presence.PHOTO, presence.getPhoto());
 		cv.put(Presence.STATUS, presence.getStatus());
 		cv.put(RELATIONSHIP, relationship);
+		cv.put(RID, rid);
 		return cv;
 	}
 
@@ -103,13 +110,17 @@ public class RosterEntry extends Contact implements Serializable {
 	}
 
 	@Override
-	public String getId() {
-		return user.getUid();
+	public String getName() {
+		return user.getName();
 	}
 
 	@Override
-	public String getName() {
-		return user.getName();
+	public String getRid() {
+		return rid;
+	}
+
+	public void setRid(String rid) {
+		this.rid = rid;
 	}
 
 	@Override
@@ -118,7 +129,8 @@ public class RosterEntry extends Contact implements Serializable {
 			RosterEntry entry = (RosterEntry) o;
 			return this.user.equals(entry.user)
 					&& this.presence.equals(entry.presence)
-					&& this.relationship.equals(entry.relationship);
+					&& this.relationship.equals(entry.relationship)
+					&& this.rid.equals(entry.rid);
 		}
 		return false;
 	}
@@ -128,7 +140,7 @@ public class RosterEntry extends Contact implements Serializable {
 		final int PRIME = 81;
 		int result = 1;
 		result = PRIME * result + (PRIME * getUser().hashCode())
-				+ getPresence().hashCode() + getRelationship().hashCode();
+				+ getPresence().hashCode() + getRelationship().hashCode() + getRid().hashCode();
 		return result;
 	}
 }

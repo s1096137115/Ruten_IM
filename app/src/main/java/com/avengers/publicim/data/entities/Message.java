@@ -23,7 +23,7 @@ public class Message implements Serializable {
 
 	public static final String TYPE = "type";
 
-	public static final String CONTENT = "content";
+	public static final String CONTEXT = "context";
 
 	public static final String DATE = "date";
 
@@ -36,10 +36,16 @@ public class Message implements Serializable {
 					+ FROM_NAME + " VARCHAR(50), "
 					+ RID + " VARCHAR(50), "
 					+ TYPE + " VARCHAR(30), "
-					+ CONTENT + " TEXT, "
+					+ CONTEXT + " TEXT, "
 					+ DATE + " VARCHAR(30), "
 					+ READ + " INTEGER "
 					+ ") ";
+
+	public class Type{
+		public static final String TEXT = "text";
+		public static final String IMAGE = "image";
+		public static final String LOG = "log";
+	}
 
 	@SerializedName("mid")// 可以讓你的field名稱與API不同
 	private String mid;
@@ -54,21 +60,21 @@ public class Message implements Serializable {
 	private String type;
 
 	@SerializedName("context")
-	private String content;
+	private String context;
 
 	@SerializedName("date")
-	private String date;
+	private long date;
 
 	@SerializedName("read")
 	private Integer read;
 
-	public Message(String mid, User from, String rid, String type, String content,
-	               String date, int read) {
+	public Message(String mid, User from, String rid, String type, String context,
+	               long date, int read) {
 		this.mid = mid;
 		this.from = from;
 		this.rid = rid;
 		this.type = type;
-		this.content = content;
+		this.context = context;
 		this.date = date;
 		this.read = read;
 	}
@@ -84,8 +90,8 @@ public class Message implements Serializable {
 				from,
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.RID)),
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.TYPE)),
-				cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTENT)),
-				cursor.getString(cursor.getColumnIndexOrThrow(Message.DATE)),
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTEXT)),
+				cursor.getLong(cursor.getColumnIndexOrThrow(Message.DATE)),
 				cursor.getInt(cursor.getColumnIndexOrThrow(Message.READ))
 		);
 	}
@@ -97,25 +103,25 @@ public class Message implements Serializable {
 		values.put(Message.FROM_NAME, getFrom().getName());
 		values.put(Message.RID, getRid());
 		values.put(Message.TYPE, getType());
-		values.put(Message.CONTENT, getContent());
+		values.put(Message.CONTEXT, getContext());
 		values.put(Message.DATE, getDate());
 		values.put(Message.READ, getRead());
 		return values;
 	}
 
-	public String getContent() {
-		return content;
+	public String getContext() {
+		return context;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
+	public void setContext(String content) {
+		this.context = context;
 	}
 
-	public String getDate() {
+	public long getDate() {
 		return date;
 	}
 
-	public void setDate(String date) {
+	public void setDate(long date) {
 		this.date = date;
 	}
 
@@ -157,10 +163,5 @@ public class Message implements Serializable {
 
 	public void setRead(Integer read) {
 		this.read = read;
-	}
-
-	public class Type{
-		public static final String TEXT = "text";
-		public static final String IMAGE = "image";
 	}
 }

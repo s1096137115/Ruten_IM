@@ -8,9 +8,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.entities.Contact;
-import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
 
@@ -80,8 +80,7 @@ public class DbHelper extends SQLiteOpenHelper{
 	public ArrayList<Message> getMessages(Contact contact){
 		SQLiteDatabase db = getWritableDatabase();
 		String SQL_SEL = String.format("SELECT * FROM %s WHERE %s = '%s' ORDER BY %s DESC",
-				Message.TABLE_NAME, Message.RID,
-				contact instanceof RosterEntry ? contact.getName():contact.getId(), Message.DATE);
+				Message.TABLE_NAME, Message.RID, contact.getRid(), Message.DATE);
 		Cursor cursor = db.rawQuery(SQL_SEL, null);
 		ArrayList<Message> list = new ArrayList<>();
 		cursor.moveToLast();
@@ -89,6 +88,19 @@ public class DbHelper extends SQLiteOpenHelper{
 			do {
 				list.add(Message.newInstance(cursor));
 			} while (cursor.moveToPrevious());
+		}
+		cursor.close();
+		return list;
+	}
+
+	public ArrayList<Room> getRooms(){
+		SQLiteDatabase db = getWritableDatabase();
+		String SQL_SEL = String.format("SELECT * FROM %s GROUP BY %s ORDER BY %s ",
+				Room.TABLE_NAME, Room.RID, Room.NAME);
+		Cursor cursor = db.rawQuery(SQL_SEL, null);
+		ArrayList<Room> list = new ArrayList<>();
+		while(cursor.moveToNext()){
+			list.add(Room.newInstance(cursor));
 		}
 		cursor.close();
 		return list;
@@ -125,19 +137,14 @@ public class DbHelper extends SQLiteOpenHelper{
 		return db.insert(RosterEntry.TABLE_NAME, null, entry.getContentValues());
 	}
 
-	public long insertChat(Chat chat){
-		SQLiteDatabase db = getWritableDatabase();
-		return db.insert(Chat.TABLE_NAME, null, chat.getContentValues());
+	public long insertMessage(Message msg){
+		SQLiteDatabase db = this.getWritableDatabase();
+		return db.insert(Message.TABLE_NAME, null, msg.getContentValues());
 	}
 
-	public void insertMessage(Message msg){
+	public long insertRoom(Room room){
 		SQLiteDatabase db = this.getWritableDatabase();
-		db.insert(Message.TABLE_NAME, null, msg.getContentValues());
-	}
-
-	public void insertRoom(Room room){
-		SQLiteDatabase db = this.getWritableDatabase();
-		db.insert(Room.TABLE_NAME, null, room.getContentValues());
+		return db.insert(Room.TABLE_NAME, null, room.getContentValues());
 	}
 
 	public void insertMember(Member member){
@@ -150,12 +157,6 @@ public class DbHelper extends SQLiteOpenHelper{
 		String whereSql = String.format("%s = '%s' AND %s = '%s'",
 				User.NAME, entry.getUser().getName(), User.UID, entry.getUser().getUid());
 		db.update(RosterEntry.TABLE_NAME, entry.getContentValues(), whereSql, null);
-	}
-
-	public void updateChat(Chat chat){
-		SQLiteDatabase db = getWritableDatabase();
-		String whereSql = String.format("%s = '%s'", Chat.CID, chat.getCid());
-		db.update(Chat.TABLE_NAME, chat.getContentValues(), whereSql, null);
 	}
 
 	public void updateMessage(Message message){
@@ -193,12 +194,6 @@ public class DbHelper extends SQLiteOpenHelper{
 		SQLiteDatabase db = this.getReadableDatabase();
 		String where = String.format("%s = '%s'", User.NAME, userName);
 		db.delete(RosterEntry.TABLE_NAME, where, null);
-	}
-
-	public void deleteChat(String chatId){
-		SQLiteDatabase db = this.getReadableDatabase();
-		String where = String.format("%s = '%s'", Chat.CID, chatId);
-		db.delete(Chat.TABLE_NAME, where, null);
 	}
 
 	/**

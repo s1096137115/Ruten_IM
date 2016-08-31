@@ -54,10 +54,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 		}
 		holder.mTitle.setText(title);
 		holder.mDate.setText(mRooms.get(position).getDate());
-		holder.mContent.setText(mRooms.get(position).getLastMsg().getContent());
-		holder.mUnread.setText(String.valueOf(mRooms.get(position).getUnread()));
-		int visible = mRooms.get(position).getUnread() == 0 ? View.GONE : View.VISIBLE;
-		holder.mUnread.setVisibility(visible);
+//		holder.mContent.setText(mRooms.get(position).getLastMsg().getContent());
+//		holder.mUnread.setText(String.valueOf(mRooms.get(position).getUnread()));
+//		int visible = mRooms.get(position).getUnread() == 0 ? View.GONE : View.VISIBLE;
+//		holder.mUnread.setVisibility(visible);
 	}
 
 	@Override
