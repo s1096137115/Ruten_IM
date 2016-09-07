@@ -27,8 +27,6 @@ public class Message implements Serializable {
 
 	public static final String DATE = "date";
 
-	public static final String READ = "read";
-
 	public static final String CREATE_SQL =
 			"CREATE TABLE " + TABLE_NAME + "("
 					+ MID + " VARCHAR(30) PRIMARY KEY, "
@@ -37,9 +35,13 @@ public class Message implements Serializable {
 					+ RID + " VARCHAR(50), "
 					+ TYPE + " VARCHAR(30), "
 					+ CONTEXT + " TEXT, "
-					+ DATE + " VARCHAR(30), "
-					+ READ + " INTEGER "
+					+ DATE + " TIMESTAMP"
 					+ ") ";
+
+	public static class Read {
+		public static final int TRUE = 1;
+		public static final int FALSE = 0;
+	}
 
 	public class Type{
 		public static final String TEXT = "text";
@@ -65,18 +67,20 @@ public class Message implements Serializable {
 	@SerializedName("date")
 	private long date;
 
-	@SerializedName("read")
-	private Integer read;
+	public Message(String rid, String type, String context){
+		this.rid = rid;
+		this.type = type;
+		this.context = context;
+	}
 
 	public Message(String mid, User from, String rid, String type, String context,
-	               long date, int read) {
+	               long date) {
 		this.mid = mid;
 		this.from = from;
 		this.rid = rid;
 		this.type = type;
 		this.context = context;
 		this.date = date;
-		this.read = read;
 	}
 
 	public static Message newInstance(Cursor cursor){
@@ -91,21 +95,21 @@ public class Message implements Serializable {
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.RID)),
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.TYPE)),
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTEXT)),
-				cursor.getLong(cursor.getColumnIndexOrThrow(Message.DATE)),
-				cursor.getInt(cursor.getColumnIndexOrThrow(Message.READ))
+				cursor.getLong(cursor.getColumnIndexOrThrow(Message.DATE))
 		);
 	}
 
 	public ContentValues getContentValues(){
 		ContentValues values = new ContentValues();
-		values.put(Message.MID, getMid());
-		values.put(Message.FROM_ID, getFrom().getUid());
-		values.put(Message.FROM_NAME, getFrom().getName());
-		values.put(Message.RID, getRid());
-		values.put(Message.TYPE, getType());
-		values.put(Message.CONTEXT, getContext());
-		values.put(Message.DATE, getDate());
-		values.put(Message.READ, getRead());
+		if(getMid() != null) values.put(Message.MID, getMid());
+		if(getFrom() != null){
+			if(getFrom().getUid() != null) values.put(Message.FROM_ID, getFrom().getUid());
+			if(getFrom().getName() != null) values.put(Message.FROM_NAME, getFrom().getName());
+		}
+		if(getRid() != null) values.put(Message.RID, getRid());
+		if(getType() != null) values.put(Message.TYPE, getType());
+		if(getContext() != null) values.put(Message.CONTEXT, getContext());
+		if(getDate() != null) values.put(Message.DATE, getDate());
 		return values;
 	}
 
@@ -117,7 +121,7 @@ public class Message implements Serializable {
 		this.context = context;
 	}
 
-	public long getDate() {
+	public Long getDate() {
 		return date;
 	}
 
@@ -155,13 +159,5 @@ public class Message implements Serializable {
 
 	public void setType(String type) {
 		this.type = type;
-	}
-
-	public Integer getRead() {
-		return read;
-	}
-
-	public void setRead(Integer read) {
-		this.read = read;
 	}
 }

@@ -31,7 +31,7 @@ public class InviteActivity extends BaseActivity{
         setContentView(R.layout.activity_invite);
         mButton = (Button)findViewById(R.id.button);
         mInviteAdapter = new InviteAdapter(this , getRosterManager().getList());
-        getContact();
+        getData();
         setToolbar();
         setRecyclerView(mInviteAdapter);
         mButton.setOnClickListener(new View.OnClickListener() {
@@ -62,7 +62,7 @@ public class InviteActivity extends BaseActivity{
         mRecyclerView.setAdapter(adapter);
     }
 
-    private void getContact(){
+    private void getData(){
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             mContact = (Contact)bundle.getSerializable(Contact.Type.CONTACT);
@@ -71,7 +71,7 @@ public class InviteActivity extends BaseActivity{
 
     @Override
     public void onServeiceResponse(ServiceEvent event) {
-        if(this == event.toListener()){
+        if(this == event.getListener()){
             switch (event.getEvent()){
                 case ServiceEvent.EVENT_CLOSE_DIALOG:
                     getProgress().dismiss();
@@ -79,5 +79,10 @@ public class InviteActivity extends BaseActivity{
                     break;
             }
         }
+    }
+
+    @Override
+    public String getName() {
+        return null;
     }
 }

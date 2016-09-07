@@ -89,7 +89,7 @@ public class Room extends Contact implements Serializable {
 	@SerializedName("type")
 	private String type;
 
-	private String date;
+	private long date;
 
 	private Message lastMsg;
 
@@ -151,11 +151,11 @@ public class Room extends Contact implements Serializable {
 		this.owner = owner;
 	}
 
-	public String getDate() {
+	public Long getDate() {
 		return date;
 	}
 
-	public void setDate(String date) {
+	public void setDate(long date) {
 		this.date = date;
 	}
 
@@ -184,13 +184,13 @@ public class Room extends Contact implements Serializable {
 	}
 
 	/**
-	 * 額外的資訊來自Message，不會存取在chat的DB上
+	 * 額外的資訊來自其他DB，不會存取在room的DB上
 	 * @param cursor
 	 */
 	public void setInfo(Cursor cursor){
 		setLastMsg(Message.newInstance(cursor));
 		int unread = cursor.getInt(cursor.getColumnIndex(UNREAD));
-		String date = cursor.getString(cursor.getColumnIndex(DATE)) == null ? "" : cursor.getString(cursor.getColumnIndex(DATE));
+		Long date = cursor.getLong(cursor.getColumnIndex(DATE));
 		setUnread(unread);
 		setDate(date);
 	}

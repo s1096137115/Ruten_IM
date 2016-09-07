@@ -24,9 +24,9 @@ public class GroupManager extends BaseManager<Room, GroupListener> {
 	}
 
 	@Override
-	public Room getItem(String gid) {
+	public Room getItem(String rid) {
 		for (Room room : mList) {
-			if(room.getRid().equals(gid)){
+			if(room.getRid().equals(rid)){
 				return room;
 			}
 		}
@@ -39,19 +39,23 @@ public class GroupManager extends BaseManager<Room, GroupListener> {
 	}
 
 	@Override
-	public boolean contains(Room item) {
-		for(Room room : mList){
-			if(room.equals(item)){
-				return true;
+	public void setItem(Room item) {
+		for (int i = 0; i < mList.size(); i++) {
+			if(mList.get(i).getRid().equals(item.getRid())){
+				mList.set(i, item);
 			}
 		}
-		return false;
 	}
 
 	@Override
-	public boolean contains(String gid) {
+	public boolean contains(Room item) {
+		return mList.contains(item);
+	}
+
+	@Override
+	public boolean contains(String rid) {
 		for(Room room : mList){
-			if(room.getRid().equals(gid)){
+			if(room.getRid().equals(rid)){
 				return true;
 			}
 		}

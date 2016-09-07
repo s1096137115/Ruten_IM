@@ -39,6 +39,15 @@ public class RosterManager extends BaseManager<RosterEntry, RosterListener> {
 	}
 
 	@Override
+	public void setItem(RosterEntry item) {
+		for (int i = 0; i < mList.size(); i++) {
+			if(mList.get(i).getName().equals(item.getName())){
+				mList.set(i, item);
+			}
+		}
+	}
+
+	@Override
 	public boolean contains(RosterEntry item) {
 		for(RosterEntry entry : mList){
 			if(entry.equals(item)){

@@ -7,4 +7,6 @@ public interface ServiceListener extends Listener {
 
 	void onServeiceResponse(ServiceEvent event);
 
+	String getName();
+
 }

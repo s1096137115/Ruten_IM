@@ -14,6 +14,8 @@ public interface Manager<T> {
 
 	void setList(List<T> list);
 
+	void setItem(T item);
+
 	boolean contains(T item);
 
 	boolean contains(String value);

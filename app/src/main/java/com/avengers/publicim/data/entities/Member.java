@@ -19,6 +19,8 @@ public class Member implements Serializable{
 
 	public static final String INVITOR = "invitor";
 
+	public static final String READ_TIME = "read_time";
+
 	public static final String RID = "rid";
 
 	public static final String CREATE_SQL =
@@ -27,6 +29,7 @@ public class Member implements Serializable{
 					+ USER + " VARCHAR(30), "
 					+ INVITOR + " VARCHAR(30), "
 					+ RID + " VARCHAR(50), "
+					+ READ_TIME + " TIMESTAMP, "
 					+ "PRIMARY KEY (" + USER + "," + RID + ") "
 					+ ") ";
 
@@ -40,13 +43,20 @@ public class Member implements Serializable{
 	@SerializedName("invitor")
 	private String invitor;
 
+	@SerializedName("read_time")
+	private long read_time;
+
 	private String rid;
 
-	private Member(String user, String invitor, String role, String rid) {
+	public Member(String user, String invitor, String role, long read_time, String rid) {
 		this.user = user;
 		this.invitor = invitor;
 		this.role = role;
+		this.read_time = read_time;
 		this.rid = rid;
+	}
+
+	public Member(){
 	}
 
 	public static Member newInstance(Cursor cursor){
@@ -54,16 +64,18 @@ public class Member implements Serializable{
 				cursor.getString(cursor.getColumnIndexOrThrow(USER)),
 				cursor.getString(cursor.getColumnIndexOrThrow(INVITOR)),
 				cursor.getString(cursor.getColumnIndexOrThrow(ROLE)),
+				cursor.getLong(cursor.getColumnIndexOrThrow(READ_TIME)),
 				cursor.getString(cursor.getColumnIndexOrThrow(RID))
 		);
 	}
 
 	public ContentValues getContentValues(){
 		ContentValues values = new ContentValues();
-		values.put(ROLE, getRole());
-		values.put(USER, getUser());
-		values.put(INVITOR, getInvitor());
-		values.put(RID, getRid());
+		if(getRole() != null) values.put(ROLE, getRole());
+		if(getUser() != null) values.put(USER, getUser());
+		if(getInvitor() != null) values.put(INVITOR, getInvitor());
+		if(getRead_time() != null) values.put(READ_TIME, getRead_time());
+		if(getRid() != null) values.put(RID, getRid());
 		return values;
 	}
 
@@ -97,6 +109,14 @@ public class Member implements Serializable{
 
 	public void setUser(String user) {
 		this.user = user;
+	}
+
+	public Long getRead_time() {
+		return read_time;
+	}
+
+	public void setRead_time(long read_time) {
+		this.read_time = read_time;
 	}
 
 	@Override

@@ -94,4 +94,9 @@ public class ChatListFragment extends BaseFragment implements RoomListener {
 	public void onServeiceResponse(ServiceEvent event) {
 
 	}
+
+	@Override
+	public String getName() {
+		return null;
+	}
 }

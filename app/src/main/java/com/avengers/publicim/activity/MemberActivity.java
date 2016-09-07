@@ -20,7 +20,7 @@ public class MemberActivity extends BaseActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_member);
-		getContact();
+		getData();
 		setToolbar();
 		mMemberAdapter = new MemberAdapter(this, ((Room)mContact).getMembers());
 		setRecyclerView(mMemberAdapter);
@@ -40,7 +40,7 @@ public class MemberActivity extends BaseActivity {
 		mRecyclerView.setAdapter(adapter);
 	}
 
-	private void getContact(){
+	private void getData(){
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
 			mContact = (Contact)bundle.getSerializable(Contact.Type.CONTACT);
@@ -50,5 +50,10 @@ public class MemberActivity extends BaseActivity {
 	@Override
 	public void onServeiceResponse(ServiceEvent event) {
 
+	}
+
+	@Override
+	public String getName() {
+		return null;
 	}
 }

@@ -17,7 +17,6 @@ import com.avengers.publicim.data.callback.RosterListener;
 import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.utils.ItemClickSupport;
-import com.avengers.publicim.utils.PreferenceHelper;
 
 
 public class RosterFragment extends BaseFragment implements RosterListener, GroupListener{
@@ -85,8 +84,9 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 			@Override
 			public void onClick(View view) {
 				refresh();
-//				mIMService.sendGetUser2(GetUser.Type.ID, "test02");
-				mIMService.sendGetMessage(PreferenceHelper.UpdateStatus.getUpdateTime(), null);
+//				mIMService.sendGetUser(GetUser.Type.ID, "test02");
+//				mIMService.sendGetMessage(PreferenceHelper.UpdateStatus.getUpdateTime(), null);
+//				mIMService.sendGetMessageRead();
 			}
 		});
 	}
@@ -119,5 +119,10 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 	@Override
 	public void onServeiceResponse(ServiceEvent event) {
 
+	}
+
+	@Override
+	public String getName() {
+		return null;
 	}
 }

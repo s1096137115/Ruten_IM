@@ -1,12 +1,10 @@
 package com.avengers.publicim.conponent;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
@@ -25,11 +23,6 @@ public class DbHelper extends SQLiteOpenHelper{
 	final private static String _DB_DATABASE_NAME = "IMDatabase.db"; //todo "user name" + IMDatabase
 	private static DbHelper instance = null;
 
-	public static class IntBoolean {
-		public static final int TRUE = 1;
-		public static final int FALSE = 0;
-	}
-
 	public DbHelper(Context context) {
 		super(context, _DB_DATABASE_NAME, null, _DB_VERSION);
 	}
@@ -44,7 +37,7 @@ public class DbHelper extends SQLiteOpenHelper{
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(RosterEntry.CREATE_SQL);
-		db.execSQL(Chat.CREATE_SQL);
+//		db.execSQL(Chat.CREATE_SQL);
 		db.execSQL(Message.CREATE_SQL);
 		db.execSQL(Room.CREATE_SQL);
 		db.execSQL(Member.CREATE_SQL);
@@ -70,10 +63,30 @@ public class DbHelper extends SQLiteOpenHelper{
 
 	public Cursor getContentOfRooms(){
 		SQLiteDatabase db = getWritableDatabase();
-		String SQL_SEL = String.format("SELECT * FROM (SELECT *,MAX(msg.date) last,SUM(msg.read = 0)unread " +
-				"FROM %s msg GROUP BY msg.rid)info, %s c " +
-				"WHERE info.rid = c.rid ORDER BY info.last DESC",
-				Message.TABLE_NAME, Room.TABLE_NAME);
+//		String SQL_SEL = String.format("SELECT * FROM (SELECT *,MAX(msg.date) last,SUM(msg.read = 0)unread " +
+//				"FROM %s msg GROUP BY msg.rid)info, %s c " +
+//				"WHERE info.rid = c.rid ORDER BY info.last DESC",
+//				Message.TABLE_NAME, Room.TABLE_NAME);
+		String SQL_SEL = String.format(
+				"SELECT count(CASE WHEN msg.date < mem.read_time THEN 1 ELSE NULL END) %s, * " +
+				"FROM %s msg, %s mem, %s r " +
+				"WHERE msg.rid = mem.rid " +
+				"AND msg.rid = r.rid " +
+				"GROUP BY msg.rid",
+				Room.UNREAD, Message.TABLE_NAME, Member.TABLE_NAME, Room.TABLE_NAME);
+		return db.rawQuery(SQL_SEL, null);
+	}
+
+	public Cursor getContentOfRoom(String rid){
+		SQLiteDatabase db = getWritableDatabase();
+		String SQL_SEL = String.format(
+				"SELECT count(CASE WHEN msg.date < mem.read_time THEN 1 ELSE NULL END) %s, * " +
+						"FROM %s msg, %s mem, %s r " +
+						"WHERE msg.rid =" + rid +
+						"AND mem.rid =" + rid +
+						"AND r.rid =" + rid +
+						"GROUP BY msg.rid",
+				Room.UNREAD, Message.TABLE_NAME, Member.TABLE_NAME, Room.TABLE_NAME);
 		return db.rawQuery(SQL_SEL, null);
 	}
 
@@ -165,13 +178,13 @@ public class DbHelper extends SQLiteOpenHelper{
 		db.update(Message.TABLE_NAME, message.getContentValues(), whereSql, null);
 	}
 
-	public void updateMessageofRead(Room room, int read){
-		SQLiteDatabase db = getWritableDatabase();
-		ContentValues values = new ContentValues();
-		values.put(Message.READ, read);
-		String whereSql = String.format("%s = '%s'", Message.RID, room.getRid());
-		db.update(Message.TABLE_NAME, values, whereSql, null);
-	}
+//	public void updateMessageofRead(Room room, int read){
+//		SQLiteDatabase db = getWritableDatabase();
+//		ContentValues values = new ContentValues();
+//		values.put(Message.READ, read);
+//		String whereSql = String.format("%s = '%s'", Message.RID, room.getRid());
+//		db.update(Message.TABLE_NAME, values, whereSql, null);
+//	}
 
 	public void updateRoom(Room room){
 		SQLiteDatabase db = getWritableDatabase();

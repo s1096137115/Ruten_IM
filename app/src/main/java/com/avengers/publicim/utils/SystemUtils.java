@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.avengers.publicim.conponent.IMApplication;
-import com.avengers.publicim.data.Constants;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -67,8 +66,8 @@ public class SystemUtils {
 		}
 	}
 
-	public static String getDate(long timestamp){
-		SimpleDateFormat sdf = new SimpleDateFormat(Constants.SAVE_DB_SIMPLE_DATETIME_FORMAT, Locale.TAIWAN);
+	public static String getDate(long timestamp,String type){
+		SimpleDateFormat sdf = new SimpleDateFormat(type, Locale.TAIWAN);
 		return sdf.format(new Date(timestamp));
 	}
 }

@@ -11,8 +11,10 @@ import android.widget.TextView;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Room;
+import com.avengers.publicim.utils.SystemUtils;
 
 import java.util.List;
 
@@ -53,11 +55,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 			title = mRooms.get(position).getName();
 		}
 		holder.mTitle.setText(title);
-		holder.mDate.setText(mRooms.get(position).getDate());
-//		holder.mContent.setText(mRooms.get(position).getLastMsg().getContent());
-//		holder.mUnread.setText(String.valueOf(mRooms.get(position).getUnread()));
-//		int visible = mRooms.get(position).getUnread() == 0 ? View.GONE : View.VISIBLE;
-//		holder.mUnread.setVisibility(visible);
+		holder.mDate.setText(SystemUtils.getDate(mRooms.get(position).getDate(), Constants.WEEK_DATETIME));
+		holder.mContent.setText(mRooms.get(position).getLastMsg().getContext());
+		holder.mUnread.setText(String.valueOf(mRooms.get(position).getUnread()));
+		int visible = mRooms.get(position).getUnread() == 0 ? View.GONE : View.VISIBLE;
+		holder.mUnread.setVisibility(visible);
 	}
 
 	@Override

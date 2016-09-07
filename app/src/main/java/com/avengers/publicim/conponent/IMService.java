@@ -3,6 +3,7 @@ package com.avengers.publicim.conponent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
@@ -12,6 +13,7 @@ import android.widget.Toast;
 import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.action.CreateRoom;
 import com.avengers.publicim.data.action.GetMessage;
+import com.avengers.publicim.data.action.GetMesssgeRead;
 import com.avengers.publicim.data.action.GetRoom;
 import com.avengers.publicim.data.action.GetRoster;
 import com.avengers.publicim.data.action.GetUser;
@@ -22,12 +24,14 @@ import com.avengers.publicim.data.callback.ServiceListener;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
+import com.avengers.publicim.data.entities.MessageRead;
 import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.GsonUtils;
 import com.avengers.publicim.utils.PreferenceHelper;
+import com.avengers.publicim.utils.SystemUtils;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
@@ -80,9 +84,9 @@ public class IMService extends Service {
 		socket.on(Socket.EVENT_RECONNECTING, onConnectError);
 		socket.on(Constants.Socket.EVENT_RESPONSE, onResponse);
 		socket.on(Constants.Socket.EVENT_RECEIVE_MESSAGE, onReceiveMessage);
-		socket.on(Constants.Socket.EVENT_RECEIVE_ROOM_MESSAGE, onReceiveMessage);
 		socket.on(Constants.Socket.EVENT_RECEIVE_PRESENCE, onReceivePresence);
 		socket.on(Constants.Socket.EVENT_RECEIVE_INVITE, onReceiveInvite);
+		socket.on(Constants.Socket.EVENT_RECEIVE_MESSAGE_READ, onReceiveMessageRead);
 	}
 
 	public void addListener(ServiceListener listener){
@@ -99,8 +103,26 @@ public class IMService extends Service {
 
 	public void addMessage(Message message){
 		mDB.insertMessage(message);
-		getMessageManager().change();
+		getMessageManager().add(message);
 		getRoomManager().reload();
+	}
+
+	public void addMessages(List<Message> list){
+		//確保成功寫入後才會callback到listener
+		List<Message> list2 = new ArrayList<>();
+		for (Message message : list) {
+			long value = mDB.insertMessage(message);
+			if(value != -1){
+				list2.add(message);
+			}
+		}
+		if(list.isEmpty()) {
+			PreferenceHelper.UpdateStatus.setUpdateTime(System.currentTimeMillis());
+		}else{
+			getMessageManager().add(list2);
+			getRoomManager().reload();
+			sendGetMessage(list.get(list.size() -1).getDate(), null);
+		}
 	}
 
 	public void addRoom(Room room){
@@ -149,7 +171,7 @@ public class IMService extends Service {
 		getRosterManager().reload();
 	}
 
-	public void updateRoom(List<Room> listNew){
+	public void updateRooms(List<Room> listNew){
 		List<Room> listOld = getGroupManager().getList();
 		List<Room>[] list = categorize(listNew,listOld);
 		if(list[MODIFY_NEW].isEmpty() && list[MODIFY_OLD].isEmpty()) return;
@@ -188,10 +210,18 @@ public class IMService extends Service {
 			}
 			mDB.deleteRoom(room);
 			mDB.deleteMessages(room.getRid());
+			for (ServiceListener listener : mServiceListener) {
+				if(listener.getName().equals("ChatActivity")){
+					ServiceEvent event = new ServiceEvent(ServiceEvent.EVENT_CLOSE_ACTIVITY, listener);
+					Bundle bundle = new Bundle();
+					bundle.putString(Room.RID, room.getRid());
+					event.setBundle(bundle);
+					listener.onServeiceResponse(event);
+				}
+			}
 		}
 		getGroupManager().reload();
 		getRoomManager().reload();
-		getMessageManager().change();
 	}
 
 	public <T> List[] categorize(List<T> listNew, List<T> listOld){
@@ -237,29 +267,14 @@ public class IMService extends Service {
 
 	public void updateMessage(Message message){
 		mDB.updateMessage(message);
-		getMessageManager().change();
+		getMessageManager().update(message);
 	}
 
-	public void updateMessages(List<Message> list){
-		for (Message message : list) {
-			mDB.insertMessage(message);
-		}
-		getMessageManager().change();
-		getRoomManager().reload();
-
-		if(list.size() == 0) {
-			PreferenceHelper.UpdateStatus.setUpdateTime(System.currentTimeMillis());
-		}else{
-			sendGetMessage(list.get(list.size() -1).getDate(), null);
-		}
-	}
-
-	public void updateMessageOfRead(Room room, int read){
-		mDB.updateMessageofRead(room, read);
-	}
+//	public void updateMessageOfRead(Room room, int read){
+//		mDB.updateMessageofRead(room, read);
+//	}
 
 	public void updateMessageOfMid(){
-
 	}
 
 	public void deleteRoom(Room room){
@@ -288,10 +303,35 @@ public class IMService extends Service {
 		mSocket.emit(Constants.Socket.EVENT_SEND_MESSAGE, obj, new Ack() {
 			@Override
 			public void call(Object... args) {
-				String errorMessage = (String) args[0];
-				String mid = String.valueOf(args[1]);
+				if(args[0] != null){
+					String errorMessage = args[0].toString();
+					Log.d(TAG, errorMessage);
+					return;
+				}
+				String mid = args[1].toString();
+				long date = Long.valueOf(args[2].toString());
 				message.setMid(mid);
+				message.setDate(date);
+				message.setFrom(IMApplication.getUser());
+//				message.setRead(Message.Read.TRUE);
 				addMessage(message);
+			}
+		});
+	}
+
+	public void sendMessageRead(String rid, long date){
+		MessageRead messageRead = new MessageRead();
+		messageRead.setRid(rid);
+		messageRead.setDate(date);
+		final JSONObject obj = GsonUtils.toJSONObject(messageRead);
+		mSocket.emit(Constants.Socket.EVENT_SEND_MESSAGE_READ, obj, new Ack() {
+			@Override
+			public void call(Object... args) {
+				if(args[0] != null){
+					String errorMessage = args[0].toString();
+					Log.d(TAG, errorMessage);
+					return;
+				}
 			}
 		});
 	}
@@ -304,7 +344,11 @@ public class IMService extends Service {
 			mSocket.emit(Constants.Socket.EVENT_SEND_PRESENCE, obj, new Ack() {
 				@Override
 				public void call(Object... args) {
-					String errorMessage = (String) args[0];
+					if(args[0] != null){
+						String errorMessage = args[0].toString();
+						Log.d(TAG, errorMessage);
+						return;
+					}
 				}
 			});
 		} catch (Exception e) {
@@ -323,6 +367,7 @@ public class IMService extends Service {
 			public void call(Object... args) {
 				if(args[0] != null){
 					String errorMessage = args[0].toString();
+					Log.d(TAG, errorMessage);
 					return;
 				}
 				if(invite.getType().equals(Invite.Type.FRIEND)){
@@ -351,7 +396,7 @@ public class IMService extends Service {
 		setRoomMemberRole.setTarget(target);
 		setRoomMemberRole.setRole(role);
 		final JSONObject obj = GsonUtils.toJSONObject(setRoomMemberRole);
-		mSocket.emit("request", obj);
+		mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
 	}
 
 	/**
@@ -365,7 +410,7 @@ public class IMService extends Service {
 		setRoster.setUser(user);
 		setRoster.setRelationship(relationship);
 		final JSONObject obj = GsonUtils.toJSONObject(setRoster);
-		mSocket.emit("request", obj);
+		mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
 	}
 
 	/**
@@ -381,26 +426,14 @@ public class IMService extends Service {
 		getUser.setType(type);
 		getUser.setKey(key);
 		final JSONObject obj = GsonUtils.toJSONObject(getUser);
-		mSocket.emit("request", obj);
-	}
-
-	public void sendGetUser2(String type, String key){
-		try {
-			JSONObject obj = new JSONObject();
-			obj.put("action", Constants.Socket.EVENT_GET_USER);
-//			obj.put("type", type);
-			obj.put("key", key);
-			mSocket.emit("request", obj);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
 	}
 
 	public void sendGetSyncData(){
 		try {
 			JSONObject obj = new JSONObject();
 			obj.put("action", Constants.Socket.EVENT_GET_SYNC_DATA);
-			mSocket.emit("request", obj);
+			mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -410,7 +443,7 @@ public class IMService extends Service {
 		try {
 			JSONObject obj = new JSONObject();
 			obj.put("action", Constants.Socket.EVENT_GET_ROSTER);
-			mSocket.emit("request", obj);
+			mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -422,14 +455,14 @@ public class IMService extends Service {
 		createRoom.setName(name);
 		createRoom.setType(type);
 		final JSONObject obj = GsonUtils.toJSONObject(createRoom);
-		mSocket.emit("request", obj);
+		mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
 	}
 
 	public void sendGetRoom(){
 		try {
 			JSONObject obj = new JSONObject();
 			obj.put("action", Constants.Socket.EVENT_GET_ROOM);
-			mSocket.emit("request", obj);
+			mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -440,13 +473,22 @@ public class IMService extends Service {
 	 * @param rid
 	 */
 	public void sendGetMessage(long date, String rid){
+		String str = SystemUtils.getDate(date, Constants.LONG_DATETIME);
 		GetMessage getMessage = new GetMessage();
 		getMessage.setAction(Constants.Socket.EVENT_GET_MESSAGE);
 		getMessage.setType(GetMessage.Type.BELOW);
 		getMessage.setDate(date);
 		getMessage.setRid(rid);
 		final JSONObject obj = GsonUtils.toJSONObject(getMessage);
-		mSocket.emit("request", obj);
+		mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
+	}
+
+	public void sendGetMessageRead(){
+		GetMesssgeRead getMessageRead = new GetMesssgeRead();
+		getMessageRead.setAction(Constants.Socket.EVENT_GET_MESSAGE_READ);
+		getMessageRead.setDate(System.currentTimeMillis());
+		final JSONObject obj = GsonUtils.toJSONObject(getMessageRead);
+		mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
 	}
 
 	//---------------------------------------------------------------------------------------------------------------------------------
@@ -484,7 +526,7 @@ public class IMService extends Service {
 
 	public void receiveGetRoom(String data){
 		GetRoom getRoom = GsonUtils.fromJson(data, GetRoom.class);
-		updateRoom(getRoom.getRooms());
+		updateRooms(getRoom.getRooms());
 	}
 
 	public void receiveCreateRoom(String data){
@@ -502,7 +544,12 @@ public class IMService extends Service {
 
 	public void receiveGetMessage(String data){
 		GetMessage getMessage = GsonUtils.fromJson(data, GetMessage.class);
-		updateMessages(getMessage.getMessages());
+		addMessages(getMessage.getMessages());
+	}
+
+	public void receiveGetMessageRead(String data){
+		GetMesssgeRead getMessageRead = GsonUtils.fromJson(data, GetMesssgeRead.class);
+		int i = 0;
 	}
 
 	@Override
@@ -542,6 +589,7 @@ public class IMService extends Service {
 						Boolean state = (Boolean)args[1];
 
 //						sendGetSyncData();
+						sendGetMessage(PreferenceHelper.UpdateStatus.getUpdateTime(), null);
 						sendGetRoster();
 						sendGetRoom();
 						sendPresence(IMApplication.getPresence());
@@ -596,6 +644,8 @@ public class IMService extends Service {
 					receiveGetUser(args[0].toString());
 				}else if(action.equals(Constants.Socket.EVENT_GET_MESSAGE)){
 					receiveGetMessage(args[0].toString());
+				}else if(action.equals(Constants.Socket.EVENT_GET_MESSAGE_READ)){
+					receiveGetMessageRead(args[0].toString());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -611,6 +661,7 @@ public class IMService extends Service {
 		public void call(final Object... args) {
 			Log.d(TAG, args[0].toString());
 			Message message = GsonUtils.fromJson(args[0].toString(), Message.class);
+			//原device不處理，其他device跟進
 			if(message.getFrom().equals(IMApplication.getUser())) return;
 			addMessage(message);
 		}
@@ -655,6 +706,22 @@ public class IMService extends Service {
 			}else if(invite.getType().equals(Invite.Type.ROOM)){
 				sendGetRoom();
 			}
+		}
+	};
+
+	private Emitter.Listener onReceiveMessageRead = new Emitter.Listener() {
+		@Override
+		public void call(final Object... args) {
+			Log.d(TAG, args[0].toString());
+			MessageRead messageRead = GsonUtils.fromJson(args[0].toString(), MessageRead.class);
+			if(messageRead.getFrom().equals(IMApplication.getUser())) return;
+			Member member = new Member();
+			member.setUser(messageRead.getFrom().getName());
+			member.setRid(messageRead.getRid());
+			member.setRead_time(messageRead.getDate());
+			mDB.updateMember(member);
+			getRoomManager().reload();
+//			getMessageManager().update(messageRead.getMessages());
 		}
 	};
 

@@ -37,6 +37,11 @@ public class ChatManager extends BaseManager<Chat, ChatListener> {
 		mList = list;
 	}
 
+	@Override
+	public void setItem(Chat item) {
+
+	}
+
 	public void setList(Cursor cursor){
 		mList.clear();
 		while(cursor.moveToNext()){

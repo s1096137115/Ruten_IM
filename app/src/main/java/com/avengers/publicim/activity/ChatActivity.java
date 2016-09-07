@@ -14,23 +14,26 @@ import android.widget.ImageButton;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.ChatAdapter;
-import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMApplication;
 import com.avengers.publicim.data.callback.MessageListener;
+import com.avengers.publicim.data.callback.RoomListener;
 import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
+import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.utils.SystemUtils;
 
+import java.util.List;
+
 import static com.avengers.publicim.conponent.IMApplication.getProgress;
 import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 
-public class ChatActivity extends BaseActivity implements MessageListener{
+public class ChatActivity extends BaseActivity implements MessageListener, RoomListener{
 	private RecyclerView mRecyclerView;
 	private ChatAdapter mChatAdapter;
 	private RosterEntry mEntry;
-//	private Room mRoom;
+	private Room mRoom;
 	private Contact mContact;
 //	private Chat mChat;
 
@@ -43,27 +46,16 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		setContentView(R.layout.activity_chat);
 		mSendButton = (ImageButton) findViewById(R.id.textSendButton);
 		mTextInput = (EditText) findViewById(R.id.textInput);
-		getContact();
+		getData();
 		setToolbar();
-		mChatAdapter = new ChatAdapter(ChatActivity.this, mDB.getMessages(mContact));
+		mChatAdapter = new ChatAdapter(ChatActivity.this, mDB.getMessages(mContact), mRoom);
 		setRecyclerView();
 
 		mSendButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-//				Message message = null;
-//				if(mContact instanceof RosterEntry){
-//					message = new Message(null, IMApplication.getUser(), ((RosterEntry)mContact).getUser(), "",
-//							Message.Type.TEXT, mTextInput.getText().toString(), SystemUtils.getDateTime(),
-//							((RosterEntry)mContact).getUser().getName(), DbHelper.IntBoolean.TRUE);
-//				}else if(mContact instanceof Room){
-//					message = new Message(null, IMApplication.getUser(), User.newInstance("",""), ((Room)mContact).getRid(),
-//							Message.Type.TEXT, mTextInput.getText().toString(), SystemUtils.getDateTime(),
-//							((Room)mContact).getRid(), DbHelper.IntBoolean.TRUE);
-//				}
-//				if(message != null){
-//					mIMService.sendMessage(message);
-//				}
+				Message message = new Message(mContact.getRid(), Message.Type.TEXT, mTextInput.getText().toString());
+				mIMService.sendMessage(message);
 
 				//adjust UI
 				mTextInput.getText().clear();
@@ -72,10 +64,11 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		});
 	}
 
-	public void getContact(){
+	public void getData(){
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
 			mContact = (Contact)bundle.getSerializable(Contact.Type.CONTACT);
+			mRoom = getRoomManager().getItem(mContact.getRid());
 		}
 	}
 
@@ -87,7 +80,6 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		if(mContact != null){
 			getSupportActionBar().setTitle(mContact.getName());
 		}
-
 	}
 
 	public void setRecyclerView(){
@@ -100,9 +92,9 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 	@Override
 	protected void onBackendConnected() {
 		super.onBackendConnected();
-		if(mChatAdapter.hasUnread()){
-				mIMService.updateMessageOfRead((Room)mContact, DbHelper.IntBoolean.TRUE);
-			getRoomManager().reload();
+		//hasUnread
+		if(mRoom.getUnread() > 0){
+			mIMService.sendMessageRead(mContact.getRid(), System.currentTimeMillis());
 		}
 	}
 
@@ -145,9 +137,10 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		return true;
 	}
 
-	@Override
+
 	public void onMessageUpdate() {
-		mIMService.updateMessageOfRead((Room)mContact, DbHelper.IntBoolean.TRUE);
+//		mIMService.updateMessageOfRead((Room)mContact, Message.Read.TRUE);
+		mIMService.sendMessageRead(mContact.getRid(), System.currentTimeMillis());
 		mChatAdapter.update(mDB.getMessages(mContact));
 		mChatAdapter.refresh();
 		mHandler.post(new Runnable() {
@@ -161,13 +154,71 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 
 	@Override
 	public void onServeiceResponse(ServiceEvent event) {
-		if(this == event.toListener()){
+		if(this == event.getListener()){
 			switch (event.getEvent()){
 				case ServiceEvent.EVENT_CLOSE_DIALOG:
 					getProgress().dismiss();
 					finish();
 					break;
+				case ServiceEvent.EVENT_CLOSE_ACTIVITY:
+					String rid = event.getBundle().getString(Room.RID);
+					if(rid.equals(mContact.getRid())) finish();
 			}
 		}
+	}
+
+	@Override
+	public String getName() {
+		return "ChatActivity";
+	}
+
+	@Override
+	public void onMessageAddition(Message message) {
+		mIMService.sendMessageRead(mContact.getRid(), System.currentTimeMillis());
+		mChatAdapter.add(message);
+		mChatAdapter.refresh();
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				mRecyclerView.scrollToPosition(mChatAdapter.getItemCount()-1);
+			}
+		});
+	}
+
+	@Override
+	public void onMessagesAddition(List<Message> list) {
+		boolean update = false;
+		for (Message message: list) {
+			if(message.getRid().equals(mRoom.getRid())){
+				mChatAdapter.add(message);
+				update = true;
+			}
+		}
+		if(!update) return; //如果沒有新增到該房間的資料就return
+		mIMService.sendMessageRead(mContact.getRid(), System.currentTimeMillis());
+		mChatAdapter.refresh();
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				mRecyclerView.scrollToPosition(mChatAdapter.getItemCount()-1);
+			}
+		});
+	}
+
+	@Override
+	public void onMessageUpdate(Message message) {
+
+	}
+
+	@Override
+	public void onMessagesUpdate(List<Message> list) {
+
+	}
+
+	@Override
+	public void onRoomUpdate() {
+		mRoom = getRoomManager().getItem(mContact.getRid());
+		mChatAdapter.update(mRoom);
+		mChatAdapter.refresh();
 	}
 }
