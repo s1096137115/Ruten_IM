@@ -2,11 +2,12 @@ package com.avengers.publicim.data.Manager;
 
 import android.content.Context;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 
 import com.avengers.publicim.conponent.DbHelper;
-import com.avengers.publicim.data.callback.Listener;
+import com.avengers.publicim.data.event.ServiceEvent;
+import com.avengers.publicim.data.listener.Listener;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -14,25 +15,29 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * Created by D-IT-MAX2 on 2016/6/21.
  */
-public abstract class BaseManager<T,E extends Listener> implements Manager<T>{
+public abstract class BaseManager<T,L extends Listener>{
 	protected DbHelper mDB;
 
 	protected Handler mHandler;
 
-	protected List<T> mList = new ArrayList<>();
-
-	protected Set<E> mListeners = new CopyOnWriteArraySet<>();
+	protected Set<L> mListeners = new CopyOnWriteArraySet<>();
 
 	public BaseManager(Context context) {
 		mDB = DbHelper.getInstance(context);
 		mHandler = new Handler();
 	}
 
-	public void addListener(E listener){
+	public void addListener(L listener){
 		mListeners.add(listener);
 	}
 
-	public void removeListener(E listener){
+	public void removeListener(L listener){
 		mListeners.remove(listener);
 	}
+
+	public abstract List<T> getList(@NonNull String type);
+
+	public abstract T getItem(@NonNull String type, @NonNull String value);
+
+	public abstract void notify(@NonNull ServiceEvent event);
 }

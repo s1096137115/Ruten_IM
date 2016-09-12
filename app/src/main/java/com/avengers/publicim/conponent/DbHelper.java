@@ -61,23 +61,32 @@ public class DbHelper extends SQLiteOpenHelper{
 		return roster;
 	}
 
-	public Cursor getContentOfRooms(){
+	public ArrayList<Room> getChatOfRooms(){
 		SQLiteDatabase db = getWritableDatabase();
 //		String SQL_SEL = String.format("SELECT * FROM (SELECT *,MAX(msg.date) last,SUM(msg.read = 0)unread " +
 //				"FROM %s msg GROUP BY msg.rid)info, %s c " +
 //				"WHERE info.rid = c.rid ORDER BY info.last DESC",
 //				Message.TABLE_NAME, Room.TABLE_NAME);
 		String SQL_SEL = String.format(
-				"SELECT count(CASE WHEN msg.date < mem.read_time THEN 1 ELSE NULL END) %s, * " +
+				"SELECT count(CASE WHEN msg.date < mem.read_time THEN 1 ELSE NULL END) %s, MAX(msg.date) last, * " +
 				"FROM %s msg, %s mem, %s r " +
 				"WHERE msg.rid = mem.rid " +
 				"AND msg.rid = r.rid " +
-				"GROUP BY msg.rid",
+				"GROUP BY msg.rid " +
+				"ORDER BY last DESC",
 				Room.UNREAD, Message.TABLE_NAME, Member.TABLE_NAME, Room.TABLE_NAME);
-		return db.rawQuery(SQL_SEL, null);
+		Cursor cursor = db.rawQuery(SQL_SEL, null);
+		ArrayList<Room> list = new ArrayList<>();
+		while(cursor.moveToNext()){
+			Room room = Room.newInstance(cursor);
+			room.setInfo(cursor);
+			room.setMembers(getMembers(room));
+			list.add(room);
+		}
+		return list;
 	}
 
-	public Cursor getContentOfRoom(String rid){
+	public Cursor getChatOfRoom(String rid){
 		SQLiteDatabase db = getWritableDatabase();
 		String SQL_SEL = String.format(
 				"SELECT count(CASE WHEN msg.date < mem.read_time THEN 1 ELSE NULL END) %s, * " +

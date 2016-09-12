@@ -13,6 +13,6 @@
 	<string name="title_activity_invite">InviteActivity</string>
 	<string name="title_activity_member">MemberActivity</string>
 
-	<string name="msg_read_count">"已讀" + %d</string>
+	<string name="msg_read_count">"已讀" %d</string>
 	<string name="msg_read">"已讀"</string>
 </resources>

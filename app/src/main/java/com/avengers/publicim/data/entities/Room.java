@@ -70,8 +70,20 @@ public class Room extends Contact implements Serializable {
 
 	public class Type{
 		public static final String SINGLE = "single";
+
 		public static final String GROUP = "group";
+
 		public static final String MULTIPLE = "multiple";
+
+		/**
+		 * local type - has messages of rooms
+		 */
+		public static final String CHAT = "chat";
+
+		/**
+		 * local type - all of rooms
+		 */
+		public static final String ALL = "all";
 	}
 
 	@SerializedName("rid")

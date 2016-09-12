@@ -20,7 +20,7 @@ import com.avengers.publicim.data.entities.RosterEntry;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
+import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
 /**
@@ -151,8 +151,8 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 	}
 
 	public void update(){
-		mRooms = getGroupManager().getList();
-		mRoster = getRosterManager().getList();
+		mRooms = getRoomManager().getList(Room.Type.GROUP);
+		mRoster = getRosterManager().getList(RosterEntry.Type.ROSTER);
 		mContacts.clear();
 		mContacts.add(mHeader.get(GROUPS));
 		mContacts.addAll(mRooms);

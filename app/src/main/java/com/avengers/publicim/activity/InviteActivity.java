@@ -9,7 +9,8 @@ import android.widget.Button;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.InviteAdapter;
-import com.avengers.publicim.data.callback.ServiceEvent;
+import com.avengers.publicim.data.entities.Room;
+import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.RosterEntry;
@@ -17,6 +18,7 @@ import com.avengers.publicim.data.entities.RosterEntry;
 import java.util.List;
 
 import static com.avengers.publicim.conponent.IMApplication.getProgress;
+import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
 public class InviteActivity extends BaseActivity{
@@ -24,13 +26,14 @@ public class InviteActivity extends BaseActivity{
     private Button mButton;
     private InviteAdapter mInviteAdapter;
     private Contact mContact;
+    private Room mRoom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invite);
         mButton = (Button)findViewById(R.id.button);
-        mInviteAdapter = new InviteAdapter(this , getRosterManager().getList());
+        mInviteAdapter = new InviteAdapter(this , getRosterManager().getList(RosterEntry.Type.ROSTER));
         getData();
         setToolbar();
         setRecyclerView(mInviteAdapter);
@@ -66,6 +69,7 @@ public class InviteActivity extends BaseActivity{
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             mContact = (Contact)bundle.getSerializable(Contact.Type.CONTACT);
+            mRoom = getRoomManager().getItem(Room.Type.ALL ,mContact.getRid());
         }
     }
 
@@ -73,7 +77,7 @@ public class InviteActivity extends BaseActivity{
     public void onServeiceResponse(ServiceEvent event) {
         if(this == event.getListener()){
             switch (event.getEvent()){
-                case ServiceEvent.EVENT_CLOSE_DIALOG:
+                case ServiceEvent.Event.CLOSE_DIALOG:
                     getProgress().dismiss();
                     finish();
                     break;

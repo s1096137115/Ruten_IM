@@ -12,11 +12,10 @@ import android.support.v7.app.AppCompatActivity;
 import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMService;
 import com.avengers.publicim.conponent.IMService.IMBinder;
-import com.avengers.publicim.data.callback.GroupListener;
-import com.avengers.publicim.data.callback.MessageListener;
-import com.avengers.publicim.data.callback.RoomListener;
-import com.avengers.publicim.data.callback.RosterListener;
-import com.avengers.publicim.data.callback.ServiceListener;
+import com.avengers.publicim.data.listener.MessageListener;
+import com.avengers.publicim.data.listener.RoomListener;
+import com.avengers.publicim.data.listener.RosterListener;
+import com.avengers.publicim.data.listener.ServiceListener;
 import com.avengers.publicim.fragment.BaseFragment;
 import com.avengers.publicim.view.DialogBuilder;
 import com.avengers.publicim.view.IMProgressDialog;
@@ -24,7 +23,6 @@ import com.avengers.publicim.view.IMProgressDialog;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
 import static com.avengers.publicim.conponent.IMApplication.getMessageManager;
 import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
@@ -100,10 +98,7 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 			getRoomManager().addListener((RoomListener) this);
 		}
 		if (this instanceof RosterListener) {
-			getRosterManager().addListener((RosterListener) this);
-		}
-		if (this instanceof GroupListener) {
-			getGroupManager().addListener((GroupListener) this);
+			getRosterManager().removeListener((RosterListener) this);
 		}
 		if (this instanceof MessageListener) {
 			getMessageManager().addMessageListener((MessageListener) this);
@@ -117,9 +112,6 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 		}
 		if (this instanceof RosterListener) {
 			getRosterManager().removeListener((RosterListener) this);
-		}
-		if (this instanceof GroupListener) {
-			getGroupManager().removeListener((GroupListener) this);
 		}
 		if (this instanceof MessageListener) {
 			getMessageManager().removeMessageListener((MessageListener) this);

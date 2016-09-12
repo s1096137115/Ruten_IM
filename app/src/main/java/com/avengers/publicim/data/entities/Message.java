@@ -2,6 +2,7 @@ package com.avengers.publicim.data.entities;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -10,7 +11,7 @@ import java.io.Serializable;
 /**
  * Created by D-IT-MAX2 on 2016/3/4.
  */
-public class Message implements Serializable {
+public class Message implements Serializable, Comparable<Message>{
 	public static final String TABLE_NAME = "message";
 
 	public static final String MID = "mid";
@@ -45,8 +46,15 @@ public class Message implements Serializable {
 
 	public class Type{
 		public static final String TEXT = "text";
+
 		public static final String IMAGE = "image";
+
 		public static final String LOG = "log";
+
+		/**
+		 * local type
+		 */
+		public static final String DATE = "date";
 	}
 
 	@SerializedName("mid")// 可以讓你的field名稱與API不同
@@ -159,5 +167,10 @@ public class Message implements Serializable {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	@Override
+	public int compareTo(@NonNull Message another) {
+		return this.getDate() < another.getDate() ? -1 : (this.getDate().equals(another.getDate()) ? 0 : 1);
 	}
 }

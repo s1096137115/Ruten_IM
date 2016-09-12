@@ -17,7 +17,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.data.callback.ServiceEvent;
+import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.User;
@@ -194,7 +194,7 @@ public class MainActivity extends BaseActivity {
 	public void onServeiceResponse(ServiceEvent event) {
 		if(this == event.getListener()){
 			switch (event.getEvent()){
-				case ServiceEvent.EVENT_CLOSE_DIALOG:
+				case ServiceEvent.Event.CLOSE_DIALOG:
 					getProgress().dismiss();
 					break;
 			}

@@ -38,12 +38,22 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	 * 收到的消息
 	 */
 	private static final int TYPE_RECEIVE = 1;
+	/**
+	 * 系統訊息
+	 */
+	private static final int TYPE_SYSTEM = 2;
+	/**
+	 * 時間訊息
+	 */
+	private static final int TYPE_DATE = 3;
 
-	public ChatAdapter(Context context, List<Message> objects, Room room) {
-		mMessages = objects;
+	public ChatAdapter(Context context, List<Message> messages, Room room) {
+		mMessages = messages;
 		mContext = context;
 		mLayoutInflater = LayoutInflater.from(context);
 		mRoom = room;
+		addDateMsg(0, mMessages.size()-1);
+		fullLoad();
 	}
 
 	@Override
@@ -56,15 +66,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 			case TYPE_SEND:
 				holder = new SelfHolder(mLayoutInflater.inflate(R.layout.view_msg_item_right, parent, false));
 				break;
+			case TYPE_SYSTEM:
+				holder = new SystemHolder(mLayoutInflater.inflate(R.layout.view_msg_system, parent, false));
+				break;
+			case TYPE_DATE:
+				holder = new DateHolder(mLayoutInflater.inflate(R.layout.view_msg_date, parent, false));
+				break;
 		}
 		return holder;
 	}
 
 	@Override
 	public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-		if(position == 1){
-			mMessages.add(1,mMessages.get(1));
-		}
 		if (holder instanceof TheOtherViewHolder) {
 			((TheOtherViewHolder) holder).mID.setText(mMessages.get(position).getFrom().getName());
 			if(mMessages.get(position).getRid().isEmpty()){
@@ -96,6 +109,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 					}
 				}
 			}
+		} else if (holder instanceof SystemHolder) {
+			((SystemHolder) holder).mContent.setText(mMessages.get(position).getContext());
+
+			String eventTime = SystemUtils.getDate(mMessages.get(position).getDate(), Constants.SHORT_DATETIME).replace(" ","\n");
+			((SystemHolder) holder).mDatetime.setText(eventTime);
+		} else if (holder instanceof DateHolder) {
+			((DateHolder) holder).mContent.setText(mMessages.get(position).getContext());
 		}
 	}
 
@@ -106,10 +126,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
 	@Override
 	public int getItemViewType(int position) {
-		String from = mMessages.get(position).getFrom().getName();
-		String name = IMApplication.getUser().getName();
-		return mMessages.get(position).getFrom().getName().equals(IMApplication.getUser().getName())
-				? TYPE_SEND : TYPE_RECEIVE;
+		if(mMessages.get(position).getType().equals(Message.Type.LOG)){
+			return TYPE_SYSTEM;
+		}else if(mMessages.get(position).getType().equals(Message.Type.DATE)){
+			return TYPE_DATE;
+		}else{
+			return mMessages.get(position).getFrom().getName().equals(IMApplication.getUser().getName())
+					? TYPE_SEND : TYPE_RECEIVE;
+		}
 	}
 
 	public void refresh(){
@@ -121,20 +145,48 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 		});
 	}
 
-	public void update(List<Message> objects){
-		mMessages = objects;
+	public void update(List<Message> messages){
+		mMessages = messages;
 	}
 
 	public void update(Room room){
 		mRoom = room;
 	}
 
+	public void loadUp(List<Message> messages){
+		mMessages.addAll(0, messages);
+		addDateMsg(0, messages.size());//更新的範團包含銜接的地方
+	}
+
 	public void add(Message message){
 		mMessages.add(message);
+		addDateMsg(mMessages.size()-2, mMessages.size()-1);
 	}
 
 	public List<Message> getData(){
 		return mMessages;
+	}
+
+	/**
+	 * 新增時間訊息，參數為區間
+	 * @param upper
+	 * @param lower
+	 */
+	private void addDateMsg(int upper, int lower){
+		if(mMessages.isEmpty()) return;
+		for (int i = lower; i > upper; i--) {
+			String previous = SystemUtils.getDate(mMessages.get(i-1).getDate(),Constants.WEEK_DATETIME);
+			String self = SystemUtils.getDate(mMessages.get(i).getDate(),Constants.WEEK_DATETIME);
+			if(!self.equals(previous)){
+				mMessages.add(i, new Message(mRoom.getRid(), Message.Type.DATE, self));
+			}
+		}
+	}
+
+	private void fullLoad(){
+		if(mMessages.isEmpty()) return;
+		mMessages.add(0, new Message(mRoom.getRid(), Message.Type.DATE,
+				SystemUtils.getDate(mMessages.get(0).getDate(),Constants.WEEK_DATETIME)));
 	}
 
 	public static class TheOtherViewHolder extends RecyclerView.ViewHolder {
@@ -166,9 +218,22 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	}
 
 	public static class SystemHolder extends RecyclerView.ViewHolder {
+		TextView mContent;
+		TextView mDatetime;
 
 		public SystemHolder(View view) {
 			super(view);
+			mContent = (TextView)view.findViewById(R.id.msg);
+			mDatetime = (TextView)view.findViewById(R.id.datetime);
+		}
+	}
+
+	public static class DateHolder extends RecyclerView.ViewHolder {
+		TextView mContent;
+
+		public DateHolder(View view) {
+			super(view);
+			mContent = (TextView)view.findViewById(R.id.msg);
 		}
 	}
 }

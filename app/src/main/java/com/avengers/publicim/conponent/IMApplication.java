@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 
 import com.avengers.publicim.data.Constants;
-import com.avengers.publicim.data.Manager.GroupManager;
 import com.avengers.publicim.data.Manager.MessageManager;
 import com.avengers.publicim.data.Manager.RoomManager;
 import com.avengers.publicim.data.Manager.RosterManager;
@@ -28,7 +27,6 @@ public class IMApplication extends Application {
 	private Socket mSocket;
 	private static RosterManager mRosterManager;
 	private static RoomManager mRoomManager;
-	private static GroupManager mGroupManager;
 	private static MessageManager mMessageManager;
 	private static IMProgressDialog mProgressDialog;
 	private static DialogBuilder mBuilder;
@@ -73,11 +71,7 @@ public class IMApplication extends Application {
 
 	private void initManager(){
 		mRosterManager = new RosterManager(mContext);
-		mRosterManager.reload();
 		mRoomManager = new RoomManager(mContext);
-		mRoomManager.reload();
-		mGroupManager = new GroupManager(mContext);
-		mGroupManager.reload();
 		mMessageManager = new MessageManager();
 	}
 
@@ -91,10 +85,6 @@ public class IMApplication extends Application {
 
 	public static RoomManager getRoomManager(){
 		return mRoomManager;
-	}
-
-	public static GroupManager getGroupManager(){
-		return mGroupManager;
 	}
 
 	public static MessageManager getMessageManager(){

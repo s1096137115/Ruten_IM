@@ -15,13 +15,12 @@ import android.widget.ImageButton;
 import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.ChatAdapter;
 import com.avengers.publicim.conponent.IMApplication;
-import com.avengers.publicim.data.callback.MessageListener;
-import com.avengers.publicim.data.callback.RoomListener;
-import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.Room;
-import com.avengers.publicim.data.entities.RosterEntry;
+import com.avengers.publicim.data.event.ServiceEvent;
+import com.avengers.publicim.data.listener.MessageListener;
+import com.avengers.publicim.data.listener.RoomListener;
 import com.avengers.publicim.utils.SystemUtils;
 
 import java.util.List;
@@ -32,10 +31,8 @@ import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 public class ChatActivity extends BaseActivity implements MessageListener, RoomListener{
 	private RecyclerView mRecyclerView;
 	private ChatAdapter mChatAdapter;
-	private RosterEntry mEntry;
 	private Room mRoom;
 	private Contact mContact;
-//	private Chat mChat;
 
 	private ImageButton mSendButton;
 	private EditText mTextInput;
@@ -68,7 +65,7 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
 			mContact = (Contact)bundle.getSerializable(Contact.Type.CONTACT);
-			mRoom = getRoomManager().getItem(mContact.getRid());
+			mRoom = getRoomManager().getItem(Room.Type.ALL ,mContact.getRid());
 		}
 	}
 
@@ -120,18 +117,18 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 		switch (id){
 			case R.id.action_view_member:
 				intent = new Intent(this, MemberActivity.class);
-				intent.putExtra(Room.RID, mContact.getRid());
+				intent.putExtra(Contact.Type.CONTACT, mContact);
 				startActivity(intent);
 				break;
 			case R.id.action_invite_group:
 				intent = new Intent(this, InviteActivity.class);
-				intent.putExtra(Room.RID, mContact.getRid());
+				intent.putExtra(Contact.Type.CONTACT, mContact);
 				startActivity(intent);
 				break;
 			case R.id.action_exit_group:
 				getProgress().setMessage("Waiting...");
 				getProgress().show();
-				mIMService.sendSetRoomMemberRole((Room) mContact, IMApplication.getUser(), Room.Role.EXIT);
+				mIMService.sendSetRoomMemberRole(mRoom, IMApplication.getUser(), Room.Role.EXIT);
 				break;
 		}
 		return true;
@@ -156,12 +153,13 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 	public void onServeiceResponse(ServiceEvent event) {
 		if(this == event.getListener()){
 			switch (event.getEvent()){
-				case ServiceEvent.EVENT_CLOSE_DIALOG:
+				case ServiceEvent.Event.CLOSE_DIALOG:
 					getProgress().dismiss();
 					finish();
 					break;
-				case ServiceEvent.EVENT_CLOSE_ACTIVITY:
+				case ServiceEvent.Event.CLOSE_ACTIVITY:
 					String rid = event.getBundle().getString(Room.RID);
+					assert rid != null;
 					if(rid.equals(mContact.getRid())) finish();
 			}
 		}
@@ -174,6 +172,7 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 
 	@Override
 	public void onMessageAddition(Message message) {
+		if(!message.getRid().equals(mRoom.getRid())) return;
 		mIMService.sendMessageRead(mContact.getRid(), System.currentTimeMillis());
 		mChatAdapter.add(message);
 		mChatAdapter.refresh();
@@ -216,9 +215,17 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 	}
 
 	@Override
-	public void onRoomUpdate() {
-		mRoom = getRoomManager().getItem(mContact.getRid());
-		mChatAdapter.update(mRoom);
-		mChatAdapter.refresh();
+	public void onRoomUpdate(ServiceEvent event) {
+		switch (event.getEvent()) {
+			case ServiceEvent.Event.GET_ROOM:
+				mRoom = getRoomManager().getItem(Room.Type.ALL ,mContact.getRid());
+				if(mRoom != null) {
+					mChatAdapter.update(mRoom);
+					mChatAdapter.refresh();
+				}else{
+					finish();
+				}
+				break;
+		}
 	}
 }
