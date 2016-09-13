@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,6 +15,7 @@ import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.ChatAdapter;
 import com.avengers.publicim.conponent.IMApplication;
 import com.avengers.publicim.data.entities.Contact;
+import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.event.ServiceEvent;
@@ -90,8 +90,13 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 	protected void onBackendConnected() {
 		super.onBackendConnected();
 		//hasUnread
-		if(mRoom.getUnread() > 0){
-			mIMService.sendMessageRead(mContact.getRid(), System.currentTimeMillis());
+		for (Member member: mRoom.getMembers()) {
+			int last = mChatAdapter.getData().size()-1;
+			//自己的已讀時間<最後一句時才送出已讀
+			if(member.getRead_time() < mChatAdapter.getData().get(last).getDate()
+					&& member.getUser().equals(IMApplication.getUser().getName())){
+				mIMService.sendMessageRead(mContact.getRid(), System.currentTimeMillis());
+			}
 		}
 	}
 
@@ -132,21 +137,6 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 				break;
 		}
 		return true;
-	}
-
-
-	public void onMessageUpdate() {
-//		mIMService.updateMessageOfRead((Room)mContact, Message.Read.TRUE);
-		mIMService.sendMessageRead(mContact.getRid(), System.currentTimeMillis());
-		mChatAdapter.update(mDB.getMessages(mContact));
-		mChatAdapter.refresh();
-		mHandler.post(new Runnable() {
-			@Override
-			public void run() {
-				mRecyclerView.scrollToPosition(mChatAdapter.getItemCount()-1);
-			}
-		});
-		Log.d("text", "onMessageUpdate: ");
 	}
 
 	@Override

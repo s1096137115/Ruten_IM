@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 
 import com.avengers.publicim.activity.BaseActivity;
 import com.avengers.publicim.conponent.DbHelper;
@@ -66,7 +67,11 @@ public abstract class BaseFragment extends Fragment implements ServiceListener{
 	}
 
 	public void unregisterListeners(){
-		mIMService.removeListener(this);
+		if(mIMService == null){
+			Log.d("test","null");
+		}else{
+			mIMService.removeListener(this);
+		}
 		if (this instanceof RoomListener) {
 			getRoomManager().removeListener((RoomListener) this);
 		}

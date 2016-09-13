@@ -87,12 +87,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 			}
 			((TheOtherViewHolder) holder).mContent.setText(mMessages.get(position).getContext());
 
-			String eventTime = SystemUtils.getDate(mMessages.get(position).getDate(), Constants.SHORT_DATETIME).replace(" ","\n");
+			String eventTime = SystemUtils.getDate(mMessages.get(position).getDate(), Constants.Date.SHORT).replace(" ","\n");
 			((TheOtherViewHolder) holder).mDatetime.setText(eventTime);
 		} else if (holder instanceof SelfHolder) {
 			((SelfHolder) holder).mContent.setText(mMessages.get(position).getContext());
 
-			String eventTime = SystemUtils.getDate(mMessages.get(position).getDate(), Constants.SHORT_DATETIME).replace(" ","\n");
+			String eventTime = SystemUtils.getDate(mMessages.get(position).getDate(), Constants.Date.SHORT).replace(" ","\n");
 			((SelfHolder) holder).mDatetime.setText(eventTime);
 
 			((SelfHolder) holder).mRead.setVisibility(View.GONE);
@@ -112,7 +112,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 		} else if (holder instanceof SystemHolder) {
 			((SystemHolder) holder).mContent.setText(mMessages.get(position).getContext());
 
-			String eventTime = SystemUtils.getDate(mMessages.get(position).getDate(), Constants.SHORT_DATETIME).replace(" ","\n");
+			String eventTime = SystemUtils.getDate(mMessages.get(position).getDate(), Constants.Date.SHORT).replace(" ","\n");
 			((SystemHolder) holder).mDatetime.setText(eventTime);
 		} else if (holder instanceof DateHolder) {
 			((DateHolder) holder).mContent.setText(mMessages.get(position).getContext());
@@ -175,8 +175,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	private void addDateMsg(int upper, int lower){
 		if(mMessages.isEmpty()) return;
 		for (int i = lower; i > upper; i--) {
-			String previous = SystemUtils.getDate(mMessages.get(i-1).getDate(),Constants.WEEK_DATETIME);
-			String self = SystemUtils.getDate(mMessages.get(i).getDate(),Constants.WEEK_DATETIME);
+			String previous = SystemUtils.getDate(mMessages.get(i-1).getDate(), Constants.Date.WEEK);
+			String self = SystemUtils.getDate(mMessages.get(i).getDate(), Constants.Date.WEEK);
 			if(!self.equals(previous)){
 				mMessages.add(i, new Message(mRoom.getRid(), Message.Type.DATE, self));
 			}
@@ -186,7 +186,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	private void fullLoad(){
 		if(mMessages.isEmpty()) return;
 		mMessages.add(0, new Message(mRoom.getRid(), Message.Type.DATE,
-				SystemUtils.getDate(mMessages.get(0).getDate(),Constants.WEEK_DATETIME)));
+				SystemUtils.getDate(mMessages.get(0).getDate(), Constants.Date.WEEK)));
 	}
 
 	public static class TheOtherViewHolder extends RecyclerView.ViewHolder {

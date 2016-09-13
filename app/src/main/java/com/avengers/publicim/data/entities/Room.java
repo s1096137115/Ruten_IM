@@ -20,7 +20,7 @@ public class Room extends Contact implements Serializable {
 
 	public static final String NAME = "name";
 
-	public static final String ROLE = "role";
+	public static final String OWNER = "owner";
 
 	public static final String TYPE = "type";
 
@@ -38,6 +38,7 @@ public class Room extends Contact implements Serializable {
 			"CREATE TABLE " + TABLE_NAME + "("
 					+ RID + " VARCHAR(50) PRIMARY KEY, "
 					+ NAME + " VARCHAR(50), "
+					+ OWNER + " VARCHAR(30), "
 					+ TYPE + " VARCHAR(20) "
 					+ ") ";
 
@@ -107,9 +108,10 @@ public class Room extends Contact implements Serializable {
 
 	private int unread;
 
-	public Room(String rid, String name, String type) {
+	public Room(String rid, String name,String owner, String type) {
 		this.rid = rid;
 		this.name = name;
+		this.owner = owner;
 		this.type = type;
 	}
 
@@ -117,6 +119,7 @@ public class Room extends Contact implements Serializable {
 		return new Room(
 				cursor.getString(cursor.getColumnIndexOrThrow(RID)),
 				cursor.getString(cursor.getColumnIndexOrThrow(NAME)),
+				cursor.getString(cursor.getColumnIndexOrThrow(OWNER)),
 				cursor.getString(cursor.getColumnIndexOrThrow(TYPE))
 		);
 	}
@@ -125,6 +128,7 @@ public class Room extends Contact implements Serializable {
 		ContentValues values = new ContentValues();
 		values.put(RID, rid);
 		values.put(NAME, name);
+		values.put(OWNER, owner);
 		values.put(TYPE, type);
 		return values;
 	}

@@ -10,17 +10,15 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.avengers.publicim.BuildConfig;
 import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.action.CreateRoom;
 import com.avengers.publicim.data.action.GetMessage;
-import com.avengers.publicim.data.action.GetMesssgeRead;
 import com.avengers.publicim.data.action.GetRoom;
 import com.avengers.publicim.data.action.GetRoster;
 import com.avengers.publicim.data.action.GetUser;
 import com.avengers.publicim.data.action.SetRoomMemberRole;
 import com.avengers.publicim.data.action.SetRoster;
-import com.avengers.publicim.data.event.ServiceEvent;
-import com.avengers.publicim.data.listener.ServiceListener;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
@@ -29,6 +27,8 @@ import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
+import com.avengers.publicim.data.event.ServiceEvent;
+import com.avengers.publicim.data.listener.ServiceListener;
 import com.avengers.publicim.utils.GsonUtils;
 import com.avengers.publicim.utils.PreferenceHelper;
 import com.avengers.publicim.utils.SystemUtils;
@@ -323,7 +323,6 @@ public class IMService extends Service {
 				message.setMid(mid);
 				message.setDate(date);
 				message.setFrom(IMApplication.getUser());
-//				message.setRead(Message.Read.TRUE);
 				addMessage(message);
 			}
 		});
@@ -333,6 +332,10 @@ public class IMService extends Service {
 		MessageRead messageRead = new MessageRead();
 		messageRead.setRid(rid);
 		messageRead.setDate(date);
+		if(BuildConfig.DEBUG){
+			String time = SystemUtils.getDate(date, Constants.Date.LONG);
+			Log.d(TAG,time);
+		}
 		final JSONObject obj = GsonUtils.toJSONObject(messageRead);
 		mSocket.emit(Constants.Socket.EVENT_SEND_MESSAGE_READ, obj, new Ack() {
 			@Override
@@ -483,21 +486,13 @@ public class IMService extends Service {
 	 * @param rid
 	 */
 	public void sendGetMessage(long date, String rid){
-		String str = SystemUtils.getDate(date, Constants.LONG_DATETIME);
+		String str = SystemUtils.getDate(date, Constants.Date.LONG);
 		GetMessage getMessage = new GetMessage();
 		getMessage.setAction(Constants.Socket.EVENT_GET_MESSAGE);
 		getMessage.setType(GetMessage.Type.BELOW);
 		getMessage.setDate(date);
 		getMessage.setRid(rid);
 		final JSONObject obj = GsonUtils.toJSONObject(getMessage);
-		mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
-	}
-
-	public void sendGetMessageRead(){
-		GetMesssgeRead getMessageRead = new GetMesssgeRead();
-		getMessageRead.setAction(Constants.Socket.EVENT_GET_MESSAGE_READ);
-		getMessageRead.setDate(System.currentTimeMillis());
-		final JSONObject obj = GsonUtils.toJSONObject(getMessageRead);
 		mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
 	}
 
@@ -555,11 +550,6 @@ public class IMService extends Service {
 	public void receiveGetMessage(String data){
 		GetMessage getMessage = GsonUtils.fromJson(data, GetMessage.class);
 		addMessages(getMessage.getMessages());
-	}
-
-	public void receiveGetMessageRead(String data){
-		GetMesssgeRead getMessageRead = GsonUtils.fromJson(data, GetMesssgeRead.class);
-		int i = 0;
 	}
 
 	@Override
@@ -724,7 +714,6 @@ public class IMService extends Service {
 		public void call(final Object... args) {
 			Log.d(TAG, args[0].toString());
 			MessageRead messageRead = GsonUtils.fromJson(args[0].toString(), MessageRead.class);
-			if(messageRead.getFrom().equals(IMApplication.getUser())) return;
 			Member member = new Member();
 			member.setUser(messageRead.getFrom().getName());
 			member.setRid(messageRead.getRid());
@@ -735,7 +724,6 @@ public class IMService extends Service {
 			bundle.putString(Room.RID, messageRead.getRid());
 			event.setBundle(bundle);
 			getRoomManager().notify(event);
-//			getMessageManager().update(messageRead.getMessages());
 		}
 	};
 

@@ -68,12 +68,18 @@ public class DbHelper extends SQLiteOpenHelper{
 //				"WHERE info.rid = c.rid ORDER BY info.last DESC",
 //				Message.TABLE_NAME, Room.TABLE_NAME);
 		String SQL_SEL = String.format(
-				"SELECT count(CASE WHEN msg.date < mem.read_time THEN 1 ELSE NULL END) %s, MAX(msg.date) last, * " +
+				"SELECT count(CASE WHEN msg.date > mem.read_time " +
+				"AND from_name != '%s' " +
+				"AND from_name != '%s' " +
+				"AND user = '%s' " +
+				"THEN 1 ELSE NULL END) %s, " +
+				"MAX(msg.date) last, * " +
 				"FROM %s msg, %s mem, %s r " +
 				"WHERE msg.rid = mem.rid " +
 				"AND msg.rid = r.rid " +
 				"GROUP BY msg.rid " +
 				"ORDER BY last DESC",
+				"#system", IMApplication.getUser().getName(), IMApplication.getUser().getName(),
 				Room.UNREAD, Message.TABLE_NAME, Member.TABLE_NAME, Room.TABLE_NAME);
 		Cursor cursor = db.rawQuery(SQL_SEL, null);
 		ArrayList<Room> list = new ArrayList<>();
@@ -89,12 +95,16 @@ public class DbHelper extends SQLiteOpenHelper{
 	public Cursor getChatOfRoom(String rid){
 		SQLiteDatabase db = getWritableDatabase();
 		String SQL_SEL = String.format(
-				"SELECT count(CASE WHEN msg.date < mem.read_time THEN 1 ELSE NULL END) %s, * " +
+				"SELECT count(CASE WHEN msg.date < mem.read_time " +
+						"AND from_name = '%s' " +
+						"AND user = '%s' " +
+						"THEN 1 ELSE NULL END) %s, * " +
 						"FROM %s msg, %s mem, %s r " +
 						"WHERE msg.rid =" + rid +
 						"AND mem.rid =" + rid +
 						"AND r.rid =" + rid +
 						"GROUP BY msg.rid",
+				IMApplication.getUser().getName(), IMApplication.getUser().getName(),
 				Room.UNREAD, Message.TABLE_NAME, Member.TABLE_NAME, Room.TABLE_NAME);
 		return db.rawQuery(SQL_SEL, null);
 	}

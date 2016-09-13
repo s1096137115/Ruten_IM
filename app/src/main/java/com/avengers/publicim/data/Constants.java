@@ -12,10 +12,12 @@ public class Constants {
 	//max-local
 //	public static final String CHAT_SERVER_URL = "http://10.0.1.7:8000";
 
-	public static final String LONG_DATETIME = "yyyy/M/d HH:mm";
-	public static final String SHORT_DATETIME = "ahh:mm";
-	public static final String WEEK_DATETIME = "M/d E";
-	public static final String YEAR_DATETIME = "yyyy/M/d E";
+	public class Date{
+		public static final String LONG = "yyyy/M/d HH:mm";
+		public static final String SHORT = "ahh:mm";
+		public static final String WEEK = "M/d E";
+		public static final String YEAR = "yyyy/M/d E";
+	}
 
 	public class Socket{
 		//send-receive

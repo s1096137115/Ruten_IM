@@ -55,7 +55,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 			title = mRooms.get(position).getName();
 		}
 		holder.mTitle.setText(title);
-		holder.mDate.setText(SystemUtils.getDate(mRooms.get(position).getDate(), Constants.WEEK_DATETIME));
+		holder.mDate.setText(SystemUtils.getDate(mRooms.get(position).getDate(), Constants.Date.WEEK));
 		holder.mContent.setText(mRooms.get(position).getLastMsg().getContext());
 		holder.mUnread.setText(String.valueOf(mRooms.get(position).getUnread()));
 		int visible = mRooms.get(position).getUnread() == 0 ? View.GONE : View.VISIBLE;

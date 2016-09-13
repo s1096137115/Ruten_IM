@@ -12,19 +12,14 @@ import android.view.ViewGroup;
 import com.avengers.publicim.R;
 import com.avengers.publicim.activity.ChatActivity;
 import com.avengers.publicim.adapter.ContactAdapter;
-import com.avengers.publicim.data.listener.GroupListener;
-import com.avengers.publicim.data.listener.RosterListener;
-import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
+import com.avengers.publicim.data.event.ServiceEvent;
+import com.avengers.publicim.data.listener.RoomListener;
+import com.avengers.publicim.data.listener.RosterListener;
 import com.avengers.publicim.utils.ItemClickSupport;
 
 
-public class RosterFragment extends BaseFragment implements RosterListener, GroupListener{
-	private static final String ARG_PARAM1 = "param1";
-	private static final String ARG_PARAM2 = "param2";
-
-	private String mParam1;
-	private String mParam2;
+public class RosterFragment extends BaseFragment implements RosterListener, RoomListener{
 	private RecyclerView mRecyclerView;
 	private ContactAdapter mContactAdapter;
 
@@ -35,11 +30,6 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (getArguments() != null) {
-			mParam1 = getArguments().getString(ARG_PARAM1);
-			mParam2 = getArguments().getString(ARG_PARAM2);
-		}
-
 	}
 
 	@Override
@@ -83,7 +73,7 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				refresh();
+//				refresh();
 //				mIMService.sendGetUser(GetUser.Type.ID, "test02");
 //				mIMService.sendGetMessage(PreferenceHelper.UpdateStatus.getUpdateTime(), null);
 //				mIMService.sendGetMessageRead();
@@ -107,13 +97,17 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 	}
 
 	@Override
-	public void onGroupUpdate() {
-		mHandler.post(new Runnable() {
-			@Override
-			public void run() {
-				refresh();
-			}
-		});
+	public void onRoomUpdate(ServiceEvent event) {
+		switch (event.getEvent()) {
+			case ServiceEvent.Event.GET_ROOM:
+				mHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						refresh();
+					}
+				});
+				break;
+		}
 	}
 
 	@Override
