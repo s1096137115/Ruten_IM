@@ -44,6 +44,15 @@ public class RosterManager extends BaseManager<RosterEntry, RosterListener> {
 		return false;
 	}
 
+	public boolean contains(String name) {
+		for(RosterEntry entry : getList(RosterEntry.Type.ROSTER)){
+			if(entry.getUser().getName().equals(name)){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public void notify(@NonNull final ServiceEvent event) {
 		mHandler.post(new Runnable() {

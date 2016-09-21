@@ -34,7 +34,6 @@ public class Constants {
 		public static final String EVENT_REQUEST = "request";
 		public static final String EVENT_RESPONSE = "response";
 		//request-response
-		public static final String EVENT_GET_SYNC_DATA = "getSyncData";
 		public static final String EVENT_SET_ROSTER = "setRoster";
 		public static final String EVENT_GET_ROSTER = "getRoster";
 		public static final String EVENT_GET_ROOM = "getRoom";
@@ -42,6 +41,5 @@ public class Constants {
 		public static final String EVENT_SET_ROOM_MEMBER_ROLE = "setRoomMemberRole";
 		public static final String EVENT_GET_USER = "getUser";
 		public static final String EVENT_GET_MESSAGE = "getMessage";
-		public static final String EVENT_GET_MESSAGE_READ = "getMessageRead";
 	}
 }

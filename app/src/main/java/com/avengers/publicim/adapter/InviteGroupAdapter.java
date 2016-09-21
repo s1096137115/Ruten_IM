@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * Created by D-IT-MAX2 on 2016/3/15.
  */
-public class InviteAdapter extends RecyclerView.Adapter<InviteAdapter.NormalTextViewHolder> {
+public class InviteGroupAdapter extends RecyclerView.Adapter<InviteGroupAdapter.NormalTextViewHolder> {
 	private final LayoutInflater mLayoutInflater;
 	private final Context mContext;
 	private Set<Integer> mSelected = new HashSet<>();
@@ -29,7 +29,7 @@ public class InviteAdapter extends RecyclerView.Adapter<InviteAdapter.NormalText
 	private List<RosterEntry> mRosterEntries;
 	private Handler mHandler = new Handler();
 
-	public InviteAdapter(Context context, List<RosterEntry> list) {
+	public InviteGroupAdapter(Context context, List<RosterEntry> list) {
 		mRosterEntries = list;
 		mContext = context;
 		mLayoutInflater = LayoutInflater.from(context);

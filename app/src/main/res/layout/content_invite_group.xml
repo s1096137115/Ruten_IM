@@ -6,26 +6,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:showIn="@layout/activity_invite"
-    tools:context="com.avengers.publicim.activity.InviteActivity">
+    tools:showIn="@layout/activity_invite_group"
+    tools:context=".activity.InviteGroupActivity">
 
 	<android.support.v7.widget.RecyclerView
 		android:id="@+id/recyclerView"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:layout_above="@+id/inviter"
+		android:layout_above="@+id/button"
 		android:layout_alignParentLeft="true"
 		android:layout_alignParentStart="true"
 		tools:listitem="@layout/view_roster_item"
 		/>
 
-	<include
-		android:id="@+id/inviter"
-		android:layout_width="wrap_content"
+	<Button
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		layout="@layout/view_butten_invite"
+		android:text="Invite"
+		android:id="@+id/button"
 		android:layout_alignParentBottom="true"
 		android:layout_alignParentRight="true"
-		android:layout_alignParentEnd="true"/>
+		android:layout_alignParentEnd="true"
+		/>
 
 </RelativeLayout>

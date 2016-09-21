@@ -1,18 +1,36 @@
 package com.avengers.publicim.data.action;
 
+import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.User;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by D-IT-MAX2 on 2016/8/25.
  */
-public class GetUser {
+public class GetUser implements Serializable{
 	public class Type{
 		public static final String ID = "id";
 		public static final String PHONE = "phone";
 		public static final String NICKNAME = "nickname";
+	}
+
+	public class AdvUser extends User{
+		private Presence presence;
+
+		public AdvUser(String uid, String name) {
+			super(uid, name);
+		}
+
+		public Presence getPresence() {
+			return presence;
+		}
+
+		public void setPresence(Presence presence) {
+			this.presence = presence;
+		}
 	}
 
 	@SerializedName("action")
@@ -27,7 +45,7 @@ public class GetUser {
 	private String key;
 
 	@SerializedName("user")
-	private List<User> user;
+	private List<AdvUser> users;
 
 	public String getAction() {
 		return action;
@@ -61,11 +79,11 @@ public class GetUser {
 		this.key = key;
 	}
 
-	public List<User> getUser() {
-		return user;
+	public List<AdvUser> getUsers() {
+		return users;
 	}
 
-	public void setUser(List<User> user) {
-		this.user = user;
+	public void setUsers(List<AdvUser> users) {
+		this.users = users;
 	}
 }

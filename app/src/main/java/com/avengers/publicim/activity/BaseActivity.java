@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMService;
@@ -19,9 +20,6 @@ import com.avengers.publicim.data.listener.ServiceListener;
 import com.avengers.publicim.fragment.BaseFragment;
 import com.avengers.publicim.view.DialogBuilder;
 import com.avengers.publicim.view.IMProgressDialog;
-
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import static com.avengers.publicim.conponent.IMApplication.getMessageManager;
 import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
@@ -39,7 +37,6 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 //	protected DialogBuilder mBuilder;
 //	protected ProgressDialog mProgressDialog;
 	protected Handler mHandler;
-	protected Set<Fragment> mFragments;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +45,7 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 		setBuilder(new DialogBuilder(this));
 		setIMProgress(new IMProgressDialog(this));
 		mHandler = new Handler();
-		mFragments = new CopyOnWriteArraySet<>();
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	@Override
@@ -62,6 +59,7 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 			startService(intent);
 			bindService(intent,mSC,BIND_AUTO_CREATE);
 		}
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	@Override
@@ -72,21 +70,19 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 			unregisterListeners();
 			mIsBind =false;
 		}
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	@Override
 	protected void onDestroy() {
-//		mBuilder.getDialog().dismiss();
 		super.onDestroy();
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
-//	public DialogBuilder getBuilder(){
-//		return mBuilder;
-//	}
-//
-//	public ProgressDialog getProgress(){
-//		return mProgressDialog;
-//	}
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+	}
 
 	public IMService getIMService(){
 		return mIMService;
@@ -119,8 +115,10 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	}
 
 	protected void onBackendConnected() {
-		for(Fragment fragment : mFragments){
-			((BaseFragment)fragment).onBackendConnected();
+		if(getSupportFragmentManager().getFragments() != null){
+			for(Fragment fragment : getSupportFragmentManager().getFragments()){
+				((BaseFragment)fragment).onBackendConnected();
+			}
 		}
 	}
 

@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.adapter.InviteAdapter;
+import com.avengers.publicim.adapter.InviteGroupAdapter;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
@@ -21,26 +21,26 @@ import static com.avengers.publicim.conponent.IMApplication.getProgress;
 import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
-public class InviteActivity extends BaseActivity{
+public class InviteGroupActivity extends BaseActivity{
     private RecyclerView mRecyclerView;
     private Button mButton;
-    private InviteAdapter mInviteAdapter;
+    private InviteGroupAdapter mInviteAdapter;
     private Contact mContact;
     private Room mRoom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_invite);
+        setContentView(R.layout.activity_invite_group);
         mButton = (Button)findViewById(R.id.button);
-        mInviteAdapter = new InviteAdapter(this , getRosterManager().getList(RosterEntry.Type.ROSTER));
+        mInviteAdapter = new InviteGroupAdapter(this , getRosterManager().getList(RosterEntry.Type.ROSTER));
         getData();
         setToolbar();
         setRecyclerView(mInviteAdapter);
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<RosterEntry> list = ((InviteAdapter) mRecyclerView.getAdapter()).getSelectedList();
+                List<RosterEntry> list = ((InviteGroupAdapter) mRecyclerView.getAdapter()).getSelectedList();
                 for (RosterEntry entry: list) {
                     getProgress().setMessage("Waiting...");
                     getProgress().show();

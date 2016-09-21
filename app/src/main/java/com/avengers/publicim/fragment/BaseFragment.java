@@ -30,20 +30,30 @@ public abstract class BaseFragment extends Fragment implements ServiceListener{
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDB = DbHelper.getInstance(getContext());
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	@Override
 	public void onStart() {
 		super.onStart();
+		mIMService = ((BaseActivity)getActivity()).getIMService();
 		if(mIMService != null){
 			registerListeners();
 		}
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
 		unregisterListeners();
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	public void onBackendConnected() {
@@ -67,9 +77,7 @@ public abstract class BaseFragment extends Fragment implements ServiceListener{
 	}
 
 	public void unregisterListeners(){
-		if(mIMService == null){
-			Log.d("test","null");
-		}else{
+		if(mIMService != null){
 			mIMService.removeListener(this);
 		}
 		if (this instanceof RoomListener) {

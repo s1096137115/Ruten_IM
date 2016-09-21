@@ -91,6 +91,7 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 		super.onBackendConnected();
 		//hasUnread
 		for (Member member: mRoom.getMembers()) {
+			if(mChatAdapter.getData().isEmpty()) return;
 			int last = mChatAdapter.getData().size()-1;
 			//自己的已讀時間<最後一句時才送出已讀
 			if(member.getRead_time() < mChatAdapter.getData().get(last).getDate()
@@ -126,7 +127,7 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 				startActivity(intent);
 				break;
 			case R.id.action_invite_group:
-				intent = new Intent(this, InviteActivity.class);
+				intent = new Intent(this, InviteGroupActivity.class);
 				intent.putExtra(Contact.Type.CONTACT, mContact);
 				startActivity(intent);
 				break;

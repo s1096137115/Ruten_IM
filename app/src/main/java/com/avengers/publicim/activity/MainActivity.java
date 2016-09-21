@@ -17,10 +17,10 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.User;
+import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.fragment.ChatListFragment;
 import com.avengers.publicim.fragment.RosterFragment;
 
@@ -35,8 +35,8 @@ public class MainActivity extends BaseActivity {
 	private TabLayout mTabLayout;
 	private ViewPager mViewPager;
 	private ViewPagerAdapter mViewPagerAdapter;
-	private RosterFragment mRosterFragment = new RosterFragment();
-	private ChatListFragment mChatListFragment = new ChatListFragment();
+	private RosterFragment mRosterFragment;
+	private ChatListFragment mChatListFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,14 +47,8 @@ public class MainActivity extends BaseActivity {
 		setViewPager();
 		setToolBar();
 		setTabLayout();
-		mFragments.add(mRosterFragment);
-		mFragments.add(mChatListFragment);
-	}
-
-	@Override
-	protected void onDestroy() {
-		mFragments.clear();
-		super.onDestroy();
+		mRosterFragment = new RosterFragment();
+		mChatListFragment = new ChatListFragment();
 	}
 
 	private void setViewPager(){

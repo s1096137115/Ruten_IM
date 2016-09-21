@@ -177,12 +177,12 @@ public class IMService extends Service {
 	}
 
 	public void updateRooms(List<Room> listNew){
-		List<Room> listOld = getRoomManager().getList(Room.Type.GROUP);
+		List<Room> listOld = getRoomManager().getList(Room.Type.ALL);
 		List<Room>[] list = categorize(listNew,listOld);
 		if(list[MODIFY_NEW].isEmpty() && list[MODIFY_OLD].isEmpty()) return;
 		for (Room room : list[CHANGE_NEW]) {
 			mDB.updateRoom(room);
-			//在開始比較Member之前要先幫新的Member加上room_id
+			//在開始比較Member之前要先幫新的Member加上rid
 			for (Member member: room.getMembers()) {
 				member.setRid(room.getRid());
 			}
@@ -442,16 +442,6 @@ public class IMService extends Service {
 		mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
 	}
 
-	public void sendGetSyncData(){
-		try {
-			JSONObject obj = new JSONObject();
-			obj.put("action", Constants.Socket.EVENT_GET_SYNC_DATA);
-			mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	public void sendGetRoster(){
 		try {
 			JSONObject obj = new JSONObject();
@@ -526,7 +516,13 @@ public class IMService extends Service {
 
 	public void receiveGetUser(String data){
 		GetUser getUser = GsonUtils.fromJson(data, GetUser.class);
-		String a = "";
+		for (ServiceListener listener : mServiceListener) {
+			ServiceEvent event = new ServiceEvent(ServiceEvent.Event.GET_USER);
+			Bundle bundle = new Bundle();
+			bundle.putSerializable(GetUser.class.getSimpleName(), getUser);
+			event.setBundle(bundle);
+			listener.onServeiceResponse(event);
+		}
 	}
 
 	public void receiveGetRoom(String data){
@@ -628,9 +624,7 @@ public class IMService extends Service {
 				Log.d(TAG, args[0].toString());
 				JSONObject jsonObj  = new JSONObject(args[0].toString());
 				String action = jsonObj.get("action").toString();
-				if(action.equals(Constants.Socket.EVENT_GET_SYNC_DATA)){
-//					receiveGetSyncData(args[0].toString());
-				}else if(action.equals(Constants.Socket.EVENT_GET_ROSTER)){
+				if(action.equals(Constants.Socket.EVENT_GET_ROSTER)){
 					receiveGetRoster(args[0].toString());
 				}else if(action.equals(Constants.Socket.EVENT_SET_ROSTER)){
 					receiveSetRoster(args[0].toString());
@@ -644,8 +638,6 @@ public class IMService extends Service {
 					receiveGetUser(args[0].toString());
 				}else if(action.equals(Constants.Socket.EVENT_GET_MESSAGE)){
 					receiveGetMessage(args[0].toString());
-				}else if(action.equals(Constants.Socket.EVENT_GET_MESSAGE_READ)){
-					receiveGetMessageRead(args[0].toString());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
