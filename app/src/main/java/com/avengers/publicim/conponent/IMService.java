@@ -124,7 +124,10 @@ public class IMService extends Service {
 		}
 		if(list.isEmpty()) {
 			PreferenceHelper.UpdateStatus.setUpdateTime(System.currentTimeMillis());
-		}else{
+			//目前server更新機制只針對account
+			//所以 更新時間<訊息時間 才會更新
+			//以防其他device在更新時同步觸發更新
+		}else if(PreferenceHelper.UpdateStatus.getUpdateTime() < list.get(list.size() -1).getDate()){
 			ServiceEvent event = new ServiceEvent(ServiceEvent.Event.ADD_MESSAGES);
 			getMessageManager().add(list);
 			getRoomManager().notify(event);
@@ -383,12 +386,12 @@ public class IMService extends Service {
 					Log.d(TAG, errorMessage);
 					return;
 				}
-				if(invite.getType().equals(Invite.Type.FRIEND)){
-					//todo need call getUser then add roster
+				//由於callback給的資料太少，所以決定改由onReceiveInvite取得資料
+//				if(invite.getType().equals(Invite.Type.FRIEND)){
 //					addRoster(new RosterEntry(invite.getFrom(), invite.getPresence(), invite.getRelationship()));
-					Room room = GsonUtils.fromJson(args[1].toString(), Room.class);
-					addRoom(room);
-				}
+//					Room room = GsonUtils.fromJson(args[1].toString(), Room.class);
+//					addRoom(room);
+//				}
 				for (ServiceListener listener : mServiceListener) {
 					listener.onServeiceResponse(new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG));
 				}
@@ -691,7 +694,8 @@ public class IMService extends Service {
 			Log.d(TAG, args[0].toString());
 			Invite invite = GsonUtils.fromJson(args[0].toString(), Invite.class);
 
-			//不論是邀請或被邀請都在這做最後的sync
+			//由於sendInvite的callback給的資料太少
+			//所以不論是邀請或被邀請都在這做最後的sync
 			if(invite.getType().equals(Invite.Type.FRIEND)){
 				sendGetRoster();
 				sendGetRoom();

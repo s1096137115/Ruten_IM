@@ -1,7 +1,7 @@
 package com.avengers.publicim.adapter;
 
-import android.content.Context;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +13,8 @@ import android.widget.TextView;
 import com.avengers.publicim.R;
 import com.avengers.publicim.conponent.IMApplication;
 import com.avengers.publicim.data.action.GetUser;
+import com.avengers.publicim.data.entities.Invite;
+import com.avengers.publicim.fragment.InviteRosterFragment;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,15 +28,15 @@ import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
 public class InviteRosterAdapter extends RecyclerView.Adapter<InviteRosterAdapter.NormalTextViewHolder>{
 	private final LayoutInflater mLayoutInflater;
-	private final Context mContext;
+	private final Fragment mFragment;
 	private Set<Integer> mSelected = new HashSet<>();
 	private List<GetUser.AdvUser> mAdvUser;
 	private Handler mHandler = new Handler();
 
-	public InviteRosterAdapter(Context context, List<GetUser.AdvUser> list){
+	public InviteRosterAdapter(Fragment fragment, List<GetUser.AdvUser> list){
 		mAdvUser = list;
-		mContext = context;
-		mLayoutInflater = LayoutInflater.from(context);
+		mFragment = fragment;
+		mLayoutInflater = LayoutInflater.from(fragment.getContext());
 	}
 
 	@Override
@@ -43,9 +45,10 @@ public class InviteRosterAdapter extends RecyclerView.Adapter<InviteRosterAdapte
 	}
 
 	@Override
-	public void onBindViewHolder(NormalTextViewHolder holder, int position) {
+	public void onBindViewHolder(NormalTextViewHolder holder, final int position) {
 		holder.mID.setText(mAdvUser.get(position).getName());
 		holder.mIcon.setImageResource(R.drawable.ic_person_black_48dp);
+
 		if(IMApplication.getUser().getName().equals(mAdvUser.get(position).getName())){
 			holder.mDetail.setText(IMApplication.getContext().getString(R.string.msg_get_user_yourself));
 			holder.mButton.setVisibility(View.GONE);
@@ -56,6 +59,14 @@ public class InviteRosterAdapter extends RecyclerView.Adapter<InviteRosterAdapte
 			holder.mDetail.setText(IMApplication.getContext().getString(R.string.msg_get_user_not_yet));
 			holder.mButton.setVisibility(View.VISIBLE);
 		}
+
+		holder.mButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Invite invite = new Invite(getItem(position), Invite.Type.FRIEND);
+				((InviteRosterFragment)mFragment).sendInvite(invite);
+			}
+		});
 	}
 
 	@Override

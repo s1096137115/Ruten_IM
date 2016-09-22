@@ -2,6 +2,7 @@ package com.avengers.publicim.activity;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -17,9 +18,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Room;
-import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.fragment.ChatListFragment;
 import com.avengers.publicim.fragment.RosterFragment;
@@ -149,21 +148,8 @@ public class MainActivity extends BaseActivity {
 //				mIMService.connect();
 				break;
 			case R.id.action_invite_friend:
-				getBuilder()
-						.setTitle("invite")
-						.setView(input)
-						.setPositiveButton("y", new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								if(!input.getText().toString().isEmpty()){
-									getProgress().setMessage("Waiting...");
-									getProgress().show();
-									Invite invite = new Invite(
-											new User("", input.getText().toString()), Invite.Type.FRIEND);
-									mIMService.sendInvite(invite);
-								}
-							}
-						}).show();
+				Intent intent = new Intent(this, InviteRosterActivity.class);
+				startActivity(intent);
 				break;
 			case R.id.action_create_group:
 				getBuilder()

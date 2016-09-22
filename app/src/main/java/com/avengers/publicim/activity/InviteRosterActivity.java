@@ -15,12 +15,6 @@ import com.avengers.publicim.fragment.BlankFragment;
 import com.avengers.publicim.fragment.InviteRosterFragment;
 import com.avengers.publicim.view.SearchableEditText;
 
-import java.util.List;
-
-import static com.avengers.publicim.activity.InviteRosterActivity.Result.EMPTY;
-import static com.avengers.publicim.activity.InviteRosterActivity.Result.FIND;
-import static com.avengers.publicim.activity.InviteRosterActivity.Result.NOT_FIND;
-
 public class InviteRosterActivity extends BaseActivity {
 	private SearchableEditText mSearchText;
 
@@ -46,9 +40,9 @@ public class InviteRosterActivity extends BaseActivity {
 			case ServiceEvent.Event.GET_USER:
 				GetUser getUser = (GetUser)event.getBundle().getSerializable(GetUser.class.getSimpleName());
 				if(getUser.getUsers().isEmpty()){
-					actionResponse(NOT_FIND, getUser);
+					actionResponse(Result.NOT_FIND, getUser);
 				}else{
-					actionResponse(FIND, getUser);
+					actionResponse(Result.FIND, getUser);
 				}
 				break;
 		}
@@ -93,7 +87,7 @@ public class InviteRosterActivity extends BaseActivity {
 	private void initContent(){
 		Fragment newFragment = BlankFragment.newInstance("");
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-		ft.add(R.id.content, newFragment, EMPTY.name());
+		ft.add(R.id.content, newFragment, Result.EMPTY.name());
 		ft.commit();
 	}
 
@@ -103,8 +97,6 @@ public class InviteRosterActivity extends BaseActivity {
 //		ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN); //给Fragment指定标准的转场动画
 //		ft.addToBackStack(null);
 		ft.commit();
-		List<Fragment> fragments = getSupportFragmentManager().getFragments();
-		String a = "";
 	}
 
 	private SearchableEditText.DrawableRightListener onDrawableRightListener = new SearchableEditText.DrawableRightListener() {
