@@ -1,10 +1,12 @@
 package com.avengers.publicim.data.Manager;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
-import com.avengers.publicim.data.callback.RosterListener;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
+import com.avengers.publicim.data.event.ServiceEvent;
+import com.avengers.publicim.data.listener.RosterListener;
 
 import java.util.List;
 
@@ -13,19 +15,19 @@ import java.util.List;
  */
 public class RosterManager extends BaseManager<RosterEntry, RosterListener> {
 
+
 	public RosterManager(Context context) {
 		super(context);
 	}
 
-
 	@Override
-	public List<RosterEntry> getList() {
-		return mList;
+	public List<RosterEntry> getList(@NonNull String type) {
+		return mDB.getLocalRoster();
 	}
 
 	@Override
-	public RosterEntry getItem(String name) {
-		for (RosterEntry entry : mList) {
+	public RosterEntry getItem(@NonNull String type, @NonNull String name) {
+		for (RosterEntry entry : getList(RosterEntry.Type.ROSTER)) {
 			if(entry.getUser().getName().equals(name)){
 				return entry;
 			}
@@ -33,23 +35,8 @@ public class RosterManager extends BaseManager<RosterEntry, RosterListener> {
 		return null;
 	}
 
-	@Override
-	public void setList(List<RosterEntry> list) {
-		mList = list;
-	}
-
-	@Override
-	public boolean contains(RosterEntry item) {
-		for(RosterEntry entry : mList){
-			if(entry.equals(item)){
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public boolean contains(User user) {
-		for(RosterEntry entry : mList){
+		for(RosterEntry entry : getList(RosterEntry.Type.ROSTER)){
 			if(entry.getUser().equals(user)){
 				return true;
 			}
@@ -57,16 +44,8 @@ public class RosterManager extends BaseManager<RosterEntry, RosterListener> {
 		return false;
 	}
 
-
-
-	/**
-	 * 不完全比對，只比對名稱
-	 * @param name
-	 * @return
-	 */
-	@Override
 	public boolean contains(String name) {
-		for(RosterEntry entry : mList){
+		for(RosterEntry entry : getList(RosterEntry.Type.ROSTER)){
 			if(entry.getUser().getName().equals(name)){
 				return true;
 			}
@@ -75,27 +54,15 @@ public class RosterManager extends BaseManager<RosterEntry, RosterListener> {
 	}
 
 	@Override
-	public void sort() {
-
-	}
-
-	@Override
-	public void reload() {
-		new Thread(new Runnable() {
+	public void notify(@NonNull final ServiceEvent event) {
+		mHandler.post(new Runnable() {
 			@Override
 			public void run() {
-				//background
-				setList(mDB.getLocalRoster());
-				//UI
-				mHandler.post(new Runnable() {
-					@Override
-					public void run() {
-						for (RosterListener listener : mListeners){
-							listener.onRosterUpdate();
-						}
-					}
-				});
+				for (RosterListener listener : mListeners){
+					event.setListener(listener);
+					listener.onRosterUpdate(event);
+				}
 			}
-		}).start();
+		});
 	}
 }

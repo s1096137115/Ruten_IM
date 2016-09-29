@@ -10,9 +10,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.data.Constants;
+import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
+import com.avengers.publicim.data.entities.Room;
+import com.avengers.publicim.utils.SystemUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +26,11 @@ import java.util.List;
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	private final LayoutInflater mLayoutInflater;
 	private final Context mContext;
-	private List<Message> mMessages = new ArrayList<>();
 	private Handler mHandler = new Handler();
+	private List<Message> mMessages = new ArrayList<>();
+	private Room mRoom;
+	private boolean mFullLoad = false;
+	private static final int LOAD_SIZE = 3000;
 
 	/**
 	 * 发送的消息
@@ -34,11 +40,20 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	 * 收到的消息
 	 */
 	private static final int TYPE_RECEIVE = 1;
+	/**
+	 * 系統訊息
+	 */
+	private static final int TYPE_SYSTEM = 2;
+	/**
+	 * 時間訊息
+	 */
+	private static final int TYPE_DATE = 3;
 
-	public ChatAdapter(Context context, List<Message> objects) {
-		mMessages = objects;
+	public ChatAdapter(Context context, List<Message> messages, Room room) {
 		mContext = context;
 		mLayoutInflater = LayoutInflater.from(context);
+		mRoom = room;
+		loadUp(messages);
 	}
 
 	@Override
@@ -51,6 +66,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 			case TYPE_SEND:
 				holder = new SelfHolder(mLayoutInflater.inflate(R.layout.view_msg_item_right, parent, false));
 				break;
+			case TYPE_SYSTEM:
+				holder = new SystemHolder(mLayoutInflater.inflate(R.layout.view_msg_system, parent, false));
+				break;
+			case TYPE_DATE:
+				holder = new DateHolder(mLayoutInflater.inflate(R.layout.view_msg_date, parent, false));
+				break;
 		}
 		return holder;
 	}
@@ -59,18 +80,42 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 		if (holder instanceof TheOtherViewHolder) {
 			((TheOtherViewHolder) holder).mID.setText(mMessages.get(position).getFrom().getName());
-			if(mMessages.get(position).getGid().isEmpty()){
+			if(mMessages.get(position).getRid().isEmpty()){
 				((TheOtherViewHolder) holder).mID.setVisibility(View.GONE);
 			}else{
 				((TheOtherViewHolder) holder).mID.setVisibility(View.VISIBLE);
 			}
-			((TheOtherViewHolder) holder).mContent.setText(mMessages.get(position).getContent());
-			String eventTime = mMessages.get(position).getDate().replace(" ","\n");
+			((TheOtherViewHolder) holder).mContent.setText(mMessages.get(position).getContext());
+
+			String eventTime = SystemUtils.getDate(mMessages.get(position).getDate(), Constants.Date.SHORT).replace(" ","\n");
 			((TheOtherViewHolder) holder).mDatetime.setText(eventTime);
 		} else if (holder instanceof SelfHolder) {
-			((SelfHolder) holder).mContent.setText(mMessages.get(position).getContent());
-			String eventTime = mMessages.get(position).getDate().replace(" ","\n");
+			((SelfHolder) holder).mContent.setText(mMessages.get(position).getContext());
+
+			String eventTime = SystemUtils.getDate(mMessages.get(position).getDate(), Constants.Date.SHORT).replace(" ","\n");
 			((SelfHolder) holder).mDatetime.setText(eventTime);
+
+			((SelfHolder) holder).mRead.setVisibility(View.GONE);
+			int count = 0;
+			for (Member member:mRoom.getMembers()) {
+				if(member.getUser().equals(IMApplication.getUser().getName())) continue;
+				if(member.getRead_time() >= mMessages.get(position).getDate()){
+					((SelfHolder) holder).mRead.setVisibility(View.VISIBLE);
+					count ++;
+					if(mRoom.getType().equals(Room.Type.SINGLE)){
+						((SelfHolder) holder).mRead.setText(mContext.getString(R.string.msg_read));
+					}else{
+						((SelfHolder) holder).mRead.setText(mContext.getString(R.string.msg_read_count, count));
+					}
+				}
+			}
+		} else if (holder instanceof SystemHolder) {
+			((SystemHolder) holder).mContent.setText(mMessages.get(position).getContext());
+
+			String eventTime = SystemUtils.getDate(mMessages.get(position).getDate(), Constants.Date.SHORT).replace(" ","\n");
+			((SystemHolder) holder).mDatetime.setText(eventTime);
+		} else if (holder instanceof DateHolder) {
+			((DateHolder) holder).mContent.setText(mMessages.get(position).getContext());
 		}
 	}
 
@@ -81,10 +126,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
 	@Override
 	public int getItemViewType(int position) {
-		String from = mMessages.get(position).getFrom().getName();
-		String name = IMApplication.getUser().getName();
-		return mMessages.get(position).getFrom().getName().equals(IMApplication.getUser().getName())
-				? TYPE_SEND : TYPE_RECEIVE;
+		if(mMessages.get(position).getType().equals(Message.Type.LOG)){
+			return TYPE_SYSTEM;
+		}else if(mMessages.get(position).getType().equals(Message.Type.DATE)){
+			return TYPE_DATE;
+		}else{
+			return mMessages.get(position).getFrom().getName().equals(IMApplication.getUser().getName())
+					? TYPE_SEND : TYPE_RECEIVE;
+		}
 	}
 
 	public void refresh(){
@@ -96,21 +145,63 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 		});
 	}
 
-	public void update(List<Message> objects){
-		mMessages = objects;
+	public void update(List<Message> messages){
+		mMessages = messages;
+	}
+
+	public void update(Room room){
+		mRoom = room;
+	}
+
+	public boolean ismFullLoad() {
+		return mFullLoad;
+	}
+
+	public void setmFullLoad(boolean mFullLoad) {
+		this.mFullLoad = mFullLoad;
+	}
+
+	public void loadUp(List<Message> messages){
+		if(messages.size() < LOAD_SIZE) mFullLoad = true;
+		mMessages.addAll(0, messages);
+		if(mMessages.size() == messages.size()){//判斷是否是第一次載入
+			addDateMsg(0, messages.size()-1);
+		}else{
+			addDateMsg(0, messages.size());//更新的範團包含銜接的地方
+		}
+		if(mFullLoad) addTopDate();
+	}
+
+	public void add(Message message){
+		mMessages.add(message);
+		addDateMsg(mMessages.size()-2, mMessages.size()-1);
+		if(mMessages.size() == 1) addTopDate();
 	}
 
 	public List<Message> getData(){
 		return mMessages;
 	}
 
-	public boolean hasUnread(){
-		for (Message message : mMessages){
-			if(message.getRead() == DbHelper.IntBoolean.FALSE){
-				return true;
+	/**
+	 * 新增時間訊息，參數為區間
+	 * @param upper
+	 * @param lower
+	 */
+	private void addDateMsg(int upper, int lower){
+		if(mMessages.size() < 2) return;
+		for (int i = lower; i > upper; i--) {
+			String previous = SystemUtils.getDate(mMessages.get(i-1).getDate(), Constants.Date.WEEK);
+			String self = SystemUtils.getDate(mMessages.get(i).getDate(), Constants.Date.WEEK);
+			if(!self.equals(previous)){
+				mMessages.add(i, new Message(mRoom.getRid(), Message.Type.DATE, self));
 			}
 		}
-		return false;
+	}
+
+	private void addTopDate(){
+		if(mMessages.isEmpty()) return;
+		mMessages.add(0, new Message(mRoom.getRid(), Message.Type.DATE,
+				SystemUtils.getDate(mMessages.get(0).getDate(), Constants.Date.WEEK)));
 	}
 
 	public static class TheOtherViewHolder extends RecyclerView.ViewHolder {
@@ -131,11 +222,33 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	public static class SelfHolder extends RecyclerView.ViewHolder {
 		TextView mContent;
 		TextView mDatetime;
+		TextView mRead;
 
 		SelfHolder(View view) {
 			super(view);
 			mContent = (TextView)view.findViewById(R.id.msg);
 			mDatetime = (TextView)view.findViewById(R.id.datetime);
+			mRead = (TextView)view.findViewById(R.id.read);
+		}
+	}
+
+	public static class SystemHolder extends RecyclerView.ViewHolder {
+		TextView mContent;
+		TextView mDatetime;
+
+		public SystemHolder(View view) {
+			super(view);
+			mContent = (TextView)view.findViewById(R.id.msg);
+			mDatetime = (TextView)view.findViewById(R.id.datetime);
+		}
+	}
+
+	public static class DateHolder extends RecyclerView.ViewHolder {
+		TextView mContent;
+
+		public DateHolder(View view) {
+			super(view);
+			mContent = (TextView)view.findViewById(R.id.msg);
 		}
 	}
 }

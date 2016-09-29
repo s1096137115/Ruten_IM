@@ -2,6 +2,7 @@ package com.avengers.publicim.activity;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -17,9 +18,8 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.data.callback.ServiceEvent;
-import com.avengers.publicim.data.entities.Invite;
-import com.avengers.publicim.data.entities.User;
+import com.avengers.publicim.data.entities.Room;
+import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.fragment.ChatListFragment;
 import com.avengers.publicim.fragment.RosterFragment;
 
@@ -34,8 +34,8 @@ public class MainActivity extends BaseActivity {
 	private TabLayout mTabLayout;
 	private ViewPager mViewPager;
 	private ViewPagerAdapter mViewPagerAdapter;
-	private RosterFragment mRosterFragment = new RosterFragment();
-	private ChatListFragment mChatListFragment = new ChatListFragment();
+	private RosterFragment mRosterFragment;
+	private ChatListFragment mChatListFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,14 +46,8 @@ public class MainActivity extends BaseActivity {
 		setViewPager();
 		setToolBar();
 		setTabLayout();
-		mFragments.add(mRosterFragment);
-		mFragments.add(mChatListFragment);
-	}
-
-	@Override
-	protected void onDestroy() {
-		mFragments.clear();
-		super.onDestroy();
+		mRosterFragment = new RosterFragment();
+		mChatListFragment = new ChatListFragment();
 	}
 
 	private void setViewPager(){
@@ -154,19 +148,8 @@ public class MainActivity extends BaseActivity {
 //				mIMService.connect();
 				break;
 			case R.id.action_invite_friend:
-				getBuilder()
-						.setTitle("invite")
-						.setView(input)
-						.setPositiveButton("y", new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								if(!input.getText().toString().isEmpty()){
-									Invite invite = new Invite(
-											new User("", input.getText().toString()), Invite.TYPE_FRIEND);
-									mIMService.sendInvite(invite);
-								}
-							}
-						}).show();
+				Intent intent = new Intent(this, InviteRosterActivity.class);
+				startActivity(intent);
 				break;
 			case R.id.action_create_group:
 				getBuilder()
@@ -178,7 +161,7 @@ public class MainActivity extends BaseActivity {
 								if(!input.getText().toString().isEmpty()){
 									getProgress().setMessage("Waiting...");
 									getProgress().show();
-									mIMService.sendCreateGroup(input.getText().toString());
+									mIMService.sendCreateRoom(input.getText().toString(), Room.Type.GROUP);
 								}
 							}
 						}).show();
@@ -189,7 +172,16 @@ public class MainActivity extends BaseActivity {
 
 	@Override
 	public void onServeiceResponse(ServiceEvent event) {
+		switch (event.getEvent()){
+			case ServiceEvent.Event.CLOSE_DIALOG:
+				getProgress().dismiss();
+				break;
+		}
+	}
 
+	@Override
+	public String getName() {
+		return null;
 	}
 
 	/**

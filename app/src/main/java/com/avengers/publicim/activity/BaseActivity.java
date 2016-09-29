@@ -8,25 +8,21 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMService;
 import com.avengers.publicim.conponent.IMService.IMBinder;
-import com.avengers.publicim.data.callback.ChatListener;
-import com.avengers.publicim.data.callback.GroupListener;
-import com.avengers.publicim.data.callback.MessageListener;
-import com.avengers.publicim.data.callback.RosterListener;
-import com.avengers.publicim.data.callback.ServiceListener;
+import com.avengers.publicim.data.listener.MessageListener;
+import com.avengers.publicim.data.listener.RoomListener;
+import com.avengers.publicim.data.listener.RosterListener;
+import com.avengers.publicim.data.listener.ServiceListener;
 import com.avengers.publicim.fragment.BaseFragment;
 import com.avengers.publicim.view.DialogBuilder;
 import com.avengers.publicim.view.IMProgressDialog;
 
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-
-import static com.avengers.publicim.conponent.IMApplication.getChatManager;
-import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
 import static com.avengers.publicim.conponent.IMApplication.getMessageManager;
+import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 import static com.avengers.publicim.conponent.IMApplication.setBuilder;
 import static com.avengers.publicim.conponent.IMApplication.setIMProgress;
@@ -41,21 +37,20 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 //	protected DialogBuilder mBuilder;
 //	protected ProgressDialog mProgressDialog;
 	protected Handler mHandler;
-	protected Set<Fragment> mFragments;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDB = DbHelper.getInstance(this);
-		setBuilder(new DialogBuilder(this));
-		setIMProgress(new IMProgressDialog(this));
 		mHandler = new Handler();
-		mFragments = new CopyOnWriteArraySet<>();
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
+		setBuilder(new DialogBuilder(this));
+		setIMProgress(new IMProgressDialog(this));
 		if(mIsBind){
 			registerListeners();
 			onBackendConnected();
@@ -64,6 +59,7 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 			startService(intent);
 			bindService(intent,mSC,BIND_AUTO_CREATE);
 		}
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	@Override
@@ -74,21 +70,19 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 			unregisterListeners();
 			mIsBind =false;
 		}
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	@Override
 	protected void onDestroy() {
-//		mBuilder.getDialog().dismiss();
 		super.onDestroy();
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
-//	public DialogBuilder getBuilder(){
-//		return mBuilder;
-//	}
-//
-//	public ProgressDialog getProgress(){
-//		return mProgressDialog;
-//	}
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+	}
 
 	public IMService getIMService(){
 		return mIMService;
@@ -96,14 +90,11 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 
 	public void registerListeners(){
 		mIMService.addListener(this);
-		if (this instanceof ChatListener) {
-			getChatManager().addListener((ChatListener) this);
+		if (this instanceof RoomListener) {
+			getRoomManager().addListener((RoomListener) this);
 		}
 		if (this instanceof RosterListener) {
-			getRosterManager().addListener((RosterListener) this);
-		}
-		if (this instanceof GroupListener) {
-			getGroupManager().addListener((GroupListener) this);
+			getRosterManager().removeListener((RosterListener) this);
 		}
 		if (this instanceof MessageListener) {
 			getMessageManager().addMessageListener((MessageListener) this);
@@ -112,14 +103,11 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 
 	public void unregisterListeners(){
 		mIMService.removeListener(this);
-		if (this instanceof ChatListener) {
-			getChatManager().removeListener((ChatListener) this);
+		if (this instanceof RoomListener) {
+			getRoomManager().removeListener((RoomListener) this);
 		}
 		if (this instanceof RosterListener) {
 			getRosterManager().removeListener((RosterListener) this);
-		}
-		if (this instanceof GroupListener) {
-			getGroupManager().removeListener((GroupListener) this);
 		}
 		if (this instanceof MessageListener) {
 			getMessageManager().removeMessageListener((MessageListener) this);
@@ -127,8 +115,10 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	}
 
 	protected void onBackendConnected() {
-		for(Fragment fragment : mFragments){
-			((BaseFragment)fragment).onBackendConnected();
+		if(getSupportFragmentManager().getFragments() != null){
+			for(Fragment fragment : getSupportFragmentManager().getFragments()){
+				((BaseFragment)fragment).onBackendConnected();
+			}
 		}
 	}
 

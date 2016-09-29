@@ -8,7 +8,7 @@
 		android:title="@string/action_view_member"
 		app:showAsAction="never"/>
 	<item
-		android:id="@+id/action_invite_group"
+		android:id="@+id/action_invite_member"
 		android:orderInCategory="200"
 		android:title="@string/action_invite_group"
 		app:showAsAction="never"/>

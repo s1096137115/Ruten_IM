@@ -5,15 +5,15 @@ import android.database.Cursor;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
-
 /**
  * Created by D-IT-MAX2 on 2016/3/3.
  */
-public class RosterEntry implements Serializable, Contact {
+public class RosterEntry extends Contact{
 	public static final String TABLE_NAME = "roster";
 
 	public static final String RELATIONSHIP = "relationship";
+
+	public static final String RID = "rid";
 
 	public static final String CREATE_SQL =
 			"CREATE TABLE " + TABLE_NAME + "("
@@ -23,25 +23,28 @@ public class RosterEntry implements Serializable, Contact {
 					+ Presence.PHOTO + " VARCHAR(30), "
 					+ Presence.STATUS + " VARCHAR(30), "
 					+ RELATIONSHIP + " VARCHAR(30), "
+					+ RID + " VARCHAR(50), "
 					+ "PRIMARY KEY (" + User.UID + "," + User.NAME + ") "
 					+ ") ";
 
-	/**
-	 * 黑名單
-	 */
-	public static final int RELATION_BLACKLIST = -1;
-	/**
-	 * 陌生人/刪除好友
-	 */
-	public static final int RELATION_STRANGER = 0;
-	/**
-	 * 已受邀
-	 */
-	public static final int RELATION_INVITEES = 1;
-	/**
-	 * 好友
-	 */
-	public static final int RELATION_FRIEND = 2;
+	public class Releationship{
+		/**
+		 * 黑名單
+		 */
+		public static final int BLACKLIST = -1;
+		/**
+		 * 陌生人/刪除好友
+		 */
+		public static final int STRANGER = 0;
+		/**
+		 * 已受邀
+		 */
+		public static final int INVITEES = 1;
+		/**
+		 * 好友
+		 */
+		public static final int FRIEND = 2;
+	}
 
 	@SerializedName("relationship")// 可以讓你的field名稱與API不同
 	private Integer relationship;
@@ -52,16 +55,21 @@ public class RosterEntry implements Serializable, Contact {
 	@SerializedName("user")
 	private User user;
 
-	public RosterEntry(User user, Presence presence, Integer relationship) {
+	@SerializedName("rid")
+	private String rid;
+
+	public RosterEntry(User user, Presence presence, Integer relationship, String rid) {
+		this.user = user;
 		this.presence = presence;
 		this.relationship = relationship;
-		this.user = user;
+		this.rid = rid;
 	}
 
 	public static RosterEntry newInstance(Cursor cursor){
 		return new RosterEntry(
 				User.newInstance(cursor), Presence.newInstance(cursor),
-				cursor.getInt(cursor.getColumnIndexOrThrow(RosterEntry.RELATIONSHIP))
+				cursor.getInt(cursor.getColumnIndexOrThrow(RosterEntry.RELATIONSHIP)),
+				cursor.getString(cursor.getColumnIndexOrThrow(RosterEntry.RID))
 		);
 	}
 
@@ -73,6 +81,7 @@ public class RosterEntry implements Serializable, Contact {
 		cv.put(Presence.PHOTO, presence.getPhoto());
 		cv.put(Presence.STATUS, presence.getStatus());
 		cv.put(RELATIONSHIP, relationship);
+		cv.put(RID, rid);
 		return cv;
 	}
 
@@ -88,7 +97,7 @@ public class RosterEntry implements Serializable, Contact {
 		return relationship;
 	}
 
-	public void setRelationship(Integer relationship) {
+	public void setRelationship(int relationship) {
 		this.relationship = relationship;
 	}
 
@@ -101,13 +110,17 @@ public class RosterEntry implements Serializable, Contact {
 	}
 
 	@Override
-	public String getId() {
-		return user.getUid();
+	public String getName() {
+		return user.getName();
 	}
 
 	@Override
-	public String getName() {
-		return user.getName();
+	public String getRid() {
+		return rid;
+	}
+
+	public void setRid(String rid) {
+		this.rid = rid;
 	}
 
 	@Override
@@ -116,7 +129,8 @@ public class RosterEntry implements Serializable, Contact {
 			RosterEntry entry = (RosterEntry) o;
 			return this.user.equals(entry.user)
 					&& this.presence.equals(entry.presence)
-					&& this.relationship.equals(entry.relationship);
+					&& this.relationship.equals(entry.relationship)
+					&& this.rid.equals(entry.rid);
 		}
 		return false;
 	}
@@ -126,7 +140,7 @@ public class RosterEntry implements Serializable, Contact {
 		final int PRIME = 81;
 		int result = 1;
 		result = PRIME * result + (PRIME * getUser().hashCode())
-				+ getPresence().hashCode() + getRelationship().hashCode();
+				+ getPresence().hashCode() + getRelationship().hashCode() + getRid().hashCode();
 		return result;
 	}
 }

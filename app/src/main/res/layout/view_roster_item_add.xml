@@ -60,7 +60,7 @@
 				android:layout_below="@+id/id"
 				/>
 			<Button
-				android:id="@+id/btCancel"
+				android:id="@+id/btAdd"
 				android:layout_width="70dp"
 				android:layout_height="35dp"
 				android:text="add"

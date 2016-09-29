@@ -31,13 +31,23 @@
 		</service>
 
 		<activity
-			android:name=".activity.InviteActivity"
+			android:name=".activity.InviteMemberActivity"
 			android:label="@string/title_activity_invite"
 			android:theme="@style/AppTheme.NoActionBar">
 		</activity>
 		<activity
-			android:name=".activity.MemberActivity"
+			android:name=".activity.ViewMemberActivity"
 			android:label="@string/title_activity_member"
+			android:theme="@style/AppTheme.NoActionBar">
+		</activity>
+		<activity
+			android:name=".activity.InviteRosterActivity"
+			android:label="@string/title_activity_invite_roster"
+			android:theme="@style/AppTheme.NoActionBar">
+		</activity>
+		<activity
+			android:name=".activity.CreateGroupActivity"
+			android:label="@string/title_activity_create_group"
 			android:theme="@style/AppTheme.NoActionBar">
 		</activity>
 	</application>

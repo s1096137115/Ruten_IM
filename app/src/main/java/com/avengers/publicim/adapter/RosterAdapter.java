@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.data.entities.Contact;
-import com.avengers.publicim.data.entities.Group;
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
 
 import java.util.List;
@@ -40,8 +40,8 @@ public class RosterAdapter extends RecyclerView.Adapter<RosterAdapter.NormalText
 	public void onBindViewHolder(NormalTextViewHolder holder, int position) {
 		if(mRosterEntries.get(position) instanceof RosterEntry){
 			holder.mID.setText(((RosterEntry) mRosterEntries.get(position)).getUser().getName());
-		}else if(mRosterEntries.get(position) instanceof Group){
-			holder.mID.setText(((Group) mRosterEntries.get(position)).getName());
+		}else if(mRosterEntries.get(position) instanceof Room){
+			holder.mID.setText(((Room) mRosterEntries.get(position)).getName());
 		}
 	}
 

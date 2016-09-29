@@ -1,0 +1,109 @@
+package com.avengers.publicim.activity;
+
+import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.Button;
+
+import com.avengers.publicim.R;
+import com.avengers.publicim.adapter.InviteGroupAdapter;
+import com.avengers.publicim.data.entities.Contact;
+import com.avengers.publicim.data.entities.Invite;
+import com.avengers.publicim.data.entities.Member;
+import com.avengers.publicim.data.entities.Room;
+import com.avengers.publicim.data.entities.RosterEntry;
+import com.avengers.publicim.data.event.ServiceEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.avengers.publicim.conponent.IMApplication.getProgress;
+import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
+import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
+
+public class InviteMemberActivity extends BaseActivity{
+    private RecyclerView mRecyclerView;
+    private Button mButton;
+    private InviteGroupAdapter mInviteAdapter;
+    private Contact mContact;
+    private Room mRoom;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_invite_group);
+        mButton = (Button)findViewById(R.id.button);
+        getData();
+        setToolbar();
+        mInviteAdapter = new InviteGroupAdapter(this , getInviteRoster());
+        setRecyclerView(mInviteAdapter);
+        mButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<RosterEntry> list = ((InviteGroupAdapter) mRecyclerView.getAdapter()).getSelectedList();
+                for (RosterEntry entry: list) {
+                    getProgress().setMessage("Waiting...");
+                    getProgress().show();
+                    Invite invite = new Invite(entry.getUser(), Invite.Type.ROOM, mContact.getRid());
+                    mIMService.sendInvite(invite);
+                }
+            }
+        });
+    }
+
+    private List<RosterEntry> getInviteRoster(){
+        List<RosterEntry> entries = getRosterManager().getList(RosterEntry.Type.ROSTER);
+        List<RosterEntry> exists = new ArrayList<>();
+        for (RosterEntry entry:entries) {
+            for (Member member: mRoom.getMembers()) {
+                if(entry.getName().equals(member.getUser()) && !member.getRole().equals(Room.Role.EXIT)){
+                    exists.add(entry);
+                    break;
+                }
+            }
+        }
+        entries.removeAll(exists);
+        return entries;
+    }
+
+    private void setToolbar(){
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if(mContact != null){
+            getSupportActionBar().setTitle(mContact.getName());
+        }
+    }
+
+    private void setRecyclerView(RecyclerView.Adapter adapter){
+        mRecyclerView = (RecyclerView)findViewById(R.id.recyclerView);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(adapter);
+    }
+
+    private void getData(){
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            mContact = (Contact)bundle.getSerializable(Contact.Type.CONTACT);
+            mRoom = getRoomManager().getItem(Room.Type.ALL ,mContact.getRid());
+        }
+    }
+
+    @Override
+    public void onServeiceResponse(ServiceEvent event) {
+        if(this == event.getListener()){
+            switch (event.getEvent()){
+                case ServiceEvent.Event.CLOSE_DIALOG:
+                    getProgress().dismiss();
+                    finish();
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+}

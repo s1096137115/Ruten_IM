@@ -13,14 +13,14 @@ import android.widget.TextView;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.data.entities.Contact;
-import com.avengers.publicim.data.entities.Group;
 import com.avengers.publicim.data.entities.Presence;
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
+import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
 /**
@@ -31,7 +31,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 	private final Context mContext;
 	private List<Contact> mContacts;
 	private List<RosterEntry> mRoster;
-	private List<Group> mGroups;
+	private List<Room> mRooms;
 	private List<Header> mHeader;
 	private Handler mHandler = new Handler();
 
@@ -77,7 +77,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 			if(mContacts.get(position) instanceof RosterEntry){
 				((ContactViewHolder) holder).icon.setImageResource(R.drawable.ic_person_black_48dp);
 				int visibility = ((RosterEntry) mContacts.get(position)).getPresence()
-						.getStatus() == Presence.STATUS_ONLINE ? View.VISIBLE : View.GONE;
+						.getStatus() == Presence.Status.ONLINE ? View.VISIBLE : View.GONE;
 				((ContactViewHolder) holder).status.setVisibility(visibility);
 			}else{
 				((ContactViewHolder) holder).icon.setImageResource(R.drawable.ic_group_black_48dp);
@@ -102,8 +102,8 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 	public void expandHeader(int position){
 		if(((Header)mContacts.get(position)).toggle){
 			if(mContacts.get(position).getName().equals("群組")){
-				mContacts.removeAll(mGroups);
-				notifyItemRangeRemoved(position + 1, mGroups.size());
+				mContacts.removeAll(mRooms);
+				notifyItemRangeRemoved(position + 1, mRooms.size());
 			}else{
 				mContacts.removeAll(mRoster);
 				notifyItemRangeRemoved(position + 1, mRoster.size());
@@ -112,8 +112,8 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 		}else{
 			if(mContacts.get(position).getName().equals("群組")){
 				int index = mContacts.indexOf(mHeader.get(GROUPS));
-				mContacts.addAll( index+1, mGroups);
-				notifyItemRangeInserted(index+1, mGroups.size());
+				mContacts.addAll( index+1, mRooms);
+				notifyItemRangeInserted(index+1, mRooms.size());
 			}else{
 				int index = mContacts.indexOf(mHeader.get(ROSTER));
 				mContacts.addAll( index+1, mRoster);
@@ -151,11 +151,11 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 	}
 
 	public void update(){
-		mGroups = getGroupManager().getList();
-		mRoster = getRosterManager().getList();
+		mRooms = getRoomManager().getList(Room.Type.GROUP);
+		mRoster = getRosterManager().getList(RosterEntry.Type.ROSTER);
 		mContacts.clear();
 		mContacts.add(mHeader.get(GROUPS));
-		mContacts.addAll(mGroups);
+		mContacts.addAll(mRooms);
 		mContacts.add(mHeader.get(ROSTER));
 		mContacts.addAll(mRoster);
 	}
@@ -186,7 +186,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 		}
 	}
 
-	public static class Header implements Contact{
+	public static class Header extends Contact {
 		public boolean toggle;
 		public String title;
 
@@ -196,7 +196,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 		}
 
 		@Override
-		public String getId() {
+		public String getRid() {
 			return null;
 		}
 

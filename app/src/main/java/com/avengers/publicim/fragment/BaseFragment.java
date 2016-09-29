@@ -4,19 +4,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 
 import com.avengers.publicim.activity.BaseActivity;
 import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMService;
-import com.avengers.publicim.data.callback.ChatListener;
-import com.avengers.publicim.data.callback.GroupListener;
-import com.avengers.publicim.data.callback.MessageListener;
-import com.avengers.publicim.data.callback.RosterListener;
-import com.avengers.publicim.data.callback.ServiceListener;
+import com.avengers.publicim.data.listener.MessageListener;
+import com.avengers.publicim.data.listener.RoomListener;
+import com.avengers.publicim.data.listener.RosterListener;
+import com.avengers.publicim.data.listener.ServiceListener;
 
-import static com.avengers.publicim.conponent.IMApplication.getChatManager;
-import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
 import static com.avengers.publicim.conponent.IMApplication.getMessageManager;
+import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
 /**
@@ -31,20 +30,30 @@ public abstract class BaseFragment extends Fragment implements ServiceListener{
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDB = DbHelper.getInstance(getContext());
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	@Override
 	public void onStart() {
 		super.onStart();
+		mIMService = ((BaseActivity)getActivity()).getIMService();
 		if(mIMService != null){
 			registerListeners();
 		}
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
 		unregisterListeners();
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	public void onBackendConnected() {
@@ -56,14 +65,11 @@ public abstract class BaseFragment extends Fragment implements ServiceListener{
 
 	public void registerListeners(){
 		mIMService.addListener(this);
-		if (this instanceof ChatListener) {
-			getChatManager().addListener((ChatListener) this);
+		if (this instanceof RoomListener) {
+			getRoomManager().addListener((RoomListener) this);
 		}
 		if (this instanceof RosterListener) {
 			getRosterManager().addListener((RosterListener) this);
-		}
-		if (this instanceof GroupListener) {
-			getGroupManager().addListener((GroupListener) this);
 		}
 		if (this instanceof MessageListener) {
 			getMessageManager().addMessageListener((MessageListener) this);
@@ -71,15 +77,14 @@ public abstract class BaseFragment extends Fragment implements ServiceListener{
 	}
 
 	public void unregisterListeners(){
-		mIMService.removeListener(this);
-		if (this instanceof ChatListener) {
-			getChatManager().removeListener((ChatListener) this);
+		if(mIMService != null){
+			mIMService.removeListener(this);
+		}
+		if (this instanceof RoomListener) {
+			getRoomManager().removeListener((RoomListener) this);
 		}
 		if (this instanceof RosterListener) {
 			getRosterManager().removeListener((RosterListener) this);
-		}
-		if (this instanceof GroupListener) {
-			getGroupManager().removeListener((GroupListener) this);
 		}
 		if (this instanceof MessageListener) {
 			getMessageManager().removeMessageListener((MessageListener) this);

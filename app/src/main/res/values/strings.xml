@@ -6,10 +6,23 @@
 	<string name="action_create_group">建立群組</string>
 	<string name="action_invite_group">邀請</string>
 	<string name="action_exit_group">退出群組</string>
-	<string name="title_activity_chat">ChatActivity</string>
 
 	<!-- TODO: Remove or change this placeholder text -->
 	<string name="hello_blank_fragment">Hello blank fragment</string>
+
+	<string name="msg_read_count">"已讀" %d</string>
+	<string name="msg_read">"已讀"</string>
+	<string name="msg_get_user_not_find">"此使用者不存在"</string>
+	<string name="msg_get_user_yourself">"你找到了自己"</string>
+	<string name="msg_get_user_not_yet">"尚未加入此人為好友"</string>
+	<string name="msg_get_user_already">"此人己是你的好友"</string>
+
+	<string name="text_group_name">"群組名稱"</string>
+
 	<string name="title_activity_invite">InviteActivity</string>
 	<string name="title_activity_member">MemberActivity</string>
+	<string name="title_activity_chat">ChatActivity</string>
+	<string name="title_activity_invite_roster">InviteRosterActivity</string>
+	<string name="title_activity_invite_roster2">InviteRoster2Activity</string>
+	<string name="title_activity_create_group">建立群組</string>
 </resources>

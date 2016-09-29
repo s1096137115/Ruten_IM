@@ -9,14 +9,10 @@ import java.io.Serializable;
  */
 public class Invite implements Serializable {
 
-	/**
-	 *
-	 */
-	public static final String TYPE_FRIEND = "friend";
-	/**
-	 *
-	 */
-	public static final String TYPE_GROUP = "group";
+	public class Type{
+		public static final String FRIEND = "friend";
+		public static final String ROOM = "room";
+	}
 
 	/**
 	 * 傳送端
@@ -37,10 +33,10 @@ public class Invite implements Serializable {
 	private String type;
 
 	/**
-	 * 群組資料
+	 * 房間資料
 	 */
-	@SerializedName("group")
-	private Group group;
+	@SerializedName("room")
+	private Room room;
 
 	/**
 	 * 群組角色
@@ -55,19 +51,13 @@ public class Invite implements Serializable {
 	private Integer relationship;
 
 	/**
-	 * 邀請群組的gid
+	 * 邀請群組的rid
 	 */
-	@SerializedName("gid")
-	private String gid;
+	@SerializedName("rid")
+	private String rid;
 
-	public Invite(User from, User to, String type, String gid, Integer role, Integer relationship) {
-		this.from = from;
-		this.gid = gid;
-		this.relationship = relationship;
-		this.role = role;
-		this.to = to;
-		this.type = type;
-	}
+	@SerializedName("presence")
+	private Presence presence;
 
 	/**
 	 * 邀請好友
@@ -83,12 +73,20 @@ public class Invite implements Serializable {
 	 * 邀請群組
 	 * @param to
 	 * @param type
-	 * @param gid
+	 * @param rid
 	 */
-	public Invite(User to, String type, String gid){
+	public Invite(User to, String type, String rid){
 		this.to = to;
 		this.type = type;
-		this.gid = gid;
+		this.rid = rid;
+	}
+
+	public String getRidOfInvite() {
+		return rid;
+	}
+
+	public void setRidOfInvite(String rid) {
+		this.rid = rid;
 	}
 
 	public User getFrom() {
@@ -99,12 +97,12 @@ public class Invite implements Serializable {
 		this.from = from;
 	}
 
-	public Group getGroup() {
-		return group;
+	public Room getRoom() {
+		return room;
 	}
 
-	public void setGroup(Group group) {
-		this.group = group;
+	public void setRoom(Room room) {
+		this.room = room;
 	}
 
 	public Integer getRole() {
@@ -137,5 +135,13 @@ public class Invite implements Serializable {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public Presence getPresence() {
+		return presence;
+	}
+
+	public void setPresence(Presence presence) {
+		this.presence = presence;
 	}
 }

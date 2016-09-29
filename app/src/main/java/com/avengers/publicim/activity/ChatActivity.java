@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,34 +13,26 @@ import android.widget.ImageButton;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.ChatAdapter;
-import com.avengers.publicim.conponent.DbHelper;
 import com.avengers.publicim.conponent.IMApplication;
-import com.avengers.publicim.data.callback.MessageListener;
-import com.avengers.publicim.data.callback.ServiceEvent;
-import com.avengers.publicim.data.entities.Chat;
 import com.avengers.publicim.data.entities.Contact;
-import com.avengers.publicim.data.entities.Group;
+import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
-import com.avengers.publicim.data.entities.RosterEntry;
-import com.avengers.publicim.data.entities.User;
+import com.avengers.publicim.data.entities.Room;
+import com.avengers.publicim.data.event.ServiceEvent;
+import com.avengers.publicim.data.listener.MessageListener;
+import com.avengers.publicim.data.listener.RoomListener;
 import com.avengers.publicim.utils.SystemUtils;
 
-import static com.avengers.publicim.conponent.IMApplication.getChatManager;
-import static com.avengers.publicim.conponent.IMApplication.getGroupManager;
+import java.util.List;
+
 import static com.avengers.publicim.conponent.IMApplication.getProgress;
-import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
+import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 
-public class ChatActivity extends BaseActivity implements MessageListener{
-	public static final String ROSTER_NAME = "roster_name";
-	public static final String GROUP_ID = "gid";
-	public static final String ROSTER = "roster";
-
+public class ChatActivity extends BaseActivity implements MessageListener, RoomListener{
 	private RecyclerView mRecyclerView;
 	private ChatAdapter mChatAdapter;
-	private RosterEntry mEntry;
-	private Group mGroup;
+	private Room mRoom;
 	private Contact mContact;
-	private Chat mChat;
 
 	private ImageButton mSendButton;
 	private EditText mTextInput;
@@ -54,25 +45,14 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		mTextInput = (EditText) findViewById(R.id.textInput);
 		getData();
 		setToolbar();
-		mChatAdapter = new ChatAdapter(ChatActivity.this, mDB.getMessages(mContact));
+		mChatAdapter = new ChatAdapter(ChatActivity.this, mDB.getMessages(mContact), mRoom);
 		setRecyclerView();
 
 		mSendButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Message message = null;
-				if(mContact instanceof RosterEntry){
-					message = new Message(null, IMApplication.getUser(), ((RosterEntry)mContact).getUser(), "",
-							Message.Type.TEXT, mTextInput.getText().toString(), SystemUtils.getDateTime(),
-							((RosterEntry)mContact).getUser().getName(), DbHelper.IntBoolean.TRUE);
-				}else if(mContact instanceof Group){
-					message = new Message(null, IMApplication.getUser(), User.newInstance("",""), ((Group)mContact).getGid(),
-							Message.Type.TEXT, mTextInput.getText().toString(), SystemUtils.getDateTime(),
-							((Group)mContact).getGid(), DbHelper.IntBoolean.TRUE);
-				}
-				if(message != null){
-					mIMService.sendMessage(message);
-				}
+				Message message = new Message(mContact.getRid(), Message.Type.TEXT, mTextInput.getText().toString());
+				mIMService.sendMessage(message);
 
 				//adjust UI
 				mTextInput.getText().clear();
@@ -84,29 +64,8 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 	public void getData(){
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
-			String value = "";
-			if(bundle.getString(ROSTER_NAME) != null){
-				value = bundle.getString(ROSTER_NAME);
-				if(getRosterManager().contains(value)){
-					mContact = getRosterManager().getItem(value);
-				}
-			}else if(bundle.getString(GROUP_ID) != null){
-				value = bundle.getString(GROUP_ID);
-				if(getGroupManager().contains(value)){
-					mContact = getGroupManager().getItem(value);
-					((Group)mContact).setMembers(mDB.getMembers((Group)mContact));
-				}
-			}
-
-			if(getChatManager().contains(value)){
-				mChat = getChatManager().getItem(value);
-			}else{
-				if(mContact instanceof RosterEntry){
-					mChat = new Chat(mContact.getName(),mContact.getName(), Chat.TYPE_ROSTER);
-				}else{
-					mChat = new Chat(mContact.getId(),mContact.getName(), Chat.TYPE_GROUP);
-				}
-			}
+			mContact = (Contact)bundle.getSerializable(Contact.Type.CONTACT);
+			mRoom = getRoomManager().getItem(Room.Type.ALL ,mContact.getRid());
 		}
 	}
 
@@ -118,7 +77,6 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		if(mContact != null){
 			getSupportActionBar().setTitle(mContact.getName());
 		}
-
 	}
 
 	public void setRecyclerView(){
@@ -131,24 +89,24 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 	@Override
 	protected void onBackendConnected() {
 		super.onBackendConnected();
-		if(mChat == null) return;
-		//有chat & 未讀訊息的情況下才更新chat
-		if(getChatManager().contains(mChat.getCid())){
-			if(mChatAdapter.hasUnread()){
-				mIMService.updateMessageOfRead(mChat, DbHelper.IntBoolean.TRUE);
-				getChatManager().reload();
+		//hasUnread
+		for (Member member: mRoom.getMembers()) {
+			if(mChatAdapter.getData().isEmpty()) return;
+			int last = mChatAdapter.getData().size()-1;
+			//自己的已讀時間<最後一句時才送出已讀
+			if(member.getRead_time() < mChatAdapter.getData().get(last).getDate()
+					&& member.getUser().equals(IMApplication.getUser().getName())){
+				mIMService.sendMessageRead(mContact.getRid(), System.currentTimeMillis());
 			}
-		}else{
-			mIMService.addChat(mChat);
 		}
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.menu_chat, menu);
-		final MenuItem inviteGroup = menu.findItem(R.id.action_invite_group);
+		final MenuItem inviteGroup = menu.findItem(R.id.action_invite_member);
 		final MenuItem exitGroup = menu.findItem(R.id.action_exit_group);
-		if(mContact instanceof Group){
+		if(!mRoom.getType().equals(Room.Type.SINGLE)){
 			inviteGroup.setVisible(true);
 			exitGroup.setVisible(true);
 		}else{
@@ -164,28 +122,48 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 		Intent intent;
 		switch (id){
 			case R.id.action_view_member:
-				intent = new Intent(this, MemberActivity.class);
-				intent.putExtra(ChatActivity.GROUP_ID, mContact.getId());
+				intent = new Intent(this, ViewMemberActivity.class);
+				intent.putExtra(Contact.Type.CONTACT, mContact);
 				startActivity(intent);
 				break;
-			case R.id.action_invite_group:
-				intent = new Intent(this, InviteActivity.class);
-				intent.putExtra(ChatActivity.GROUP_ID, mContact.getId());
+			case R.id.action_invite_member:
+				intent = new Intent(this, InviteMemberActivity.class);
+				intent.putExtra(Contact.Type.CONTACT, mContact);
 				startActivity(intent);
 				break;
 			case R.id.action_exit_group:
 				getProgress().setMessage("Waiting...");
 				getProgress().show();
-				mIMService.sendSetGroupMemberRole((Group) mContact, Group.ROLE_EXIT);
+				mIMService.sendSetRoomMemberRole(mRoom, IMApplication.getUser(), Room.Role.EXIT);
 				break;
 		}
 		return true;
 	}
 
 	@Override
-	public void onMessageUpdate() {
-		mIMService.updateMessageOfRead(mChat, DbHelper.IntBoolean.TRUE);
-		mChatAdapter.update(mDB.getMessages(mContact));
+	public void onServeiceResponse(ServiceEvent event) {
+		switch (event.getEvent()){
+			case ServiceEvent.Event.CLOSE_DIALOG:
+				getProgress().dismiss();
+				finish();
+				break;
+			case ServiceEvent.Event.CLOSE_ACTIVITY:
+				String rid = event.getBundle().getString(Room.RID);
+				assert rid != null;
+				if(rid.equals(mContact.getRid())) finish();
+		}
+	}
+
+	@Override
+	public String getName() {
+		return "ChatActivity";
+	}
+
+	@Override
+	public void onMessageAddition(Message message) {
+		if(!message.getRid().equals(mRoom.getRid())) return;
+		mIMService.sendMessageRead(mContact.getRid(), System.currentTimeMillis());
+		mChatAdapter.add(message);
 		mChatAdapter.refresh();
 		mHandler.post(new Runnable() {
 			@Override
@@ -193,18 +171,50 @@ public class ChatActivity extends BaseActivity implements MessageListener{
 				mRecyclerView.scrollToPosition(mChatAdapter.getItemCount()-1);
 			}
 		});
-		Log.d("text", "onMessageUpdate: ");
 	}
 
 	@Override
-	public void onServeiceResponse(ServiceEvent event) {
-		if(this == event.toListener()){
-			switch (event.getEvent()){
-				case ServiceEvent.EVENT_CLOSE_DIALOG:
-					getProgress().dismiss();
-					finish();
-					break;
+	public void onMessagesAddition(List<Message> list) {
+		boolean update = false;
+		for (Message message: list) {
+			if(message.getRid().equals(mRoom.getRid())){
+				mChatAdapter.add(message);
+				update = true;
 			}
+		}
+		if(!update) return; //如果沒有新增到該房間的資料就return
+		mIMService.sendMessageRead(mContact.getRid(), System.currentTimeMillis());
+		mChatAdapter.refresh();
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				mRecyclerView.scrollToPosition(mChatAdapter.getItemCount()-1);
+			}
+		});
+	}
+
+	@Override
+	public void onMessageUpdate(Message message) {
+
+	}
+
+	@Override
+	public void onMessagesUpdate(List<Message> list) {
+
+	}
+
+	@Override
+	public void onRoomUpdate(ServiceEvent event) {
+		switch (event.getEvent()) {
+			case ServiceEvent.Event.GET_ROOM:
+				mRoom = getRoomManager().getItem(Room.Type.ALL ,mContact.getRid());
+				if(mRoom != null) {
+					mChatAdapter.update(mRoom);
+					mChatAdapter.refresh();
+				}else{
+					finish();
+				}
+				break;
 		}
 	}
 }

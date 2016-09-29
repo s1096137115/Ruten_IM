@@ -17,9 +17,6 @@ public class Chat implements Serializable {
 
 	public static final String TYPE = "type";
 
-	public static final int TYPE_ROSTER = 0;
-	public static final int TYPE_GROUP = 1;
-
 	/**
 	 * not stored in DB
 	 */

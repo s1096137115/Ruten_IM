@@ -19,21 +19,23 @@ public class Member implements Serializable{
 
 	public static final String INVITOR = "invitor";
 
-	public static final String GROUP_ID = "group_id";
+	public static final String READ_TIME = "read_time";
+
+	public static final String RID = "rid";
 
 	public static final String CREATE_SQL =
 			"CREATE TABLE " + TABLE_NAME + "("
 					+ ROLE + " VARCHAR(5), "
 					+ USER + " VARCHAR(30), "
 					+ INVITOR + " VARCHAR(30), "
-					+ GROUP_ID + " VARCHAR(50), "
-//					+ "FOREIGN KEY (" + GROUP_ID + ") REFERENCES " + Group.TABLE_NAME + "(" + Group.GID + ") "
-					+ "PRIMARY KEY (" + USER + "," + GROUP_ID + ") "
+					+ RID + " VARCHAR(50), "
+					+ READ_TIME + " TIMESTAMP, "
+					+ "PRIMARY KEY (" + USER + "," + RID + ") "
 					+ ") ";
 
 
 	@SerializedName("role")
-	private String role;
+	private Integer role;
 
 	@SerializedName("user")
 	private String user;
@@ -41,40 +43,48 @@ public class Member implements Serializable{
 	@SerializedName("invitor")
 	private String invitor;
 
+	@SerializedName("read_time")
+	private long read_time;
 
-	private String groupId;
+	private String rid;
 
-	private Member(String user, String invitor, String role, String groupId) {
+	public Member(String user, String invitor, Integer role, long read_time, String rid) {
 		this.user = user;
 		this.invitor = invitor;
 		this.role = role;
-		this.groupId = groupId;
+		this.read_time = read_time;
+		this.rid = rid;
+	}
+
+	public Member(){
 	}
 
 	public static Member newInstance(Cursor cursor){
 		return new Member(
 				cursor.getString(cursor.getColumnIndexOrThrow(USER)),
 				cursor.getString(cursor.getColumnIndexOrThrow(INVITOR)),
-				cursor.getString(cursor.getColumnIndexOrThrow(ROLE)),
-				cursor.getString(cursor.getColumnIndexOrThrow(GROUP_ID))
+				cursor.getInt(cursor.getColumnIndexOrThrow(ROLE)),
+				cursor.getLong(cursor.getColumnIndexOrThrow(READ_TIME)),
+				cursor.getString(cursor.getColumnIndexOrThrow(RID))
 		);
 	}
 
 	public ContentValues getContentValues(){
 		ContentValues values = new ContentValues();
-		values.put(ROLE, getRole());
-		values.put(USER, getUser());
-		values.put(INVITOR, getInvitor());
-		values.put(GROUP_ID, getGroupId());
+		if(getRole() != null) values.put(ROLE, getRole());
+		if(getUser() != null) values.put(USER, getUser());
+		if(getInvitor() != null) values.put(INVITOR, getInvitor());
+		if(getRead_time() != null) values.put(READ_TIME, getRead_time());
+		if(getRid() != null) values.put(RID, getRid());
 		return values;
 	}
 
-	public String getGroupId() {
-		return groupId;
+	public String getRid() {
+		return rid;
 	}
 
-	public void setGroupId(String groupId) {
-		this.groupId = groupId;
+	public void setRid(String rid) {
+		this.rid = rid;
 	}
 
 	public String getInvitor() {
@@ -85,11 +95,11 @@ public class Member implements Serializable{
 		this.invitor = invitor;
 	}
 
-	public String getRole() {
+	public Integer getRole() {
 		return role;
 	}
 
-	public void setRole(String role) {
+	public void setRole(Integer role) {
 		this.role = role;
 	}
 
@@ -101,10 +111,18 @@ public class Member implements Serializable{
 		this.user = user;
 	}
 
+	public Long getRead_time() {
+		return read_time;
+	}
+
+	public void setRead_time(long read_time) {
+		this.read_time = read_time;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if(o instanceof Member) {
-			Member member = (Member) o;;
+			Member member = (Member) o;
 			return this.role.equals(member.role)
 					&& this.user.equals(member.user)
 					&& this.invitor.equals(member.invitor);

@@ -11,22 +11,16 @@ import android.view.ViewGroup;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.activity.ChatActivity;
+import com.avengers.publicim.activity.CreateGroupActivity;
 import com.avengers.publicim.adapter.ContactAdapter;
-import com.avengers.publicim.data.callback.GroupListener;
-import com.avengers.publicim.data.callback.RosterListener;
-import com.avengers.publicim.data.callback.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
-import com.avengers.publicim.data.entities.Group;
-import com.avengers.publicim.data.entities.RosterEntry;
+import com.avengers.publicim.data.event.ServiceEvent;
+import com.avengers.publicim.data.listener.RoomListener;
+import com.avengers.publicim.data.listener.RosterListener;
 import com.avengers.publicim.utils.ItemClickSupport;
 
 
-public class RosterFragment extends BaseFragment implements RosterListener, GroupListener{
-	private static final String ARG_PARAM1 = "param1";
-	private static final String ARG_PARAM2 = "param2";
-
-	private String mParam1;
-	private String mParam2;
+public class RosterFragment extends BaseFragment implements RosterListener, RoomListener{
 	private RecyclerView mRecyclerView;
 	private ContactAdapter mContactAdapter;
 
@@ -37,11 +31,6 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (getArguments() != null) {
-			mParam1 = getArguments().getString(ARG_PARAM1);
-			mParam2 = getArguments().getString(ARG_PARAM2);
-		}
-
 	}
 
 	@Override
@@ -58,19 +47,13 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 			@Override
 			public void onItemClicked(RecyclerView recyclerView, int position, View v) {
 				Contact item = ((ContactAdapter) recyclerView.getAdapter()).getItem(position);
-				if(item instanceof ContactAdapter.Header){
+				if(item instanceof ContactAdapter.Header) {
 					RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(position);
 					((ContactAdapter) recyclerView.getAdapter()).rotationView(holder, position);
 					((ContactAdapter) recyclerView.getAdapter()).expandHeader(position);
-				}else if(item instanceof RosterEntry){
-					String name = ((ContactAdapter)recyclerView.getAdapter()).getItem(position).getName();
+				}else{
 					Intent intent = new Intent(getActivity(), ChatActivity.class);
-					intent.putExtra(ChatActivity.ROSTER_NAME, name);
-					startActivity(intent);
-				}else if(item instanceof Group){
-					String gid = ((ContactAdapter)recyclerView.getAdapter()).getItem(position).getId();
-					Intent intent = new Intent(getActivity(), ChatActivity.class);
-					intent.putExtra(ChatActivity.GROUP_ID, gid);
+					intent.putExtra(Contact.Type.CONTACT, ((ContactAdapter)recyclerView.getAdapter()).getItem(position));
 					startActivity(intent);
 				}
 			}
@@ -91,8 +74,12 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				refresh();
-				mIMService.sendGetSyncData();
+				Intent intent = new Intent(getActivity(), CreateGroupActivity.class);
+				startActivity(intent);
+//				refresh();
+//				mIMService.sendGetUser(GetUser.Type.ID, "test02");
+//				mIMService.sendGetMessage(PreferenceHelper.UpdateStatus.getUpdateTime(), null);
+//				mIMService.sendGetMessageRead();
 			}
 		});
 	}
@@ -103,7 +90,7 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 	}
 
 	@Override
-	public void onRosterUpdate() {
+	public void onRosterUpdate(ServiceEvent event) {
 		mHandler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -113,17 +100,26 @@ public class RosterFragment extends BaseFragment implements RosterListener, Grou
 	}
 
 	@Override
-	public void onGroupUpdate() {
-		mHandler.post(new Runnable() {
-			@Override
-			public void run() {
-				refresh();
-			}
-		});
+	public void onRoomUpdate(ServiceEvent event) {
+		switch (event.getEvent()) {
+			case ServiceEvent.Event.GET_ROOM:
+				mHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						refresh();
+					}
+				});
+				break;
+		}
 	}
 
 	@Override
 	public void onServeiceResponse(ServiceEvent event) {
 
+	}
+
+	@Override
+	public String getName() {
+		return null;
 	}
 }

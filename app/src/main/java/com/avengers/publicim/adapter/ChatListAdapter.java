@@ -10,7 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.data.entities.Chat;
+import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.data.Constants;
+import com.avengers.publicim.data.entities.Member;
+import com.avengers.publicim.data.entities.Room;
+import com.avengers.publicim.utils.SystemUtils;
 
 import java.util.List;
 
@@ -21,10 +25,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 	private Handler mHandler = new Handler();
 	private final LayoutInflater mLayoutInflater;
 	private final Context mContext;
-	private List<Chat> mChats;
+	private List<Room> mRooms;
 
-	public ChatListAdapter(Context context, List<Chat> objects){
-		mChats = objects;
+	public ChatListAdapter(Context context, List<Room> objects){
+		mRooms = objects;
 		mContext = context;
 		mLayoutInflater = LayoutInflater.from(context);
 	}
@@ -36,25 +40,35 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 
 	@Override
 	public void onBindViewHolder(ChatListViewHolder holder, int position) {
-		holder.mCid = mChats.get(position).getCid();
-		int resId = mChats.get(position).getType() == Chat.TYPE_GROUP ?
-				R.drawable.ic_group_black_48dp : R.drawable.ic_person_black_48dp;
+		holder.mRid = mRooms.get(position).getRid();
+		int resId = mRooms.get(position).getType().equals(Room.Type.SINGLE) ?
+				R.drawable.ic_person_black_48dp : R.drawable.ic_group_black_48dp;
 		holder.mIcon.setImageResource(resId);
-		holder.mTitle.setText(mChats.get(position).getTitle());
-		holder.mDate.setText(mChats.get(position).getDate());
-		holder.mContent.setText(mChats.get(position).getLastMsg().getContent());
-		holder.mUnread.setText(String.valueOf(mChats.get(position).getUnread()));
-		int visible = mChats.get(position).getUnread() == 0 ? View.GONE : View.VISIBLE;
+		String title = "";
+		if(mRooms.get(position).getType().equals(Room.Type.SINGLE)){
+			for (Member member : mRooms.get(position).getMembers()) {
+				if(!member.getUser().equals(IMApplication.getUser().getName())){
+					title = member.getUser();
+				}
+			}
+		}else{
+			title = mRooms.get(position).getName();
+		}
+		holder.mTitle.setText(title);
+		holder.mDate.setText(SystemUtils.getDate(mRooms.get(position).getDate(), Constants.Date.WEEK));
+		holder.mContent.setText(mRooms.get(position).getLastMsg().getContext());
+		holder.mUnread.setText(String.valueOf(mRooms.get(position).getUnread()));
+		int visible = mRooms.get(position).getUnread() == 0 ? View.GONE : View.VISIBLE;
 		holder.mUnread.setVisibility(visible);
 	}
 
 	@Override
 	public int getItemCount() {
-		return mChats == null ? 0 : mChats.size();
+		return mRooms == null ? 0 : mRooms.size();
 	}
 
-	public Chat getItem(int position){
-		return mChats.get(position);
+	public Room getItem(int position){
+		return mRooms.get(position);
 	}
 
 	public void refresh(){
@@ -66,12 +80,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 		});
 	}
 
-	public void update(List<Chat> objects){
-		mChats = objects;
+	public void update(List<Room> objects){
+		mRooms = objects;
 	}
 
 	public static class ChatListViewHolder extends RecyclerView.ViewHolder {
-		String mCid;
+		String mRid;
 		ImageView mIcon;
 		TextView mTitle;
 		TextView mUnread;
@@ -87,12 +101,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 			mContent = (TextView)view.findViewById(R.id.content);
 		}
 
-		public String getmCid() {
-			return mCid;
+		public String getmRid() {
+			return mRid;
 		}
 
-		public void setmCid(String mCid) {
-			this.mCid = mCid;
+		public void setmRid(String mRid) {
+			this.mRid = mRid;
 		}
 
 		public TextView getmContent() {

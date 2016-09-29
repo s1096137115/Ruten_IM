@@ -4,15 +4,17 @@ import android.app.Application;
 import android.content.Context;
 
 import com.avengers.publicim.data.Constants;
-import com.avengers.publicim.data.Manager.ChatManager;
-import com.avengers.publicim.data.Manager.GroupManager;
 import com.avengers.publicim.data.Manager.MessageManager;
+import com.avengers.publicim.data.Manager.RoomManager;
 import com.avengers.publicim.data.Manager.RosterManager;
 import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
+import com.avengers.publicim.utils.AndroidLoggingHandler;
 import com.avengers.publicim.view.DialogBuilder;
 import com.avengers.publicim.view.IMProgressDialog;
+
+import java.util.logging.Level;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -24,8 +26,7 @@ public class IMApplication extends Application {
 	private static Context mContext;
 	private Socket mSocket;
 	private static RosterManager mRosterManager;
-	private static ChatManager mChatManager;
-	private static GroupManager mGroupManager;
+	private static RoomManager mRoomManager;
 	private static MessageManager mMessageManager;
 	private static IMProgressDialog mProgressDialog;
 	private static DialogBuilder mBuilder;
@@ -37,14 +38,16 @@ public class IMApplication extends Application {
 		super.onCreate();
 		mContext = getApplicationContext();
 		mDB = DbHelper.getInstance(this);
+		AndroidLoggingHandler.reset(new AndroidLoggingHandler());
+		java.util.logging.Logger.getLogger("my.category").setLevel(Level.FINEST);
 		initSocket();
 		initManager();
 		initAccount();
 	}
 
 	private void initAccount(){
-		mEntry = new RosterEntry(new User("Android-0808-1652", "test01"),
-				new Presence("","",Presence.STATUS_ONLINE), 0);
+		mEntry = new RosterEntry(new User("Android-Emulator2", "test04"),
+				new Presence("","", Presence.Status.ONLINE), 0, "");
 	}
 
 	public static User getUser(){
@@ -68,11 +71,7 @@ public class IMApplication extends Application {
 
 	private void initManager(){
 		mRosterManager = new RosterManager(mContext);
-		mRosterManager.reload();
-		mChatManager = new ChatManager(mContext);
-		mChatManager.reload();
-		mGroupManager = new GroupManager(mContext);
-		mGroupManager.reload();
+		mRoomManager = new RoomManager(mContext);
 		mMessageManager = new MessageManager();
 	}
 
@@ -84,12 +83,8 @@ public class IMApplication extends Application {
 		return mRosterManager;
 	}
 
-	public static ChatManager getChatManager(){
-		return mChatManager;
-	}
-
-	public static GroupManager getGroupManager(){
-		return mGroupManager;
+	public static RoomManager getRoomManager(){
+		return mRoomManager;
 	}
 
 	public static MessageManager getMessageManager(){

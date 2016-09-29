@@ -16,8 +16,10 @@ public class Presence implements Serializable {
 
 	public static final String DESCRIBE = "describe";
 
-	public static final int STATUS_OFFLINE = 0;
-	public static final int STATUS_ONLINE = 1;
+	public class Status{
+		public static final int OFFLINE = 0;
+		public static final int ONLINE = 1;
+	}
 
 	/**
 	 * 使用者大頭照

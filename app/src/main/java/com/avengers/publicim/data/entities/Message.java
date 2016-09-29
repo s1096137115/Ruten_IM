@@ -2,11 +2,8 @@ package com.avengers.publicim.data.entities;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.text.TextUtils;
+import android.support.annotation.NonNull;
 
-import com.avengers.publicim.conponent.DbHelper;
-import com.avengers.publicim.conponent.IMApplication;
-import com.avengers.publicim.utils.SystemUtils;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -14,7 +11,7 @@ import java.io.Serializable;
 /**
  * Created by D-IT-MAX2 on 2016/3/4.
  */
-public class Message implements Serializable {
+public class Message implements Serializable, Comparable<Message>{
 	public static final String TABLE_NAME = "message";
 
 	public static final String MID = "mid";
@@ -23,37 +20,42 @@ public class Message implements Serializable {
 
 	public static final String FROM_NAME = "from_name";
 
-	public static final String TO_ID = "to_id";
-
-	public static final String TO_NAME = "to_name";
-
-	public static final String GID = "gid";
+	public static final String RID = "rid";
 
 	public static final String TYPE = "type";
 
-	public static final String CONTENT = "content";
+	public static final String CONTEXT = "context";
 
 	public static final String DATE = "date";
-
-	public static final String READ = "read";
-
-	public static final String CHAT_ID = "chat_id";
 
 	public static final String CREATE_SQL =
 			"CREATE TABLE " + TABLE_NAME + "("
 					+ MID + " VARCHAR(30) PRIMARY KEY, "
 					+ FROM_ID + " VARCHAR(50), "
 					+ FROM_NAME + " VARCHAR(50), "
-					+ TO_ID + " VARCHAR(50), "
-					+ TO_NAME + " VARCHAR(50), "
-					+ GID + " VARCHAR(50), "
+					+ RID + " VARCHAR(50), "
 					+ TYPE + " VARCHAR(30), "
-					+ CONTENT + " TEXT, "
-					+ DATE + " VARCHAR(30), "
-					+ READ + " INTEGER, "
-					+ CHAT_ID + " VARCHAR(50) "
-//					+ "FOREIGN KEY (" + CHAT_ID + ") REFERENCES " + Chat.TABLE_NAME + "(" + Chat.CID + ") "
+					+ CONTEXT + " TEXT, "
+					+ DATE + " TIMESTAMP"
 					+ ") ";
+
+	public static class Read {
+		public static final int TRUE = 1;
+		public static final int FALSE = 0;
+	}
+
+	public class Type{
+		public static final String TEXT = "text";
+
+		public static final String IMAGE = "image";
+
+		public static final String LOG = "log";
+
+		/**
+		 * local type
+		 */
+		public static final String DATE = "date";
+	}
 
 	@SerializedName("mid")// 可以讓你的field名稱與API不同
 	private String mid;
@@ -61,36 +63,32 @@ public class Message implements Serializable {
 	@SerializedName("from")
 	private User from;
 
-	@SerializedName("to")
-	private User to;
-
-	@SerializedName("gid")
-	private String gid;
+	@SerializedName("rid")
+	private String rid;
 
 	@SerializedName("type")
 	private String type;
 
 	@SerializedName("context")
-	private String content;
+	private String context;
 
 	@SerializedName("date")
-	private String date;
+	private long date;
 
-	private Integer read;
+	public Message(String rid, String type, String context){
+		this.rid = rid;
+		this.type = type;
+		this.context = context;
+	}
 
-	private String chatId;
-
-	public Message(String mid, User from, User to, String gid, String type, String content,
-	               String date, String chatId, int read) {
+	public Message(String mid, User from, String rid, String type, String context,
+	               long date) {
 		this.mid = mid;
 		this.from = from;
-		this.to = to;
-		this.gid = gid;
+		this.rid = rid;
 		this.type = type;
-		this.content = content;
+		this.context = context;
 		this.date = date;
-		this.chatId = chatId;
-		this.read = read;
 	}
 
 	public static Message newInstance(Cursor cursor){
@@ -98,72 +96,44 @@ public class Message implements Serializable {
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.FROM_ID)),
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.FROM_NAME))
 		);
-		User to = User.newInstance(
-				cursor.getString(cursor.getColumnIndexOrThrow(Message.TO_ID)),
-				cursor.getString(cursor.getColumnIndexOrThrow(Message.TO_NAME))
-		);
 
 		return new Message(
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.MID)),
 				from,
-				to,
-				cursor.getString(cursor.getColumnIndexOrThrow(Message.GID)),
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.RID)),
 				cursor.getString(cursor.getColumnIndexOrThrow(Message.TYPE)),
-				cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTENT)),
-				cursor.getString(cursor.getColumnIndexOrThrow(Message.DATE)),
-				cursor.getString(cursor.getColumnIndexOrThrow(Message.CHAT_ID)),
-				cursor.getInt(cursor.getColumnIndexOrThrow(Message.READ))
+				cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTEXT)),
+				cursor.getLong(cursor.getColumnIndexOrThrow(Message.DATE))
 		);
 	}
 
 	public ContentValues getContentValues(){
 		ContentValues values = new ContentValues();
-		values.put(Message.MID, getMid());
-		values.put(Message.FROM_ID, getFrom().getUid());
-		values.put(Message.FROM_NAME, getFrom().getName());
-		values.put(Message.TO_ID, getTo().getUid());
-		values.put(Message.TO_NAME, getTo().getName());
-		values.put(Message.GID, getGid());
-		values.put(Message.TYPE, getType());
-		values.put(Message.CONTENT, getContent());
-		values.put(Message.DATE, getDate());
-		values.put(Message.CHAT_ID, getChatId());
-		values.put(Message.READ, getRead());
+		if(getMid() != null) values.put(Message.MID, getMid());
+		if(getFrom() != null){
+			if(getFrom().getUid() != null) values.put(Message.FROM_ID, getFrom().getUid());
+			if(getFrom().getName() != null) values.put(Message.FROM_NAME, getFrom().getName());
+		}
+		if(getRid() != null) values.put(Message.RID, getRid());
+		if(getType() != null) values.put(Message.TYPE, getType());
+		if(getContext() != null) values.put(Message.CONTEXT, getContext());
+		if(getDate() != null) values.put(Message.DATE, getDate());
 		return values;
 	}
 
-	public boolean fix(){
-		if(date == null) date = SystemUtils.getDateTime();
-		if(read == null) read = DbHelper.IntBoolean.FALSE;
-		if(gid == null) gid ="";
-		if(to == null) to = User.newInstance("","");
-		if(chatId == null){
-			if(!TextUtils.isEmpty(gid)){
-				chatId = gid;
-			}else{
-				chatId = from.getName().equals(IMApplication.getUser().getName())
-				? to.getName() : from.getName();
-			}
-		}
-		if(from.getName().equals("") || to.getName().equals("") || type.equals("") || content.equals("")){
-			return false;
-		}
-		return true;
+	public String getContext() {
+		return context;
 	}
 
-	public String getContent() {
-		return content;
+	public void setContext(String content) {
+		this.context = context;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
-	}
-
-	public String getDate() {
+	public Long getDate() {
 		return date;
 	}
 
-	public void setDate(String date) {
+	public void setDate(long date) {
 		this.date = date;
 	}
 
@@ -183,20 +153,12 @@ public class Message implements Serializable {
 		this.mid = mid;
 	}
 
-	public User getTo() {
-		return to;
+	public String getRid() {
+		return rid;
 	}
 
-	public void setTo(User to) {
-		this.to = to;
-	}
-
-	public String getGid() {
-		return gid;
-	}
-
-	public void setGid(String gid) {
-		this.gid = gid;
+	public void setRid(String rid) {
+		this.rid = rid;
 	}
 
 	public String getType() {
@@ -207,24 +169,8 @@ public class Message implements Serializable {
 		this.type = type;
 	}
 
-	public String getChatId() {
-		return chatId;
-	}
-
-	public void setChatId(String chatId) {
-		this.chatId = chatId;
-	}
-
-	public Integer getRead() {
-		return read;
-	}
-
-	public void setRead(Integer read) {
-		this.read = read;
-	}
-
-	public class Type{
-		public static final String TEXT = "text";
-		public static final String IMAGE = "image";
+	@Override
+	public int compareTo(@NonNull Message another) {
+		return this.getDate() < another.getDate() ? -1 : (this.getDate().equals(another.getDate()) ? 0 : 1);
 	}
 }
