@@ -13,7 +13,7 @@ import com.avengers.publicim.data.entities.Room;
 
 import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 
-public class MemberActivity extends BaseActivity {
+public class ViewMemberActivity extends BaseActivity {
 	private RecyclerView mRecyclerView;
 	private Contact mContact;
 	private Room mRoom;

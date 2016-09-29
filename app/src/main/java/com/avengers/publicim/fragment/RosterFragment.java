@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.activity.ChatActivity;
-import com.avengers.publicim.activity.InviteRosterActivity;
+import com.avengers.publicim.activity.CreateGroupActivity;
 import com.avengers.publicim.adapter.ContactAdapter;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.event.ServiceEvent;
@@ -74,7 +74,7 @@ public class RosterFragment extends BaseFragment implements RosterListener, Room
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				Intent intent = new Intent(getActivity(), InviteRosterActivity.class);
+				Intent intent = new Intent(getActivity(), CreateGroupActivity.class);
 				startActivity(intent);
 //				refresh();
 //				mIMService.sendGetUser(GetUser.Type.ID, "test02");

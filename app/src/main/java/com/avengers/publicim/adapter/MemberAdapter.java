@@ -26,7 +26,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.NormalText
 		mLayoutInflater = LayoutInflater.from(context);
 		mMembers = new ArrayList<>();
 		for (Member member :list) {
-			if(Integer.valueOf(member.getRole()) >= Room.Role.MEMBER){
+			if(member.getRole() >= Room.Role.MEMBER){
 				mMembers.add(member);
 			}
 		}

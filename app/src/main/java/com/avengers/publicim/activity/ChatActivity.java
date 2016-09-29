@@ -104,9 +104,9 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.menu_chat, menu);
-		final MenuItem inviteGroup = menu.findItem(R.id.action_invite_group);
+		final MenuItem inviteGroup = menu.findItem(R.id.action_invite_member);
 		final MenuItem exitGroup = menu.findItem(R.id.action_exit_group);
-		if(mContact instanceof Room){
+		if(!mRoom.getType().equals(Room.Type.SINGLE)){
 			inviteGroup.setVisible(true);
 			exitGroup.setVisible(true);
 		}else{
@@ -122,12 +122,12 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 		Intent intent;
 		switch (id){
 			case R.id.action_view_member:
-				intent = new Intent(this, MemberActivity.class);
+				intent = new Intent(this, ViewMemberActivity.class);
 				intent.putExtra(Contact.Type.CONTACT, mContact);
 				startActivity(intent);
 				break;
-			case R.id.action_invite_group:
-				intent = new Intent(this, InviteGroupActivity.class);
+			case R.id.action_invite_member:
+				intent = new Intent(this, InviteMemberActivity.class);
 				intent.putExtra(Contact.Type.CONTACT, mContact);
 				startActivity(intent);
 				break;
@@ -142,17 +142,15 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 
 	@Override
 	public void onServeiceResponse(ServiceEvent event) {
-		if(this == event.getListener()){
-			switch (event.getEvent()){
-				case ServiceEvent.Event.CLOSE_DIALOG:
-					getProgress().dismiss();
-					finish();
-					break;
-				case ServiceEvent.Event.CLOSE_ACTIVITY:
-					String rid = event.getBundle().getString(Room.RID);
-					assert rid != null;
-					if(rid.equals(mContact.getRid())) finish();
-			}
+		switch (event.getEvent()){
+			case ServiceEvent.Event.CLOSE_DIALOG:
+				getProgress().dismiss();
+				finish();
+				break;
+			case ServiceEvent.Event.CLOSE_ACTIVITY:
+				String rid = event.getBundle().getString(Room.RID);
+				assert rid != null;
+				if(rid.equals(mContact.getRid())) finish();
 		}
 	}
 

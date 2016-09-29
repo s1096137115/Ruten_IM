@@ -97,7 +97,7 @@ public class RosterEntry extends Contact{
 		return relationship;
 	}
 
-	public void setRelationship(Integer relationship) {
+	public void setRelationship(int relationship) {
 		this.relationship = relationship;
 	}
 

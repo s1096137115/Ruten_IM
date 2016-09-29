@@ -42,8 +42,6 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDB = DbHelper.getInstance(this);
-		setBuilder(new DialogBuilder(this));
-		setIMProgress(new IMProgressDialog(this));
 		mHandler = new Handler();
 		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
@@ -51,6 +49,8 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	@Override
 	protected void onStart() {
 		super.onStart();
+		setBuilder(new DialogBuilder(this));
+		setIMProgress(new IMProgressDialog(this));
 		if(mIsBind){
 			registerListeners();
 			onBackendConnected();

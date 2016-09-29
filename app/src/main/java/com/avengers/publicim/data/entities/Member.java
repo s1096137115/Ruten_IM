@@ -35,7 +35,7 @@ public class Member implements Serializable{
 
 
 	@SerializedName("role")
-	private String role;
+	private Integer role;
 
 	@SerializedName("user")
 	private String user;
@@ -48,7 +48,7 @@ public class Member implements Serializable{
 
 	private String rid;
 
-	public Member(String user, String invitor, String role, long read_time, String rid) {
+	public Member(String user, String invitor, Integer role, long read_time, String rid) {
 		this.user = user;
 		this.invitor = invitor;
 		this.role = role;
@@ -63,7 +63,7 @@ public class Member implements Serializable{
 		return new Member(
 				cursor.getString(cursor.getColumnIndexOrThrow(USER)),
 				cursor.getString(cursor.getColumnIndexOrThrow(INVITOR)),
-				cursor.getString(cursor.getColumnIndexOrThrow(ROLE)),
+				cursor.getInt(cursor.getColumnIndexOrThrow(ROLE)),
 				cursor.getLong(cursor.getColumnIndexOrThrow(READ_TIME)),
 				cursor.getString(cursor.getColumnIndexOrThrow(RID))
 		);
@@ -95,11 +95,11 @@ public class Member implements Serializable{
 		this.invitor = invitor;
 	}
 
-	public String getRole() {
+	public Integer getRole() {
 		return role;
 	}
 
-	public void setRole(String role) {
+	public void setRole(Integer role) {
 		this.role = role;
 	}
 

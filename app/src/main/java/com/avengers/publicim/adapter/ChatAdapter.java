@@ -29,6 +29,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	private Handler mHandler = new Handler();
 	private List<Message> mMessages = new ArrayList<>();
 	private Room mRoom;
+	private boolean mFullLoad = false;
+	private static final int LOAD_SIZE = 3000;
 
 	/**
 	 * 发送的消息
@@ -48,12 +50,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	private static final int TYPE_DATE = 3;
 
 	public ChatAdapter(Context context, List<Message> messages, Room room) {
-		mMessages = messages;
 		mContext = context;
 		mLayoutInflater = LayoutInflater.from(context);
 		mRoom = room;
-		addDateMsg(0, mMessages.size()-1);
-		fullLoad();
+		loadUp(messages);
 	}
 
 	@Override
@@ -153,14 +153,29 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 		mRoom = room;
 	}
 
+	public boolean ismFullLoad() {
+		return mFullLoad;
+	}
+
+	public void setmFullLoad(boolean mFullLoad) {
+		this.mFullLoad = mFullLoad;
+	}
+
 	public void loadUp(List<Message> messages){
+		if(messages.size() < LOAD_SIZE) mFullLoad = true;
 		mMessages.addAll(0, messages);
-		addDateMsg(0, messages.size());//更新的範團包含銜接的地方
+		if(mMessages.size() == messages.size()){//判斷是否是第一次載入
+			addDateMsg(0, messages.size()-1);
+		}else{
+			addDateMsg(0, messages.size());//更新的範團包含銜接的地方
+		}
+		if(mFullLoad) addTopDate();
 	}
 
 	public void add(Message message){
 		mMessages.add(message);
 		addDateMsg(mMessages.size()-2, mMessages.size()-1);
+		if(mMessages.size() == 1) addTopDate();
 	}
 
 	public List<Message> getData(){
@@ -173,7 +188,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	 * @param lower
 	 */
 	private void addDateMsg(int upper, int lower){
-		if(mMessages.isEmpty()) return;
+		if(mMessages.size() < 2) return;
 		for (int i = lower; i > upper; i--) {
 			String previous = SystemUtils.getDate(mMessages.get(i-1).getDate(), Constants.Date.WEEK);
 			String self = SystemUtils.getDate(mMessages.get(i).getDate(), Constants.Date.WEEK);
@@ -183,7 +198,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 		}
 	}
 
-	private void fullLoad(){
+	private void addTopDate(){
 		if(mMessages.isEmpty()) return;
 		mMessages.add(0, new Message(mRoom.getRid(), Message.Type.DATE,
 				SystemUtils.getDate(mMessages.get(0).getDate(), Constants.Date.WEEK)));

@@ -172,12 +172,10 @@ public class MainActivity extends BaseActivity {
 
 	@Override
 	public void onServeiceResponse(ServiceEvent event) {
-		if(this == event.getListener()){
-			switch (event.getEvent()){
-				case ServiceEvent.Event.CLOSE_DIALOG:
-					getProgress().dismiss();
-					break;
-			}
+		switch (event.getEvent()){
+			case ServiceEvent.Event.CLOSE_DIALOG:
+				getProgress().dismiss();
+				break;
 		}
 	}
 

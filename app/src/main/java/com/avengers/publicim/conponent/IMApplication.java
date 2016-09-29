@@ -46,8 +46,8 @@ public class IMApplication extends Application {
 	}
 
 	private void initAccount(){
-		mEntry = new RosterEntry(new User("Android-Emulator", "test01"),
-				new Presence("","",Presence.STATUS_ONLINE), 0, "");
+		mEntry = new RosterEntry(new User("Android-Emulator2", "test04"),
+				new Presence("","", Presence.Status.ONLINE), 0, "");
 	}
 
 	public static User getUser(){

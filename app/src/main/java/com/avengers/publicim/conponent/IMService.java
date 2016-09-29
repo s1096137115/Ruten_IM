@@ -261,7 +261,6 @@ public class IMService extends Service {
 					}else if(b instanceof Room) {
 						return ((Room) a).getRid().equals(((Room) b).getRid());
 					}else if(b instanceof Member) {
-						boolean c = ((Member) a).getUser().equals(((Member) b).getUser());
 						return ((Member) a).getUser().equals(((Member) b).getUser());
 					}else{
 						return false;
@@ -495,12 +494,12 @@ public class IMService extends Service {
 
 	public void receiveSetRoomMemberRole(String data){
 		SetRoomMemberRole setRoomMemberRole = GsonUtils.fromJson(data, SetRoomMemberRole.class);
-		if(setRoomMemberRole.getRole().equals(Room.Role.MEMBER)){
-//			mDB.insertRoom(mRoom);
-//			mRoom = null;
-		}else if(setRoomMemberRole.getRole().equals(Room.Role.EXIT)){
-			Room room = getRoomManager().getItem(Room.Type.GROUP, setRoomMemberRole.getRid());
-			deleteRoom(room);
+		for (Member member: setRoomMemberRole.getRoom().getMembers()) {
+			mDB.updateMember(member);
+			if(member.getRole().equals(Room.Role.EXIT) && member.getUser().equals(IMApplication.getUser().getName())){
+				Room room = getRoomManager().getItem(Room.Type.GROUP, setRoomMemberRole.getRoom().getRid());
+				deleteRoom(room);
+			}
 		}
 		for (ServiceListener listener : mServiceListener) {
 			listener.onServeiceResponse(new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG));
@@ -538,7 +537,7 @@ public class IMService extends Service {
 		if(TextUtils.isEmpty(createRoom.getError())){
 			mDB.insertRoom(createRoom.getRoom());
 			getRoomManager().notify(new ServiceEvent(ServiceEvent.Event.GET_ROOM));
-			if(!createRoom.getType().equals(Room.Type.SINGLE)){
+			if(!createRoom.getRoom().getType().equals(Room.Type.SINGLE)){
 				for (ServiceListener listener : mServiceListener) {
 					listener.onServeiceResponse(new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG));
 				}
@@ -658,6 +657,8 @@ public class IMService extends Service {
 			Message message = GsonUtils.fromJson(args[0].toString(), Message.class);
 			//原device不處理，其他device跟進
 			if(message.getFrom().equals(IMApplication.getUser())) return;
+			//沒有room的message不處理(本身退出群組時仍會收到系統訊息)
+			if(getRoomManager().getItem(Room.Type.ALL, message.getRid()) == null) return;
 			addMessage(message);
 		}
 	};
@@ -677,6 +678,15 @@ public class IMService extends Service {
 				User from = GsonUtils.fromJson(fromStr, User.class);
 				Presence presence = GsonUtils.fromJson(args[0].toString(), Presence.class);
 				RosterEntry entry = getRosterManager().getItem(RosterEntry.Type.ROSTER ,from.getName());
+				if(entry == null){
+					String a = "";
+				}
+				if(entry.getPresence() == null){
+					String a = "";
+				}
+				if(presence.getStatus() == null){
+					String a = "";
+				}
 				entry.getPresence().setStatus(presence.getStatus());
 				updateRosterEntry(entry);
 			} catch (JSONException e) {
@@ -693,6 +703,9 @@ public class IMService extends Service {
 		public void call(final Object... args) {
 			Log.d(TAG, args[0].toString());
 			Invite invite = GsonUtils.fromJson(args[0].toString(), Invite.class);
+			if(invite.getType() == null){
+				String a = "";
+			}
 
 			//由於sendInvite的callback給的資料太少
 			//所以不論是邀請或被邀請都在這做最後的sync

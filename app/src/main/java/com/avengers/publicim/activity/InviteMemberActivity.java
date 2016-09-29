@@ -9,19 +9,21 @@ import android.widget.Button;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.InviteGroupAdapter;
-import com.avengers.publicim.data.entities.Room;
-import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Invite;
+import com.avengers.publicim.data.entities.Member;
+import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
+import com.avengers.publicim.data.event.ServiceEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.avengers.publicim.conponent.IMApplication.getProgress;
 import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
 import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
 
-public class InviteGroupActivity extends BaseActivity{
+public class InviteMemberActivity extends BaseActivity{
     private RecyclerView mRecyclerView;
     private Button mButton;
     private InviteGroupAdapter mInviteAdapter;
@@ -33,9 +35,9 @@ public class InviteGroupActivity extends BaseActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invite_group);
         mButton = (Button)findViewById(R.id.button);
-        mInviteAdapter = new InviteGroupAdapter(this , getRosterManager().getList(RosterEntry.Type.ROSTER));
         getData();
         setToolbar();
+        mInviteAdapter = new InviteGroupAdapter(this , getInviteRoster());
         setRecyclerView(mInviteAdapter);
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,6 +51,21 @@ public class InviteGroupActivity extends BaseActivity{
                 }
             }
         });
+    }
+
+    private List<RosterEntry> getInviteRoster(){
+        List<RosterEntry> entries = getRosterManager().getList(RosterEntry.Type.ROSTER);
+        List<RosterEntry> exists = new ArrayList<>();
+        for (RosterEntry entry:entries) {
+            for (Member member: mRoom.getMembers()) {
+                if(entry.getName().equals(member.getUser()) && !member.getRole().equals(Room.Role.EXIT)){
+                    exists.add(entry);
+                    break;
+                }
+            }
+        }
+        entries.removeAll(exists);
+        return entries;
     }
 
     private void setToolbar(){

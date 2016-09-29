@@ -23,7 +23,6 @@
 			android:imeOptions="actionSearch"
 			android:background="@android:color/white"
 			android:hint="請輸入帳號"
-			android:layout_weight="1"
 			android:inputType="text"
 			android:drawableRight="@android:drawable/ic_menu_search"
 			android:paddingTop="8dp"

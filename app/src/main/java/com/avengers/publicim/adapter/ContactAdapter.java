@@ -77,7 +77,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 			if(mContacts.get(position) instanceof RosterEntry){
 				((ContactViewHolder) holder).icon.setImageResource(R.drawable.ic_person_black_48dp);
 				int visibility = ((RosterEntry) mContacts.get(position)).getPresence()
-						.getStatus() == Presence.STATUS_ONLINE ? View.VISIBLE : View.GONE;
+						.getStatus() == Presence.Status.ONLINE ? View.VISIBLE : View.GONE;
 				((ContactViewHolder) holder).status.setVisibility(visibility);
 			}else{
 				((ContactViewHolder) holder).icon.setImageResource(R.drawable.ic_group_black_48dp);
