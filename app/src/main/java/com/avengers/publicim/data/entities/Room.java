@@ -7,13 +7,12 @@ import com.google.gson.annotations.SerializedName;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/4.
  */
-public class Room extends Contact implements Serializable {
+public class Room extends Contact {
 	public static final String TABLE_NAME = "room";
 
 	public static final String RID = "rid";

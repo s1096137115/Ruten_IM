@@ -20,8 +20,8 @@ import com.avengers.publicim.data.entities.RosterEntry;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
-import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
+import static com.avengers.publicim.component.IMApplication.getRoomManager;
+import static com.avengers.publicim.component.IMApplication.getRosterManager;
 
 /**
  * Created by D-IT-MAX2 on 2016/6/23.

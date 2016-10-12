@@ -8,7 +8,7 @@ import android.net.NetworkInfo;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
-import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.component.IMApplication;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;

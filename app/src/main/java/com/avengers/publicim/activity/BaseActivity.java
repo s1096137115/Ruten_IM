@@ -9,10 +9,11 @@ import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 
-import com.avengers.publicim.conponent.DbHelper;
-import com.avengers.publicim.conponent.IMService;
-import com.avengers.publicim.conponent.IMService.IMBinder;
+import com.avengers.publicim.component.DbHelper;
+import com.avengers.publicim.component.IMService;
+import com.avengers.publicim.component.IMService.IMBinder;
 import com.avengers.publicim.data.listener.MessageListener;
 import com.avengers.publicim.data.listener.RoomListener;
 import com.avengers.publicim.data.listener.RosterListener;
@@ -21,11 +22,11 @@ import com.avengers.publicim.fragment.BaseFragment;
 import com.avengers.publicim.view.DialogBuilder;
 import com.avengers.publicim.view.IMProgressDialog;
 
-import static com.avengers.publicim.conponent.IMApplication.getMessageManager;
-import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
-import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
-import static com.avengers.publicim.conponent.IMApplication.setBuilder;
-import static com.avengers.publicim.conponent.IMApplication.setIMProgress;
+import static com.avengers.publicim.component.IMApplication.getMessageManager;
+import static com.avengers.publicim.component.IMApplication.getRoomManager;
+import static com.avengers.publicim.component.IMApplication.getRosterManager;
+import static com.avengers.publicim.component.IMApplication.setBuilder;
+import static com.avengers.publicim.component.IMApplication.setIMProgress;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/1.
@@ -80,8 +81,15 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	}
 
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if(!(this instanceof MainActivity)){
+			switch (item.getItemId()) {
+				case android.R.id.home:
+					finish();
+					return true;
+			}
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	public IMService getIMService(){

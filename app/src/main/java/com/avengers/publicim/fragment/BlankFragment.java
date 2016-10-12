@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.data.event.ServiceEvent;
 
 /**

@@ -18,7 +18,7 @@ import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.utils.ItemClickSupport;
 
-import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
+import static com.avengers.publicim.component.IMApplication.getRoomManager;
 
 
 public class ChatListFragment extends BaseFragment implements RoomListener {

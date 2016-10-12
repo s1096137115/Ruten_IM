@@ -11,7 +11,7 @@ import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Room;
 
-import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
+import static com.avengers.publicim.component.IMApplication.getRoomManager;
 
 public class ViewMemberActivity extends BaseActivity {
 	private RecyclerView mRecyclerView;
@@ -33,7 +33,8 @@ public class ViewMemberActivity extends BaseActivity {
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		if(mContact != null){
-			getSupportActionBar().setTitle(mContact.getName());
+			getSupportActionBar().setTitle(getString(R.string.action_view_member) +
+					"(" + mRoom.getMembers().size() + ")");
 		}
 	}
 

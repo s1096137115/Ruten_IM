@@ -1,4 +1,4 @@
-package com.avengers.publicim.conponent;
+package com.avengers.publicim.component;
 
 import android.app.Service;
 import android.content.Intent;
@@ -36,6 +36,7 @@ import com.avengers.publicim.utils.SystemUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.collections4.PredicateUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -48,9 +49,9 @@ import io.socket.client.Ack;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
-import static com.avengers.publicim.conponent.IMApplication.getMessageManager;
-import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
-import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
+import static com.avengers.publicim.component.IMApplication.getMessageManager;
+import static com.avengers.publicim.component.IMApplication.getRoomManager;
+import static com.avengers.publicim.component.IMApplication.getRosterManager;
 
 public class IMService extends Service {
 	private static final String TAG = "IMService";
@@ -177,6 +178,24 @@ public class IMService extends Service {
 			mDB.deleteRoster(entry);
 		}
 		getRosterManager().notify(new ServiceEvent(ServiceEvent.Event.GET_ROSTER));
+	}
+
+	public void updateMember(Room room, List<Member> listNew){
+		List<Member> listOld = mDB.getMembers(room);
+		//在開始比較Member之前要先幫新的Member加上rid
+		for (Member member: listNew) {
+			member.setRid(room.getRid());
+		}
+		List<Member>[] list2 = categorize(listNew, listOld);
+		for (Member member: list2[CHANGE_NEW]) {
+			mDB.updateMember(member);
+		}
+		for (Member member: list2[ADD]) {
+			mDB.insertMember(member);
+		}
+		for (Member member: list2[REMOVE]) {
+			mDB.deleteMember(member);
+		}
 	}
 
 	public void updateRooms(List<Room> listNew){
@@ -371,6 +390,15 @@ public class IMService extends Service {
 		}
 	}
 
+	public void sendInvite(List<Invite> list){
+		for (Invite invite: list) {
+			sendInvite(invite);
+		}
+		for (ServiceListener listener : mServiceListener) {
+			listener.onServeiceResponse(new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG));
+		}
+	}
+
 	/**
 	 * 邀請好友、邀請至聊天室
 	 * @param invite
@@ -383,6 +411,7 @@ public class IMService extends Service {
 				if(args[0] != null){
 					String errorMessage = args[0].toString();
 					Log.d(TAG, errorMessage);
+					Log.d(TAG, "sendInvite callback");
 					return;
 				}
 				//由於callback給的資料太少，所以決定改由onReceiveInvite取得資料
@@ -391,6 +420,7 @@ public class IMService extends Service {
 //					Room room = GsonUtils.fromJson(args[1].toString(), Room.class);
 //					addRoom(room);
 //				}
+				//群組邀請不會有callback，所以這裡只有邀請好友會觸發
 				for (ServiceListener listener : mServiceListener) {
 					listener.onServeiceResponse(new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG));
 				}
@@ -494,15 +524,21 @@ public class IMService extends Service {
 
 	public void receiveSetRoomMemberRole(String data){
 		SetRoomMemberRole setRoomMemberRole = GsonUtils.fromJson(data, SetRoomMemberRole.class);
+		updateMember(setRoomMemberRole.getRoom(), setRoomMemberRole.getRoom().getMembers());
 		for (Member member: setRoomMemberRole.getRoom().getMembers()) {
-			mDB.updateMember(member);
+//			mDB.updateMember(member);
 			if(member.getRole().equals(Room.Role.EXIT) && member.getUser().equals(IMApplication.getUser().getName())){
 				Room room = getRoomManager().getItem(Room.Type.GROUP, setRoomMemberRole.getRoom().getRid());
 				deleteRoom(room);
 			}
 		}
 		for (ServiceListener listener : mServiceListener) {
-			listener.onServeiceResponse(new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG));
+			ServiceEvent event = new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG);
+			Bundle bundle = new Bundle();
+			bundle.putSerializable(Room.class.getSimpleName(), setRoomMemberRole.getRoom());
+			event.setBundle(bundle);
+			Log.d("test", "role" + setRoomMemberRole.getRoom().getMembers().size());
+			listener.onServeiceResponse(event);
 		}
 	}
 
@@ -517,7 +553,23 @@ public class IMService extends Service {
 	}
 
 	public void receiveGetUser(String data){
-		GetUser getUser = GsonUtils.fromJson(data, GetUser.class);
+		GetUser getUser = new GetUser();
+		try {
+			JSONObject obj = new JSONObject(data);
+			getUser.setAction(obj.getString("action"));
+			JSONArray array =obj.getJSONArray("user");
+			JSONObject obj2 = array.getJSONObject(0);
+
+			GetUser.AdvUser adv = getUser.new AdvUser(obj2.getString("identify"), obj2.getString("name"));
+			JSONObject obj3 = obj2.getJSONObject("presence");
+			adv.setPresence(new Presence("","",0));
+			List list = new ArrayList<>();
+			list.add(adv);
+			getUser.setUsers(list);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+//		GetUser getUser = GsonUtils.fromJson(data, GetUser.class);
 		for (ServiceListener listener : mServiceListener) {
 			ServiceEvent event = new ServiceEvent(ServiceEvent.Event.GET_USER);
 			Bundle bundle = new Bundle();
@@ -536,12 +588,17 @@ public class IMService extends Service {
 		CreateRoom createRoom = GsonUtils.fromJson(data, CreateRoom.class);
 		if(TextUtils.isEmpty(createRoom.getError())){
 			mDB.insertRoom(createRoom.getRoom());
-			getRoomManager().notify(new ServiceEvent(ServiceEvent.Event.GET_ROOM));
-			if(!createRoom.getRoom().getType().equals(Room.Type.SINGLE)){
-				for (ServiceListener listener : mServiceListener) {
-					listener.onServeiceResponse(new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG));
-				}
-			}
+			mDB.insertMember(createRoom.getRoom().getMembers().get(0));
+			ServiceEvent event = new ServiceEvent(ServiceEvent.Event.CREATE_ROOM);
+			Bundle bundle = new Bundle();
+			bundle.putSerializable(Room.class.getSimpleName(), createRoom.getRoom());
+			event.setBundle(bundle);
+			getRoomManager().notify(event);
+//			if(!createRoom.getRoom().getType().equals(Room.Type.SINGLE)){
+//				for (ServiceListener listener : mServiceListener) {
+//					listener.onServeiceResponse(new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG));
+//				}
+//			}
 		}
 	}
 
@@ -703,9 +760,6 @@ public class IMService extends Service {
 		public void call(final Object... args) {
 			Log.d(TAG, args[0].toString());
 			Invite invite = GsonUtils.fromJson(args[0].toString(), Invite.class);
-			if(invite.getType() == null){
-				String a = "";
-			}
 
 			//由於sendInvite的callback給的資料太少
 			//所以不論是邀請或被邀請都在這做最後的sync

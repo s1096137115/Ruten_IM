@@ -7,16 +7,16 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import com.avengers.publicim.activity.BaseActivity;
-import com.avengers.publicim.conponent.DbHelper;
-import com.avengers.publicim.conponent.IMService;
+import com.avengers.publicim.component.DbHelper;
+import com.avengers.publicim.component.IMService;
 import com.avengers.publicim.data.listener.MessageListener;
 import com.avengers.publicim.data.listener.RoomListener;
 import com.avengers.publicim.data.listener.RosterListener;
 import com.avengers.publicim.data.listener.ServiceListener;
 
-import static com.avengers.publicim.conponent.IMApplication.getMessageManager;
-import static com.avengers.publicim.conponent.IMApplication.getRoomManager;
-import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
+import static com.avengers.publicim.component.IMApplication.getMessageManager;
+import static com.avengers.publicim.component.IMApplication.getRoomManager;
+import static com.avengers.publicim.component.IMApplication.getRosterManager;
 
 /**
  * Created by D-IT-MAX2 on 2016/5/10.

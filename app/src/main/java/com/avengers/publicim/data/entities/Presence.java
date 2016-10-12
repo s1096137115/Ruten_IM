@@ -1,6 +1,8 @@
 package com.avengers.publicim.data.entities;
 
 import android.database.Cursor;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +11,7 @@ import java.io.Serializable;
 /**
  * Created by D-IT-MAX2 on 2016/3/9.
  */
-public class Presence implements Serializable {
+public class Presence implements Serializable, Parcelable {
 	public static final String PHOTO = "photo";
 
 	public static final String STATUS = "status";
@@ -96,4 +98,34 @@ public class Presence implements Serializable {
 				+ getStatus().hashCode() + getDescribe().hashCode();
 		return result;
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.photo);
+		dest.writeValue(this.status);
+		dest.writeString(this.describe);
+	}
+
+	protected Presence(Parcel in) {
+		this.photo = in.readString();
+		this.status = (Integer) in.readValue(Integer.class.getClassLoader());
+		this.describe = in.readString();
+	}
+
+	public static final Parcelable.Creator<Presence> CREATOR = new Parcelable.Creator<Presence>() {
+		@Override
+		public Presence createFromParcel(Parcel source) {
+			return new Presence(source);
+		}
+
+		@Override
+		public Presence[] newArray(int size) {
+			return new Presence[size];
+		}
+	};
 }

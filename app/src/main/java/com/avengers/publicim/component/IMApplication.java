@@ -1,4 +1,4 @@
-package com.avengers.publicim.conponent;
+package com.avengers.publicim.component;
 
 import android.app.Application;
 import android.content.Context;
@@ -46,7 +46,7 @@ public class IMApplication extends Application {
 	}
 
 	private void initAccount(){
-		mEntry = new RosterEntry(new User("Android-Emulator2", "test04"),
+		mEntry = new RosterEntry(new User("Android-Emulator", "test04"),
 				new Presence("","", Presence.Status.ONLINE), 0, "");
 	}
 

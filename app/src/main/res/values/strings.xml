@@ -18,11 +18,11 @@
 	<string name="msg_get_user_already">"此人己是你的好友"</string>
 
 	<string name="text_group_name">"群組名稱"</string>
+	<string name="text_member_name">"成員名稱"</string>
 
-	<string name="title_activity_invite">InviteActivity</string>
+	<string name="title_activity_invite_member">新增成員</string>
 	<string name="title_activity_member">MemberActivity</string>
 	<string name="title_activity_chat">ChatActivity</string>
 	<string name="title_activity_invite_roster">InviteRosterActivity</string>
-	<string name="title_activity_invite_roster2">InviteRoster2Activity</string>
 	<string name="title_activity_create_group">建立群組</string>
 </resources>

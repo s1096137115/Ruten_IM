@@ -2,13 +2,15 @@ package com.avengers.publicim.data.entities;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/3.
  */
-public class RosterEntry extends Contact{
+public class RosterEntry extends Contact implements Parcelable {
 	public static final String TABLE_NAME = "roster";
 
 	public static final String RELATIONSHIP = "relationship";
@@ -143,4 +145,36 @@ public class RosterEntry extends Contact{
 				+ getPresence().hashCode() + getRelationship().hashCode() + getRid().hashCode();
 		return result;
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeValue(this.relationship);
+		dest.writeParcelable(this.presence, flags);
+		dest.writeParcelable(this.user, flags);
+		dest.writeString(this.rid);
+	}
+
+	protected RosterEntry(Parcel in) {
+		this.relationship = (Integer) in.readValue(Integer.class.getClassLoader());
+		this.presence = in.readParcelable(Presence.class.getClassLoader());
+		this.user = in.readParcelable(User.class.getClassLoader());
+		this.rid = in.readString();
+	}
+
+	public static final Creator<RosterEntry> CREATOR = new Creator<RosterEntry>() {
+		@Override
+		public RosterEntry createFromParcel(Parcel source) {
+			return new RosterEntry(source);
+		}
+
+		@Override
+		public RosterEntry[] newArray(int size) {
+			return new RosterEntry[size];
+		}
+	};
 }

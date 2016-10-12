@@ -15,7 +15,8 @@ public class ServiceEvent extends BaseEvent {
 		public static final int LOAD_MESSAGE = 13;
 
 		public static final int GET_ROOM = 20;
-		public static final int DELETE_ROOM = 21;
+		public static final int CREATE_ROOM = 21;
+		public static final int DELETE_ROOM = 22;
 
 
 		public static final int GET_GROUP = 30;

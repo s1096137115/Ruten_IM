@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Room;

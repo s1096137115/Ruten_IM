@@ -1,6 +1,8 @@
 package com.avengers.publicim.data.entities;
 
 import android.database.Cursor;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +11,7 @@ import java.io.Serializable;
 /**
  * Created by D-IT-MAX2 on 2016/3/9.
  */
-public class User implements Serializable {
+public class User implements Serializable, Parcelable {
 	public static final String UID = "uid";
 
 	public static final String NAME = "name";
@@ -68,4 +70,32 @@ public class User implements Serializable {
 		result = PRIME * result + (PRIME * getUid().hashCode()) + getName().hashCode();
 		return result;
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.name);
+		dest.writeString(this.uid);
+	}
+
+	protected User(Parcel in) {
+		this.name = in.readString();
+		this.uid = in.readString();
+	}
+
+	public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
+		@Override
+		public User createFromParcel(Parcel source) {
+			return new User(source);
+		}
+
+		@Override
+		public User[] newArray(int size) {
+			return new User[size];
+		}
+	};
 }

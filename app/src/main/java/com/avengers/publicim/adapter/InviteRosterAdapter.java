@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.data.action.GetUser;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.fragment.InviteRosterFragment;
@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.avengers.publicim.conponent.IMApplication.getRosterManager;
+import static com.avengers.publicim.component.IMApplication.getRosterManager;
 
 /**
  * Created by D-IT-MAX2 on 2016/9/20.

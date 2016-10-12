@@ -13,7 +13,7 @@ import com.avengers.publicim.data.action.GetUser;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.event.ServiceEvent;
 
-import static com.avengers.publicim.conponent.IMApplication.getProgress;
+import static com.avengers.publicim.component.IMApplication.getProgress;
 
 /**
  * A placeholder fragment containing a simple view.

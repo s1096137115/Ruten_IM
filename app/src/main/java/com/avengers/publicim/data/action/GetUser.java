@@ -17,7 +17,7 @@ public class GetUser implements Serializable{
 		public static final String NICKNAME = "nickname";
 	}
 
-	public class AdvUser extends User{
+	public final class AdvUser extends User{
 		private Presence presence;
 
 		public AdvUser(String uid, String name) {

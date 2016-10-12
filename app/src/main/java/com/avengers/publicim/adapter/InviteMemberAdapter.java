@@ -14,22 +14,19 @@ import com.avengers.publicim.R;
 import com.avengers.publicim.data.entities.RosterEntry;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/15.
  */
-public class InviteGroupAdapter extends RecyclerView.Adapter<InviteGroupAdapter.NormalTextViewHolder> {
+public class InviteMemberAdapter extends RecyclerView.Adapter<InviteMemberAdapter.NormalTextViewHolder> {
 	private final LayoutInflater mLayoutInflater;
 	private final Context mContext;
-	private Set<Integer> mSelected = new HashSet<>();
 	private List<RosterEntry> mSelectedEntries = new ArrayList<>();
 	private List<RosterEntry> mRosterEntries;
 	private Handler mHandler = new Handler();
 
-	public InviteGroupAdapter(Context context, List<RosterEntry> list) {
+	public InviteMemberAdapter(Context context, List<RosterEntry> list) {
 		mRosterEntries = list;
 		mContext = context;
 		mLayoutInflater = LayoutInflater.from(context);
@@ -41,29 +38,30 @@ public class InviteGroupAdapter extends RecyclerView.Adapter<InviteGroupAdapter.
 	}
 
 	@Override
-	public void onBindViewHolder(final NormalTextViewHolder holder, final int position) {
+	public void onBindViewHolder(final NormalTextViewHolder holder,final int position) {
 		holder.mID.setText(mRosterEntries.get(position).getUser().getName());
 		holder.mIcon.setImageResource(R.drawable.ic_person_black_48dp);
 		holder.mCheckBox.setVisibility(View.VISIBLE);
-		if(mSelected.contains(position)){
+		if(mSelectedEntries.contains(mRosterEntries.get(position))){
 			holder.mCheckBox.setChecked(true);
 		}else{
 			holder.mCheckBox.setChecked(false);
 		}
-		holder.mView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if(mSelected.contains(position)){
-					mSelected.remove(position);
-					holder.mCheckBox.setChecked(false);
-					mSelectedEntries.remove(mRosterEntries.get(position));
-				}else{
-					mSelected.add(position);
-					holder.mCheckBox.setChecked(true);
-					mSelectedEntries.add(mRosterEntries.get(position));
-				}
-			}
-		});
+//		holder.mView.setOnClickListener(new View.OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//				if(mSelectedEntries.contains(mRosterEntries.get(position))){
+//					holder.mCheckBox.setChecked(false);
+//					mSelectedEntries.remove(mRosterEntries.get(position));
+////					((InviteMemberActivity)mContext).removeSelect();
+//				}else{
+//					holder.mCheckBox.setChecked(true);
+//					mSelectedEntries.add(mRosterEntries.get(position));
+////					((InviteMemberActivity)mContext).addSelect();
+//				}
+//				((InviteMemberActivity)mContext).reloadSelect();
+//			}
+//		});
 	}
 
 	@Override
@@ -77,6 +75,10 @@ public class InviteGroupAdapter extends RecyclerView.Adapter<InviteGroupAdapter.
 
 	public List<RosterEntry> getSelectedList(){
 		return mSelectedEntries;
+	}
+
+	public void setSelectedList(List<RosterEntry> list) {
+		mSelectedEntries = list;
 	}
 
 	public void refresh(){
@@ -104,6 +106,38 @@ public class InviteGroupAdapter extends RecyclerView.Adapter<InviteGroupAdapter.
 			mIcon = (ImageView)view.findViewById(R.id.icon);
 			mID = (TextView)view.findViewById(R.id.id);
 			mCheckBox = (CheckBox)view.findViewById(R.id.checkBox);
+		}
+
+		public View getmView() {
+			return mView;
+		}
+
+		public void setmView(View mView) {
+			this.mView = mView;
+		}
+
+		public ImageView getmIcon() {
+			return mIcon;
+		}
+
+		public void setmIcon(ImageView mIcon) {
+			this.mIcon = mIcon;
+		}
+
+		public TextView getmID() {
+			return mID;
+		}
+
+		public void setmID(TextView mID) {
+			this.mID = mID;
+		}
+
+		public CheckBox getmCheckBox() {
+			return mCheckBox;
+		}
+
+		public void setmCheckBox(CheckBox mCheckBox) {
+			this.mCheckBox = mCheckBox;
 		}
 	}
 }

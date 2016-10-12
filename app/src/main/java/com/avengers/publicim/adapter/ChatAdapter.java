@@ -10,11 +10,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.Room;
+import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.SystemUtils;
 
 import java.util.ArrayList;
@@ -136,13 +137,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 		}
 	}
 
-	public void refresh(){
-		mHandler.post(new Runnable() {
+	public void refresh(int delayMillis){
+		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				notifyDataSetChanged();
 			}
-		});
+		}, delayMillis);
 	}
 
 	public void update(List<Message> messages){
@@ -153,12 +154,28 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 		mRoom = room;
 	}
 
-	public boolean ismFullLoad() {
+	public boolean isFullLoad() {
 		return mFullLoad;
 	}
 
-	public void setmFullLoad(boolean mFullLoad) {
+	public void setFullLoad(boolean mFullLoad) {
 		this.mFullLoad = mFullLoad;
+	}
+
+	public int positionOfUnread(){
+		Member myself = null;
+		for (Member member: mRoom.getMembers()) {
+			if(member.getUser().equals(IMApplication.getUser().getName())){
+				myself = member;
+				break;
+			}
+		}
+		for (int i = 0; i < mMessages.size(); i++) {
+			if(mMessages.get(i).getFrom().getName().equals(IMApplication.getUser().getName())) continue;
+			if(mMessages.get(i).getType().equals(Message.Type.DATE)) continue;
+			if(myself.getRead_time() <= mMessages.get(i).getDate()) return i;
+		}
+		return mMessages.size() -1;
 	}
 
 	public void loadUp(List<Message> messages){
@@ -193,15 +210,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 			String previous = SystemUtils.getDate(mMessages.get(i-1).getDate(), Constants.Date.WEEK);
 			String self = SystemUtils.getDate(mMessages.get(i).getDate(), Constants.Date.WEEK);
 			if(!self.equals(previous)){
-				mMessages.add(i, new Message(mRoom.getRid(), Message.Type.DATE, self));
+				mMessages.add(i, new Message("", new User("", "#local"), mRoom.getRid(), Message.Type.DATE, self, 0));
 			}
 		}
 	}
 
+	/**
+	 * 新增置頂時間
+	 */
 	private void addTopDate(){
 		if(mMessages.isEmpty()) return;
-		mMessages.add(0, new Message(mRoom.getRid(), Message.Type.DATE,
-				SystemUtils.getDate(mMessages.get(0).getDate(), Constants.Date.WEEK)));
+		String self = SystemUtils.getDate(mMessages.get(0).getDate(), Constants.Date.WEEK);
+		mMessages.add(0, new Message("", new User("", "#local"), mRoom.getRid(), Message.Type.DATE, self, 0));
 	}
 
 	public static class TheOtherViewHolder extends RecyclerView.ViewHolder {

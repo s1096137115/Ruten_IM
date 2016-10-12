@@ -1,4 +1,4 @@
-package com.avengers.publicim.conponent;
+package com.avengers.publicim.component;
 
 import android.content.Context;
 import android.database.Cursor;

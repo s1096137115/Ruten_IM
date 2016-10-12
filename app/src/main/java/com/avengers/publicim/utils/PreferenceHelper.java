@@ -3,7 +3,7 @@ package com.avengers.publicim.utils;
 import android.app.Activity;
 import android.content.SharedPreferences;
 
-import com.avengers.publicim.conponent.IMApplication;
+import com.avengers.publicim.component.IMApplication;
 
 /**
  * Created by D-IT-MAX2 on 2016/8/30.
