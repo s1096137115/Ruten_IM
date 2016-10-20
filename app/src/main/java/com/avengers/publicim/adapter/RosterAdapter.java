@@ -1,9 +1,7 @@
 package com.avengers.publicim.adapter;
 
 import android.content.Context;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -19,29 +17,25 @@ import java.util.List;
 /**
  * Created by D-IT-MAX2 on 2016/3/15.
  */
-public class RosterAdapter extends RecyclerView.Adapter<RosterAdapter.NormalTextViewHolder> {
-	private final LayoutInflater mLayoutInflater;
-	private final Context mContext;
+public class RosterAdapter extends BaseAdapter{
 	private List<? extends Contact> mRosterEntries;
-	private Handler mHandler = new Handler();
 
 	public RosterAdapter(Context context, List<? extends Contact> objects) {
+		super(context);
 		mRosterEntries = objects;
-		mContext = context;
-		mLayoutInflater = LayoutInflater.from(context);
 	}
 
 	@Override
-	public NormalTextViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+	public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 		return new NormalTextViewHolder(mLayoutInflater.inflate(R.layout.view_roster_item, parent, false));
 	}
 
 	@Override
-	public void onBindViewHolder(NormalTextViewHolder holder, int position) {
+	public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 		if(mRosterEntries.get(position) instanceof RosterEntry){
-			holder.mID.setText(((RosterEntry) mRosterEntries.get(position)).getUser().getName());
+			((NormalTextViewHolder)holder).mID.setText(((RosterEntry) mRosterEntries.get(position)).getUser().getName());
 		}else if(mRosterEntries.get(position) instanceof Room){
-			holder.mID.setText(((Room) mRosterEntries.get(position)).getName());
+			((NormalTextViewHolder)holder).mID.setText(mRosterEntries.get(position).getName());
 		}
 	}
 

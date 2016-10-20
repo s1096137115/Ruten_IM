@@ -17,4 +17,9 @@
 		android:orderInCategory="300"
 		android:title="@string/action_create_group"
 		app:showAsAction="never"/>
+	<item
+		android:id="@+id/action_logout"
+		android:orderInCategory="400"
+		android:title="@string/action_logout"
+		app:showAsAction="never"/>
 </menu>

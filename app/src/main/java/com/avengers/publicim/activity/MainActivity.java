@@ -17,9 +17,12 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.avengers.publicim.R;
+import com.avengers.publicim.component.IMApplication;
+import com.avengers.publicim.component.IMService;
 import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.fragment.ChatListFragment;
 import com.avengers.publicim.fragment.RosterFragment;
+import com.avengers.publicim.utils.PreferenceHelper;
 
 import io.socket.client.Socket;
 
@@ -78,7 +81,9 @@ public class MainActivity extends BaseActivity {
 	@Override
 	protected void onBackendConnected() {
 		super.onBackendConnected();
-		mIMService.connect();
+		if(!mIMService.connected()){
+			mIMService.connect();
+		}
 	}
 
 	@Override
@@ -166,8 +171,25 @@ public class MainActivity extends BaseActivity {
 //							}
 //						}).show();
 				break;
+			case R.id.action_logout:
+				logout();
+				intent = new Intent(this, LoginActivity.class);
+				startActivity(intent);
+				finish();
+				break;
 		}
 		return true;
+	}
+
+	private void logout(){
+		mIMService.disconnect();
+		PreferenceHelper.LoginStatus.setAccount("");
+		mDB.clearInstance();
+		mRosterManager.clearInstance();
+		mRoomManager.clearInstance();
+		mMessageManager.clearInstance();
+		mIMService.stopService(new Intent(this, IMService.class));
+		IMApplication.setAccount(null);
 	}
 
 	@Override

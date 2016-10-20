@@ -1,9 +1,7 @@
 package com.avengers.publicim.adapter;
 
 import android.content.Context;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -21,29 +19,26 @@ import java.util.List;
 /**
  * Created by D-IT-MAX2 on 2016/3/15.
  */
-public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatListViewHolder>{
-	private Handler mHandler = new Handler();
-	private final LayoutInflater mLayoutInflater;
-	private final Context mContext;
+public class ChatListAdapter extends BaseAdapter{
 	private List<Room> mRooms;
 
 	public ChatListAdapter(Context context, List<Room> objects){
+		super(context);
 		mRooms = objects;
-		mContext = context;
-		mLayoutInflater = LayoutInflater.from(context);
 	}
 
 	@Override
-	public ChatListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+	public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 		return new ChatListViewHolder(mLayoutInflater.inflate(R.layout.view_chat_list_item, parent, false));
 	}
 
 	@Override
-	public void onBindViewHolder(ChatListViewHolder holder, int position) {
-		holder.mRid = mRooms.get(position).getRid();
+	public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+
+		((ChatListViewHolder)holder).mRid = mRooms.get(position).getRid();
 		int resId = mRooms.get(position).getType().equals(Room.Type.SINGLE) ?
 				R.drawable.ic_person_black_48dp : R.drawable.ic_group_black_48dp;
-		holder.mIcon.setImageResource(resId);
+		((ChatListViewHolder)holder).mIcon.setImageResource(resId);
 		String title = "";
 		if(mRooms.get(position).getType().equals(Room.Type.SINGLE)){
 			for (Member member : mRooms.get(position).getMembers()) {
@@ -54,12 +49,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 		}else{
 			title = mRooms.get(position).getName();
 		}
-		holder.mTitle.setText(title);
-		holder.mDate.setText(SystemUtils.getDate(mRooms.get(position).getDate(), Constants.Date.WEEK));
-		holder.mContent.setText(mRooms.get(position).getLastMsg().getContext());
-		holder.mUnread.setText(String.valueOf(mRooms.get(position).getUnread()));
+		((ChatListViewHolder)holder).mTitle.setText(title);
+		((ChatListViewHolder)holder).mDate.setText(SystemUtils.getDate(mRooms.get(position).getDate(), Constants.Date.WEEK));
+		((ChatListViewHolder)holder).mContent.setText(mRooms.get(position).getLastMsg().getContext());
+		((ChatListViewHolder)holder).mUnread.setText(String.valueOf(mRooms.get(position).getUnread()));
 		int visible = mRooms.get(position).getUnread() == 0 ? View.GONE : View.VISIBLE;
-		holder.mUnread.setVisibility(visible);
+		((ChatListViewHolder)holder).mUnread.setVisibility(visible);
 	}
 
 	@Override

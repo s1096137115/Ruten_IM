@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.avengers.publicim.component.IMApplication;
+import com.avengers.publicim.data.Constants;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -67,7 +68,16 @@ public class SystemUtils {
 	}
 
 	public static String getDate(long timestamp,String type){
-		SimpleDateFormat sdf = new SimpleDateFormat(type, Locale.TAIWAN);
+		SimpleDateFormat sdf;
+		if(type.equals(Constants.Date.WEEK)){//週日期需先檢查是否同年
+			sdf = new SimpleDateFormat(Constants.Date.YEAR, Locale.TAIWAN);
+			String thisYear = sdf.format(new Date(System.currentTimeMillis()));
+			String msgYear = sdf.format(new Date(timestamp));
+			if(!thisYear.equals(msgYear)){
+				type = Constants.Date.YEAR_WEEK;
+			}
+		}
+		sdf = new SimpleDateFormat(type, Locale.TAIWAN);
 		return sdf.format(new Date(timestamp));
 	}
 }

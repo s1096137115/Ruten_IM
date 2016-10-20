@@ -31,7 +31,6 @@ import java.util.List;
 
 import static com.avengers.publicim.R.id.recyclerView;
 import static com.avengers.publicim.component.IMApplication.getProgress;
-import static com.avengers.publicim.component.IMApplication.getRoomManager;
 import static com.avengers.publicim.utils.OnRcvScrollListener.Position.BOTTOM;
 
 public class ChatActivity extends BaseActivity implements MessageListener, RoomListener{
@@ -62,7 +61,7 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
 			mContact = (Contact)bundle.getSerializable(Contact.Type.CONTACT);
-			mRoom = getRoomManager().getItem(Room.Type.ALL ,mContact.getRid());
+			mRoom = mRoomManager.getItem(Room.Type.ALL ,mContact.getRid());
 		}
 	}
 
@@ -220,7 +219,7 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 			case ServiceEvent.Event.GET_ROOM:
 				String rid = event.getBundle().getString(Room.RID);
 				if(rid.equals(mContact.getRid())){
-					mRoom = getRoomManager().getItem(Room.Type.ALL ,mContact.getRid());
+					mRoom = mRoomManager.getItem(Room.Type.ALL ,mContact.getRid());
 					if(mRoom != null) {
 						mChatAdapter.update(mRoom);
 						mChatAdapter.refresh(1000);

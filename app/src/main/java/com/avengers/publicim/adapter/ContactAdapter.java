@@ -1,9 +1,7 @@
 package com.avengers.publicim.adapter;
 
 import android.content.Context;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -20,20 +18,14 @@ import com.avengers.publicim.data.entities.RosterEntry;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.avengers.publicim.component.IMApplication.getRoomManager;
-import static com.avengers.publicim.component.IMApplication.getRosterManager;
-
 /**
  * Created by D-IT-MAX2 on 2016/6/23.
  */
-public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-	private final LayoutInflater mLayoutInflater;
-	private final Context mContext;
+public class ContactAdapter extends BaseAdapter {
 	private List<Contact> mContacts;
 	private List<RosterEntry> mRoster;
 	private List<Room> mRooms;
 	private List<Header> mHeader;
-	private Handler mHandler = new Handler();
 
 	private static final int TYPE_HEADER = 0;
 	private static final int TYPE_CONTACT = 1;
@@ -43,14 +35,15 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 	private static final int ROSTER = 1;
 
 	public ContactAdapter(Context context) {
+		super(context);
 		mContacts = new ArrayList<>();
 		mHeader = new ArrayList<>();
 		mHeader.add(new Header(true,"群組"));
 		mHeader.add(new Header(true,"好友"));
-		mContext = context;
-		mLayoutInflater = LayoutInflater.from(context);
 		update();
 	}
+
+
 
 	@Override
 	public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -151,8 +144,9 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 	}
 
 	public void update(){
-		mRooms = getRoomManager().getList(Room.Type.GROUP);
-		mRoster = getRosterManager().getList(RosterEntry.Type.ROSTER);
+
+		mRooms = mRoomManager.getList(Room.Type.GROUP);
+		mRoster = mRosterManager.getList(RosterEntry.Type.ROSTER);
 		mContacts.clear();
 		mContacts.add(mHeader.get(GROUPS));
 		mContacts.addAll(mRooms);

@@ -12,6 +12,9 @@ import android.widget.Toast;
 
 import com.avengers.publicim.BuildConfig;
 import com.avengers.publicim.data.Constants;
+import com.avengers.publicim.data.Manager.MessageManager;
+import com.avengers.publicim.data.Manager.RoomManager;
+import com.avengers.publicim.data.Manager.RosterManager;
 import com.avengers.publicim.data.action.CreateRoom;
 import com.avengers.publicim.data.action.GetMessage;
 import com.avengers.publicim.data.action.GetRoom;
@@ -49,10 +52,6 @@ import io.socket.client.Ack;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
-import static com.avengers.publicim.component.IMApplication.getMessageManager;
-import static com.avengers.publicim.component.IMApplication.getRoomManager;
-import static com.avengers.publicim.component.IMApplication.getRosterManager;
-
 public class IMService extends Service {
 	private static final String TAG = "IMService";
 	private IMBinder mBinder = new IMBinder();
@@ -60,6 +59,9 @@ public class IMService extends Service {
 	private DbHelper mDB;
 	private Handler mHandler = new Handler();
 	private Set<ServiceListener> mServiceListener = new CopyOnWriteArraySet<>();
+	private static RosterManager mRosterManager;
+	private static RoomManager mRoomManager;
+	private static MessageManager mMessageManager;
 
 	public IMService() {
 	}
@@ -69,8 +71,20 @@ public class IMService extends Service {
 		super.onCreate();
 		IMApplication app = (IMApplication) getApplication();
 		mDB = DbHelper.getInstance(this);
+		initManager();
 		mSocket = app.getSocket();
 		setSocketListener(mSocket);
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+	}
+
+	private void initManager(){
+		mRosterManager = RosterManager.getInstance(IMApplication.getContext());
+		mRoomManager = RoomManager.getInstance(IMApplication.getContext());
+		mMessageManager = MessageManager.getInstance();
 	}
 
 	private void setSocketListener(Socket socket){
@@ -110,8 +124,8 @@ public class IMService extends Service {
 //		bundle.putString(Room.RID, message.getRid());
 //		bundle.putSerializable(ServiceEvent.Item.MESSAGE, message);
 //		event.setBundle(bundle);
-		getMessageManager().add(message);
-		getRoomManager().notify(event);
+		mMessageManager.add(message);
+		mRoomManager.notify(event);
 	}
 
 	public void addMessages(List<Message> list){
@@ -130,26 +144,26 @@ public class IMService extends Service {
 			//以防其他device在更新時同步觸發更新
 		}else if(PreferenceHelper.UpdateStatus.getUpdateTime() < list.get(list.size() -1).getDate()){
 			ServiceEvent event = new ServiceEvent(ServiceEvent.Event.ADD_MESSAGES);
-			getMessageManager().add(list);
-			getRoomManager().notify(event);
+			mMessageManager.add(list);
+			mRoomManager.notify(event);
 			sendGetMessage(list.get(list.size() -1).getDate(), null);
 		}
 	}
 
 	public void addRoom(Room room){
 		mDB.insertRoom(room);
-//		getRoomManager().update(Room.Type.ALL);
+//		mRoomManager.update(Room.Type.ALL);
 	}
 
 	public void addRoster(RosterEntry entry){
 		mDB.insertRoster(entry);
-		getRosterManager().notify(new ServiceEvent(ServiceEvent.Event.GET_ROSTER));
+		mRosterManager.notify(new ServiceEvent(ServiceEvent.Event.GET_ROSTER));
 	}
 
 	public void updateRosterEntry(RosterEntry entry){
-		if(getRosterManager().contains(entry.getUser())){
+		if(mRosterManager.contains(entry.getUser())){
 			mDB.updateRoster(entry);
-			getRosterManager().notify(new ServiceEvent(ServiceEvent.Event.GET_ROSTER));
+			mRosterManager.notify(new ServiceEvent(ServiceEvent.Event.GET_ROSTER));
 		}
 	}
 
@@ -165,7 +179,7 @@ public class IMService extends Service {
 	//主要是利用新舊名單的差集取得有更動的名單
 	//再利用使用者名稱的異同區分出增刪或改
 	public void updateRoster(List<RosterEntry> listNew){
-		List<RosterEntry> listOld = getRosterManager().getList(RosterEntry.Type.ROSTER);
+		List<RosterEntry> listOld = mRosterManager.getList(RosterEntry.Type.ROSTER);
 		List<RosterEntry>[] list = categorize(listNew,listOld);
 		if(list[MODIFY_NEW].isEmpty() && list[MODIFY_OLD].isEmpty()) return;
 		for (RosterEntry entry: list[CHANGE_NEW]) {
@@ -177,7 +191,7 @@ public class IMService extends Service {
 		for (RosterEntry entry: list[REMOVE]) {
 			mDB.deleteRoster(entry);
 		}
-		getRosterManager().notify(new ServiceEvent(ServiceEvent.Event.GET_ROSTER));
+		mRosterManager.notify(new ServiceEvent(ServiceEvent.Event.GET_ROSTER));
 	}
 
 	public void updateMember(Room room, List<Member> listNew){
@@ -199,7 +213,7 @@ public class IMService extends Service {
 	}
 
 	public void updateRooms(List<Room> listNew){
-		List<Room> listOld = getRoomManager().getList(Room.Type.ALL);
+		List<Room> listOld = mRoomManager.getList(Room.Type.ALL);
 		List<Room>[] list = categorize(listNew,listOld);
 		if(list[MODIFY_NEW].isEmpty() && list[MODIFY_OLD].isEmpty()) return;
 		for (Room room : list[CHANGE_NEW]) {
@@ -247,7 +261,7 @@ public class IMService extends Service {
 //				}
 //			}
 		}
-		getRoomManager().notify(new ServiceEvent(ServiceEvent.Event.GET_ROOM));
+		mRoomManager.notify(new ServiceEvent(ServiceEvent.Event.GET_ROOM));
 	}
 
 	public <T> List[] categorize(List<T> listNew, List<T> listOld){
@@ -297,8 +311,8 @@ public class IMService extends Service {
 //		bundle.putString(Room.RID, message.getRid());
 //		bundle.putSerializable(ServiceEvent.Item.MESSAGE, message);
 //		event.setBundle(bundle);
-		getRoomManager().notify(event);
-		getMessageManager().update(message);
+		mRoomManager.notify(event);
+		mMessageManager.update(message);
 	}
 
 //	public void updateMessageOfRead(Room room, int read){
@@ -323,6 +337,10 @@ public class IMService extends Service {
 
 	public void connect(){
 		mSocket.connect();
+	}
+
+	public boolean connected(){
+		return mSocket.connected();
 	}
 
 	public void disconnect(){
@@ -528,7 +546,7 @@ public class IMService extends Service {
 		for (Member member: setRoomMemberRole.getRoom().getMembers()) {
 //			mDB.updateMember(member);
 			if(member.getRole().equals(Room.Role.EXIT) && member.getUser().equals(IMApplication.getUser().getName())){
-				Room room = getRoomManager().getItem(Room.Type.GROUP, setRoomMemberRole.getRoom().getRid());
+				Room room = mRoomManager.getItem(Room.Type.GROUP, setRoomMemberRole.getRoom().getRid());
 				deleteRoom(room);
 			}
 		}
@@ -593,7 +611,7 @@ public class IMService extends Service {
 			Bundle bundle = new Bundle();
 			bundle.putSerializable(Room.class.getSimpleName(), createRoom.getRoom());
 			event.setBundle(bundle);
-			getRoomManager().notify(event);
+			mRoomManager.notify(event);
 //			if(!createRoom.getRoom().getType().equals(Room.Type.SINGLE)){
 //				for (ServiceListener listener : mServiceListener) {
 //					listener.onServeiceResponse(new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG));
@@ -715,7 +733,7 @@ public class IMService extends Service {
 			//原device不處理，其他device跟進
 			if(message.getFrom().equals(IMApplication.getUser())) return;
 			//沒有room的message不處理(本身退出群組時仍會收到系統訊息)
-			if(getRoomManager().getItem(Room.Type.ALL, message.getRid()) == null) return;
+			if(mRoomManager.getItem(Room.Type.ALL, message.getRid()) == null) return;
 			addMessage(message);
 		}
 	};
@@ -734,7 +752,7 @@ public class IMService extends Service {
 				String fromStr = jsonObj.get("from").toString();
 				User from = GsonUtils.fromJson(fromStr, User.class);
 				Presence presence = GsonUtils.fromJson(args[0].toString(), Presence.class);
-				RosterEntry entry = getRosterManager().getItem(RosterEntry.Type.ROSTER ,from.getName());
+				RosterEntry entry = mRosterManager.getItem(RosterEntry.Type.ROSTER ,from.getName());
 				if(entry == null){
 					String a = "";
 				}
@@ -786,7 +804,7 @@ public class IMService extends Service {
 			Bundle bundle = new Bundle();
 			bundle.putString(Room.RID, messageRead.getRid());
 			event.setBundle(bundle);
-			getRoomManager().notify(event);
+			mRoomManager.notify(event);
 		}
 	};
 

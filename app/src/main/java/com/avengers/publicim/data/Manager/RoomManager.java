@@ -3,6 +3,7 @@ package com.avengers.publicim.data.Manager;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.avengers.publicim.component.DbHelper;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.listener.RoomListener;
@@ -13,13 +14,26 @@ import java.util.List;
  * Created by D-IT-MAX2 on 2016/8/23.
  */
 public class RoomManager extends BaseManager<Room, RoomListener> {
+	private static RoomManager instance = null;
 
 	public RoomManager(Context context) {
 		super(context);
 	}
 
+	public static synchronized RoomManager getInstance(Context context){
+		if(instance == null){
+			instance = new RoomManager(context);
+		}
+		return instance;
+	}
+
+	public synchronized void clearInstance(){
+		instance = null;
+	}
+
 	@Override
 	public List<Room> getList(@NonNull String type) {
+		if(mDB == null) mDB = DbHelper.getInstance(mContext);
 		List<Room> rooms;
 		if(type.equals(Room.Type.ALL)){
 			rooms = mDB.getRooms();

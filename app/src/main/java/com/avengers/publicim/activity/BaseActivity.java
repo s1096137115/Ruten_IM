@@ -12,8 +12,12 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import com.avengers.publicim.component.DbHelper;
+import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.component.IMService;
 import com.avengers.publicim.component.IMService.IMBinder;
+import com.avengers.publicim.data.Manager.MessageManager;
+import com.avengers.publicim.data.Manager.RoomManager;
+import com.avengers.publicim.data.Manager.RosterManager;
 import com.avengers.publicim.data.listener.MessageListener;
 import com.avengers.publicim.data.listener.RoomListener;
 import com.avengers.publicim.data.listener.RosterListener;
@@ -22,9 +26,6 @@ import com.avengers.publicim.fragment.BaseFragment;
 import com.avengers.publicim.view.DialogBuilder;
 import com.avengers.publicim.view.IMProgressDialog;
 
-import static com.avengers.publicim.component.IMApplication.getMessageManager;
-import static com.avengers.publicim.component.IMApplication.getRoomManager;
-import static com.avengers.publicim.component.IMApplication.getRosterManager;
 import static com.avengers.publicim.component.IMApplication.setBuilder;
 import static com.avengers.publicim.component.IMApplication.setIMProgress;
 
@@ -38,13 +39,23 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 //	protected DialogBuilder mBuilder;
 //	protected ProgressDialog mProgressDialog;
 	protected Handler mHandler;
+	protected RosterManager mRosterManager;
+	protected RoomManager mRoomManager;
+	protected MessageManager mMessageManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDB = DbHelper.getInstance(this);
+		initManager();
 		mHandler = new Handler();
 		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
+	}
+
+	private void initManager(){
+		mRosterManager = RosterManager.getInstance(IMApplication.getContext());
+		mRoomManager = RoomManager.getInstance(IMApplication.getContext());
+		mMessageManager = MessageManager.getInstance();
 	}
 
 	@Override
@@ -99,26 +110,26 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	public void registerListeners(){
 		mIMService.addListener(this);
 		if (this instanceof RoomListener) {
-			getRoomManager().addListener((RoomListener) this);
+			mRoomManager.addListener((RoomListener) this);
 		}
 		if (this instanceof RosterListener) {
-			getRosterManager().removeListener((RosterListener) this);
+			mRosterManager.removeListener((RosterListener) this);
 		}
 		if (this instanceof MessageListener) {
-			getMessageManager().addMessageListener((MessageListener) this);
+			mMessageManager.addMessageListener((MessageListener) this);
 		}
 	}
 
 	public void unregisterListeners(){
 		mIMService.removeListener(this);
 		if (this instanceof RoomListener) {
-			getRoomManager().removeListener((RoomListener) this);
+			mRoomManager.removeListener((RoomListener) this);
 		}
 		if (this instanceof RosterListener) {
-			getRosterManager().removeListener((RosterListener) this);
+			mRosterManager.removeListener((RosterListener) this);
 		}
 		if (this instanceof MessageListener) {
-			getMessageManager().removeMessageListener((MessageListener) this);
+			mMessageManager.removeMessageListener((MessageListener) this);
 		}
 	}
 

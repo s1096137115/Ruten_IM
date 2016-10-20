@@ -12,13 +12,11 @@ import android.view.ViewGroup;
 import com.avengers.publicim.R;
 import com.avengers.publicim.activity.ChatActivity;
 import com.avengers.publicim.adapter.ChatListAdapter;
-import com.avengers.publicim.data.listener.RoomListener;
-import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Room;
+import com.avengers.publicim.data.event.ServiceEvent;
+import com.avengers.publicim.data.listener.RoomListener;
 import com.avengers.publicim.utils.ItemClickSupport;
-
-import static com.avengers.publicim.component.IMApplication.getRoomManager;
 
 
 public class ChatListFragment extends BaseFragment implements RoomListener {
@@ -39,7 +37,7 @@ public class ChatListFragment extends BaseFragment implements RoomListener {
 	                         Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
 		View view = inflater.inflate(R.layout.fragment_chat, container, false);
-		mChatListAdapter = new ChatListAdapter(getContext(), getRoomManager().getList(Room.Type.CHAT));
+		mChatListAdapter = new ChatListAdapter(getContext(), mRoomManager.getList(Room.Type.CHAT));
 		mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
 		mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 		mRecyclerView.setAdapter(mChatListAdapter);
@@ -76,7 +74,7 @@ public class ChatListFragment extends BaseFragment implements RoomListener {
 	}
 
 	public void refresh(){
-		mChatListAdapter.update(getRoomManager().getList(Room.Type.CHAT));
+		mChatListAdapter.update(mRoomManager.getList(Room.Type.CHAT));
 		mChatListAdapter.refresh();
 	}
 

@@ -1,9 +1,7 @@
 package com.avengers.publicim.adapter;
 
 import android.content.Context;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -19,33 +17,29 @@ import java.util.List;
 /**
  * Created by D-IT-MAX2 on 2016/3/15.
  */
-public class InviteMemberAdapter extends RecyclerView.Adapter<InviteMemberAdapter.NormalTextViewHolder> {
-	private final LayoutInflater mLayoutInflater;
-	private final Context mContext;
+public class InviteMemberAdapter extends BaseAdapter {
 	private List<RosterEntry> mSelectedEntries = new ArrayList<>();
 	private List<RosterEntry> mRosterEntries;
-	private Handler mHandler = new Handler();
 
 	public InviteMemberAdapter(Context context, List<RosterEntry> list) {
+		super(context);
 		mRosterEntries = list;
-		mContext = context;
-		mLayoutInflater = LayoutInflater.from(context);
 	}
 
 	@Override
-	public NormalTextViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+	public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 		return new NormalTextViewHolder(mLayoutInflater.inflate(R.layout.view_roster_item, parent, false));
 	}
 
 	@Override
-	public void onBindViewHolder(final NormalTextViewHolder holder,final int position) {
-		holder.mID.setText(mRosterEntries.get(position).getUser().getName());
-		holder.mIcon.setImageResource(R.drawable.ic_person_black_48dp);
-		holder.mCheckBox.setVisibility(View.VISIBLE);
+	public void onBindViewHolder(final RecyclerView.ViewHolder holder,final int position) {
+		((NormalTextViewHolder)holder).mID.setText(mRosterEntries.get(position).getUser().getName());
+		((NormalTextViewHolder)holder).mIcon.setImageResource(R.drawable.ic_person_black_48dp);
+		((NormalTextViewHolder)holder).mCheckBox.setVisibility(View.VISIBLE);
 		if(mSelectedEntries.contains(mRosterEntries.get(position))){
-			holder.mCheckBox.setChecked(true);
+			((NormalTextViewHolder)holder).mCheckBox.setChecked(true);
 		}else{
-			holder.mCheckBox.setChecked(false);
+			((NormalTextViewHolder)holder).mCheckBox.setChecked(false);
 		}
 //		holder.mView.setOnClickListener(new View.OnClickListener() {
 //			@Override

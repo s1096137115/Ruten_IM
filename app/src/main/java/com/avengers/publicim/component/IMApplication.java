@@ -30,19 +30,17 @@ public class IMApplication extends Application {
 	private static MessageManager mMessageManager;
 	private static IMProgressDialog mProgressDialog;
 	private static DialogBuilder mBuilder;
-	private DbHelper mDB;
 	private static RosterEntry mEntry;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		mContext = getApplicationContext();
-		mDB = DbHelper.getInstance(this);
 		AndroidLoggingHandler.reset(new AndroidLoggingHandler());
 		java.util.logging.Logger.getLogger("my.category").setLevel(Level.FINEST);
+//		initAccount();
 		initSocket();
 		initManager();
-		initAccount();
 	}
 
 	private void initAccount(){
@@ -50,8 +48,12 @@ public class IMApplication extends Application {
 				new Presence("","", Presence.Status.ONLINE), 0, "");
 	}
 
+	public static void setAccount(RosterEntry entry){
+		mEntry = entry;
+	}
+
 	public static User getUser(){
-		return mEntry.getUser();
+		return mEntry != null ? mEntry.getUser() : null;
 	}
 
 	public static Presence getPresence(){

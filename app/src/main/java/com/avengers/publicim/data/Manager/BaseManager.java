@@ -16,14 +16,13 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * Created by D-IT-MAX2 on 2016/6/21.
  */
 public abstract class BaseManager<T,L extends Listener>{
+	protected Context mContext;
 	protected DbHelper mDB;
-
 	protected Handler mHandler;
-
 	protected Set<L> mListeners = new CopyOnWriteArraySet<>();
 
 	public BaseManager(Context context) {
-		mDB = DbHelper.getInstance(context);
+		mContext = context;
 		mHandler = new Handler();
 	}
 

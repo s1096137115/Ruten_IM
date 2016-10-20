@@ -1,9 +1,7 @@
 package com.avengers.publicim.adapter;
 
 import android.content.Context;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -24,10 +22,7 @@ import java.util.List;
 /**
  * Created by D-IT-MAX2 on 2016/3/15.
  */
-public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-	private final LayoutInflater mLayoutInflater;
-	private final Context mContext;
-	private Handler mHandler = new Handler();
+public class ChatAdapter extends BaseAdapter {
 	private List<Message> mMessages = new ArrayList<>();
 	private Room mRoom;
 	private boolean mFullLoad = false;
@@ -51,8 +46,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	private static final int TYPE_DATE = 3;
 
 	public ChatAdapter(Context context, List<Message> messages, Room room) {
-		mContext = context;
-		mLayoutInflater = LayoutInflater.from(context);
+		super(context);
 		mRoom = room;
 		loadUp(messages);
 	}

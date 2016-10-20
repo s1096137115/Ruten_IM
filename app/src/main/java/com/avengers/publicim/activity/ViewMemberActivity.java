@@ -7,11 +7,9 @@ import android.support.v7.widget.Toolbar;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.MemberAdapter;
-import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Room;
-
-import static com.avengers.publicim.component.IMApplication.getRoomManager;
+import com.avengers.publicim.data.event.ServiceEvent;
 
 public class ViewMemberActivity extends BaseActivity {
 	private RecyclerView mRecyclerView;
@@ -48,7 +46,7 @@ public class ViewMemberActivity extends BaseActivity {
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
 			mContact = (Contact)bundle.getSerializable(Contact.Type.CONTACT);
-			mRoom = getRoomManager().getItem(Room.Type.ALL ,mContact.getRid());
+			mRoom = mRoomManager.getItem(Room.Type.ALL ,mContact.getRid());
 		}
 	}
 

@@ -29,8 +29,6 @@ import java.util.List;
 
 import static com.avengers.publicim.R.id.recyclerView;
 import static com.avengers.publicim.component.IMApplication.getProgress;
-import static com.avengers.publicim.component.IMApplication.getRoomManager;
-import static com.avengers.publicim.component.IMApplication.getRosterManager;
 
 public class InviteMemberActivity extends BaseActivity{
     private RecyclerView mRecyclerView;
@@ -111,7 +109,7 @@ public class InviteMemberActivity extends BaseActivity{
             switch (mRequestCode){
                 case INVITE:
                     mContact = (Contact)bundle.getSerializable(Contact.Type.CONTACT);
-                    mRoom = getRoomManager().getItem(Room.Type.ALL ,mContact.getRid());
+                    mRoom = mRoomManager.getItem(Room.Type.ALL ,mContact.getRid());
                     break;
                 case CREATE:
                     mSelects = bundle.getParcelableArrayList(EXTRA);
@@ -121,7 +119,7 @@ public class InviteMemberActivity extends BaseActivity{
     }
 
     private List<RosterEntry> getInviteRoster(){
-        mEntries = getRosterManager().getList(RosterEntry.Type.ROSTER);
+        mEntries = mRosterManager.getList(RosterEntry.Type.ROSTER);
         List<RosterEntry> exists = new ArrayList<>();
         switch (mRequestCode) {
             case INVITE:

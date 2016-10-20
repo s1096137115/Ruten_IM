@@ -16,7 +16,8 @@ public class Constants {
 		public static final String LONG = "yyyy/M/d HH:mm";
 		public static final String SHORT = "ahh:mm";
 		public static final String WEEK = "M/d E";
-		public static final String YEAR = "yyyy/M/d E";
+		public static final String YEAR = "yyyy";
+		public static final String YEAR_WEEK = "yyyy/M/d E";
 	}
 
 	public class Socket{

@@ -13,8 +13,20 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * Created by D-IT-MAX2 on 2016/5/3.
  */
 public class MessageManager {
+	private static MessageManager instance = null;
 	private Set<MessageListener> mMessageListeners = new CopyOnWriteArraySet<>();
 	protected Handler mHandler = new Handler();
+
+	public static synchronized MessageManager getInstance(){
+		if(instance == null){
+			instance = new MessageManager();
+		}
+		return instance;
+	}
+
+	public synchronized void clearInstance(){
+		instance = null;
+	}
 
 	public void add(final Message message){
 		mHandler.post(new Runnable() {

@@ -8,15 +8,15 @@ import android.util.Log;
 
 import com.avengers.publicim.activity.BaseActivity;
 import com.avengers.publicim.component.DbHelper;
+import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.component.IMService;
+import com.avengers.publicim.data.Manager.MessageManager;
+import com.avengers.publicim.data.Manager.RoomManager;
+import com.avengers.publicim.data.Manager.RosterManager;
 import com.avengers.publicim.data.listener.MessageListener;
 import com.avengers.publicim.data.listener.RoomListener;
 import com.avengers.publicim.data.listener.RosterListener;
 import com.avengers.publicim.data.listener.ServiceListener;
-
-import static com.avengers.publicim.component.IMApplication.getMessageManager;
-import static com.avengers.publicim.component.IMApplication.getRoomManager;
-import static com.avengers.publicim.component.IMApplication.getRosterManager;
 
 /**
  * Created by D-IT-MAX2 on 2016/5/10.
@@ -25,12 +25,22 @@ public abstract class BaseFragment extends Fragment implements ServiceListener{
 	protected DbHelper mDB;
 	protected Handler mHandler = new Handler();
 	protected IMService mIMService;
+	protected RosterManager mRosterManager;
+	protected RoomManager mRoomManager;
+	protected MessageManager mMessageManager;
 
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDB = DbHelper.getInstance(getContext());
+		initManager();
 		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
+	}
+
+	private void initManager(){
+		mRosterManager = RosterManager.getInstance(IMApplication.getContext());
+		mRoomManager = RoomManager.getInstance(IMApplication.getContext());
+		mMessageManager = MessageManager.getInstance();
 	}
 
 	@Override
@@ -66,28 +76,26 @@ public abstract class BaseFragment extends Fragment implements ServiceListener{
 	public void registerListeners(){
 		mIMService.addListener(this);
 		if (this instanceof RoomListener) {
-			getRoomManager().addListener((RoomListener) this);
+			mRoomManager.addListener((RoomListener) this);
 		}
 		if (this instanceof RosterListener) {
-			getRosterManager().addListener((RosterListener) this);
+			mRosterManager.removeListener((RosterListener) this);
 		}
 		if (this instanceof MessageListener) {
-			getMessageManager().addMessageListener((MessageListener) this);
+			mMessageManager.addMessageListener((MessageListener) this);
 		}
 	}
 
 	public void unregisterListeners(){
-		if(mIMService != null){
-			mIMService.removeListener(this);
-		}
+		mIMService.removeListener(this);
 		if (this instanceof RoomListener) {
-			getRoomManager().removeListener((RoomListener) this);
+			mRoomManager.removeListener((RoomListener) this);
 		}
 		if (this instanceof RosterListener) {
-			getRosterManager().removeListener((RosterListener) this);
+			mRosterManager.removeListener((RosterListener) this);
 		}
 		if (this instanceof MessageListener) {
-			getMessageManager().removeMessageListener((MessageListener) this);
+			mMessageManager.removeMessageListener((MessageListener) this);
 		}
 	}
 }

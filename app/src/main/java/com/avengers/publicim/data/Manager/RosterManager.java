@@ -3,6 +3,7 @@ package com.avengers.publicim.data.Manager;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.avengers.publicim.component.DbHelper;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.data.event.ServiceEvent;
@@ -14,14 +15,26 @@ import java.util.List;
  * Created by D-IT-MAX2 on 2016/6/22.
  */
 public class RosterManager extends BaseManager<RosterEntry, RosterListener> {
-
+	private static RosterManager instance = null;
 
 	public RosterManager(Context context) {
 		super(context);
 	}
 
+	public static synchronized RosterManager getInstance(Context context){
+		if(instance == null){
+			instance = new RosterManager(context);
+		}
+		return instance;
+	}
+
+	public synchronized void clearInstance(){
+		instance = null;
+	}
+
 	@Override
 	public List<RosterEntry> getList(@NonNull String type) {
+		if(mDB == null) mDB = DbHelper.getInstance(mContext);
 		return mDB.getLocalRoster();
 	}
 

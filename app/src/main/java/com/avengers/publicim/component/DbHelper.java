@@ -20,18 +20,23 @@ import java.util.List;
  */
 public class DbHelper extends SQLiteOpenHelper{
 	final private static int _DB_VERSION = 1;
-	final private static String _DB_DATABASE_NAME = "IMDatabase.db"; //todo "user name" + IMDatabase
 	private static DbHelper instance = null;
 
-	public DbHelper(Context context) {
-		super(context, _DB_DATABASE_NAME, null, _DB_VERSION);
+	private DbHelper(Context context, String name) {
+		super(context, name, null, _DB_VERSION);
 	}
 
 	public static synchronized DbHelper getInstance(Context context){
 		if(instance == null){
-			instance = new DbHelper(context);
+			String name = IMApplication.getUser().getName() + "_IMDatabase.db";
+			instance = new DbHelper(context, name);
 		}
 		return instance;
+	}
+
+	public synchronized void clearInstance(){
+		close();
+		instance = null;
 	}
 
 	@Override
