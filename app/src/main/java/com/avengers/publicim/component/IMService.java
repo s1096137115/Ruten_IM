@@ -39,7 +39,6 @@ import com.avengers.publicim.utils.SystemUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.collections4.PredicateUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -49,6 +48,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import io.socket.client.Ack;
+import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
@@ -69,16 +69,23 @@ public class IMService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		IMApplication app = (IMApplication) getApplication();
 		mDB = DbHelper.getInstance(this);
+		initSocket();
 		initManager();
-		mSocket = app.getSocket();
 		setSocketListener(mSocket);
 	}
 
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
+	private void initSocket(){
+		try {
+			IO.Options opts = new IO.Options();
+			opts.forceNew = true;
+//			opts.reconnection = false;
+			opts.reconnectionAttempts = 3;
+			opts.reconnectionDelay = 5000;
+			mSocket = IO.socket(Constants.CHAT_SERVER_URL,opts);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private void initManager(){
@@ -146,8 +153,12 @@ public class IMService extends Service {
 			ServiceEvent event = new ServiceEvent(ServiceEvent.Event.ADD_MESSAGES);
 			mMessageManager.add(list);
 			mRoomManager.notify(event);
-			sendGetMessage(list.get(list.size() -1).getDate(), null);
+			sendGetMessage(list.get(list.size() -1).getDate(), null, GetMessage.Type.BELOW);
+			//todo 取得加入room之前的對話
 		}
+//		else if(){
+//
+//		}
 	}
 
 	public void addRoom(Room room){
@@ -525,13 +536,13 @@ public class IMService extends Service {
 	 * @param date timestamp
 	 * @param rid
 	 */
-	public void sendGetMessage(long date, String rid){
+	public void sendGetMessage(long date, String rid, String type){
 		String str = SystemUtils.getDate(date, Constants.Date.LONG);
 		GetMessage getMessage = new GetMessage();
 		getMessage.setAction(Constants.Socket.EVENT_GET_MESSAGE);
-		getMessage.setType(GetMessage.Type.BELOW);
 		getMessage.setDate(date);
 		getMessage.setRid(rid);
+		getMessage.setType(type);
 		final JSONObject obj = GsonUtils.toJSONObject(getMessage);
 		mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
 	}
@@ -571,23 +582,7 @@ public class IMService extends Service {
 	}
 
 	public void receiveGetUser(String data){
-		GetUser getUser = new GetUser();
-		try {
-			JSONObject obj = new JSONObject(data);
-			getUser.setAction(obj.getString("action"));
-			JSONArray array =obj.getJSONArray("user");
-			JSONObject obj2 = array.getJSONObject(0);
-
-			GetUser.AdvUser adv = getUser.new AdvUser(obj2.getString("identify"), obj2.getString("name"));
-			JSONObject obj3 = obj2.getJSONObject("presence");
-			adv.setPresence(new Presence("","",0));
-			List list = new ArrayList<>();
-			list.add(adv);
-			getUser.setUsers(list);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-//		GetUser getUser = GsonUtils.fromJson(data, GetUser.class);
+		GetUser getUser = GsonUtils.fromJson(data, GetUser.class);
 		for (ServiceListener listener : mServiceListener) {
 			ServiceEvent event = new ServiceEvent(ServiceEvent.Event.GET_USER);
 			Bundle bundle = new Bundle();
@@ -662,7 +657,7 @@ public class IMService extends Service {
 						Boolean state = (Boolean)args[1];
 
 //						sendGetSyncData();
-						sendGetMessage(PreferenceHelper.UpdateStatus.getUpdateTime(), null);
+						sendGetMessage(PreferenceHelper.UpdateStatus.getUpdateTime(), null, GetMessage.Type.BELOW);
 						sendGetRoster();
 						sendGetRoom();
 						sendPresence(IMApplication.getPresence());
@@ -680,12 +675,12 @@ public class IMService extends Service {
 	private Emitter.Listener onConnectError = new Emitter.Listener() {
 		@Override
 		public void call(Object... args) {
-			Log.d("acho","connectError:" + args[0]);
+			Log.d("acho","connectError:");
 			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
 					Toast.makeText(IMApplication.getContext(),
-							"error", Toast.LENGTH_LONG).show();
+							"connectError", Toast.LENGTH_LONG).show();
 				}
 			});
 		}

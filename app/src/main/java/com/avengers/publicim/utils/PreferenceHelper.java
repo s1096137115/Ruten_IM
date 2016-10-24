@@ -36,7 +36,7 @@ public class PreferenceHelper {
 	}
 
 	public static class LoginStatus {
-		private static String PREFERENCES_FIELD_LOGIN_ACCOUNT = "loginAccount";
+		private static String PREFERENCES_FIELD_LOGIN_ACCOUNT = "_loginAccount";
 
 		public static String getAccount(){
 			if(IMApplication.getUser() != null){
@@ -49,7 +49,7 @@ public class PreferenceHelper {
 
 		public static void setAccount(String account){
 			if(IMApplication.getUser() != null){
-				PREFERENCES_FIELD_LOGIN_ACCOUNT = IMApplication.getUser().getName() + "_loginAccount";
+				PREFERENCES_FIELD_LOGIN_ACCOUNT = account + "_loginAccount";
 			}
 			SharedPreferences.Editor editor = IMApplication.getContext().getSharedPreferences(
 					LOGIN_STATUS_SHARED_PREFERENCES, Activity.MODE_PRIVATE).edit();

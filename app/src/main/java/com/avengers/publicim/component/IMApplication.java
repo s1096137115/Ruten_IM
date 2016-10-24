@@ -3,20 +3,15 @@ package com.avengers.publicim.component;
 import android.app.Application;
 import android.content.Context;
 
-import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.Manager.MessageManager;
 import com.avengers.publicim.data.Manager.RoomManager;
 import com.avengers.publicim.data.Manager.RosterManager;
 import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
-import com.avengers.publicim.utils.AndroidLoggingHandler;
 import com.avengers.publicim.view.DialogBuilder;
 import com.avengers.publicim.view.IMProgressDialog;
 
-import java.util.logging.Level;
-
-import io.socket.client.IO;
 import io.socket.client.Socket;
 
 /**
@@ -36,11 +31,7 @@ public class IMApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 		mContext = getApplicationContext();
-		AndroidLoggingHandler.reset(new AndroidLoggingHandler());
-		java.util.logging.Logger.getLogger("my.category").setLevel(Level.FINEST);
 //		initAccount();
-		initSocket();
-		initManager();
 	}
 
 	private void initAccount(){
@@ -58,39 +49,6 @@ public class IMApplication extends Application {
 
 	public static Presence getPresence(){
 		return mEntry.getPresence();
-	}
-
-	private void initSocket(){
-		try {
-			IO.Options opts = new IO.Options();
-//			opts.forceNew = true;
-//			opts.reconnection = false;
-			mSocket = IO.socket(Constants.CHAT_SERVER_URL,opts);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private void initManager(){
-		mRosterManager = new RosterManager(mContext);
-		mRoomManager = new RoomManager(mContext);
-		mMessageManager = new MessageManager();
-	}
-
-	public Socket getSocket() {
-		return mSocket;
-	}
-
-	public static RosterManager getRosterManager(){
-		return mRosterManager;
-	}
-
-	public static RoomManager getRoomManager(){
-		return mRoomManager;
-	}
-
-	public static MessageManager getMessageManager(){
-		return mMessageManager;
 	}
 
 	public static Context getContext() {

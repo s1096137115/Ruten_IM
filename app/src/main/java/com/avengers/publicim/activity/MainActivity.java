@@ -184,12 +184,12 @@ public class MainActivity extends BaseActivity {
 	private void logout(){
 		mIMService.disconnect();
 		PreferenceHelper.LoginStatus.setAccount("");
+		IMApplication.setAccount(null);
 		mDB.clearInstance();
 		mRosterManager.clearInstance();
 		mRoomManager.clearInstance();
 		mMessageManager.clearInstance();
 		mIMService.stopService(new Intent(this, IMService.class));
-		IMApplication.setAccount(null);
 	}
 
 	@Override

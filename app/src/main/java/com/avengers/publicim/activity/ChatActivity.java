@@ -53,7 +53,6 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 		setToolbar();
 		mChatAdapter = new ChatAdapter(ChatActivity.this, mDB.getMessages(mContact), mRoom);
 		setRecyclerView();
-
 		mSendButton.setOnClickListener(onClick);
 	}
 
@@ -98,7 +97,10 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 				break;
 			}
 		}
-		if(mChatAdapter.getData().isEmpty()) return;
+		if(mChatAdapter.getData().isEmpty()) {
+//			mIMService.sendGetMessage(System.currentTimeMillis(), mContact.getRid(), GetMessage.Type.ABOVE);
+			return;
+		}
 		int last = mChatAdapter.getData().size()-1;
 		//自己的已讀時間<最後一句時才送出已讀
 		if(myself.getRead_time() < mChatAdapter.getData().get(last).getDate()){
