@@ -17,6 +17,7 @@ import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.SystemUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -167,6 +168,9 @@ public class ChatAdapter extends BaseAdapter {
 		for (int i = 0; i < mMessages.size(); i++) {
 			if(mMessages.get(i).getFrom().getName().equals(IMApplication.getUser().getName())) continue;
 			if(mMessages.get(i).getType().equals(Message.Type.DATE)) continue;
+			if(myself == null) {
+				String a = "";
+			}
 			if(myself.getRead_time() <= mMessages.get(i).getDate()) return i;
 		}
 		return mMessages.size() -1;
@@ -189,8 +193,16 @@ public class ChatAdapter extends BaseAdapter {
 		if(mMessages.size() == 1) addTopDate();
 	}
 
+	public void add(int location, Message message){
+		mMessages.add(location, message);
+	}
+
 	public List<Message> getData(){
 		return mMessages;
+	}
+
+	public void sort(){
+		Collections.sort(mMessages);
 	}
 
 	/**

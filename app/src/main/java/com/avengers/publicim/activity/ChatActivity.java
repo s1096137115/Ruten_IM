@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.ChatAdapter;
 import com.avengers.publicim.component.IMApplication;
+import com.avengers.publicim.data.action.GetMessage;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
@@ -98,7 +99,7 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 			}
 		}
 		if(mChatAdapter.getData().isEmpty()) {
-//			mIMService.sendGetMessage(System.currentTimeMillis(), mContact.getRid(), GetMessage.Type.ABOVE);
+			mIMService.sendGetMessage(System.currentTimeMillis(), mContact.getRid(), GetMessage.Type.ABOVE);
 			return;
 		}
 		int last = mChatAdapter.getData().size()-1;
@@ -186,7 +187,7 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 	}
 
 	@Override
-	public void onMessagesAddition(List<Message> list) {
+	public void onMessagesAddition(List<Message> list, String type) {
 		boolean update = false;
 		for (Message message: list) {
 			if(message.getRid().equals(mRoom.getRid())){
@@ -217,9 +218,10 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 
 	@Override
 	public void onRoomUpdate(ServiceEvent event) {
+		String rid;
 		switch (event.getEvent()) {
 			case ServiceEvent.Event.GET_ROOM:
-				String rid = event.getBundle().getString(Room.RID);
+				rid = event.getBundle().getString(Room.RID);
 				if(rid.equals(mContact.getRid())){
 					mRoom = mRoomManager.getItem(Room.Type.ALL ,mContact.getRid());
 					if(mRoom != null) {
@@ -229,6 +231,14 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 						finish();
 					}
 				}
+				break;
+			case ServiceEvent.Event.LOAD_MESSAGE:
+//				rid = event.getBundle().getString(Room.RID);
+//				if(rid.equals(mContact.getRid())){
+					mChatAdapter.setFullLoad(false);
+					mChatAdapter.loadUp(mDB.getMessages(mContact));
+					mChatAdapter.refresh(1000);
+//				}
 				break;
 		}
 	}

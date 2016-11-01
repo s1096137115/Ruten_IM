@@ -125,40 +125,42 @@ public class IMService extends Service {
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	public void addMessage(Message message){
-		mDB.insertMessage(message);
+		long value = mDB.insertMessage(message);
+		if(value == -1) return;
 		ServiceEvent event = new ServiceEvent(ServiceEvent.Event.ADD_MESSAGE);
-//		Bundle bundle = new Bundle();
-//		bundle.putString(Room.RID, message.getRid());
-//		bundle.putSerializable(ServiceEvent.Item.MESSAGE, message);
-//		event.setBundle(bundle);
 		mMessageManager.add(message);
 		mRoomManager.notify(event);
 	}
 
-	public void addMessages(List<Message> list){
+	public void addMessages(GetMessage getMessage){
 		//確保成功寫入後才會callback到listener
-		List<Message> list2 = new ArrayList<>();
-		for (Message message : list) {
+		List<Message> insertedList = new ArrayList<>();
+		for (Message message : getMessage.getMessages()) {
 			long value = mDB.insertMessage(message);
 			if(value != -1){
-				list2.add(message);
+				insertedList.add(message);
 			}
 		}
-		if(list.isEmpty()) {
+		if(getMessage.getMessages().isEmpty()) {
+			//type為ABOVE的話當載完再reload
+			if(getMessage.getType().equals(GetMessage.Type.ABOVE)){
+				ServiceEvent event = new ServiceEvent(ServiceEvent.Event.LOAD_MESSAGE);
+				Bundle bundle = new Bundle();
+//				bundle.putString(Room.RID, getMessage.getRid());
+				event.setBundle(bundle);
+				mRoomManager.notify(event);
+			}
 			PreferenceHelper.UpdateStatus.setUpdateTime(System.currentTimeMillis());
-			//目前server更新機制只針對account
-			//所以 更新時間<訊息時間 才會更新
-			//以防其他device在更新時同步觸發更新
-		}else if(PreferenceHelper.UpdateStatus.getUpdateTime() < list.get(list.size() -1).getDate()){
+		}else if(getMessage.getType().equals(GetMessage.Type.BELOW)){
+			mMessageManager.add(insertedList, getMessage.getType());
 			ServiceEvent event = new ServiceEvent(ServiceEvent.Event.ADD_MESSAGES);
-			mMessageManager.add(list);
 			mRoomManager.notify(event);
-			sendGetMessage(list.get(list.size() -1).getDate(), null, GetMessage.Type.BELOW);
+			sendGetMessage(getMessage.getMessages().get(getMessage.getMessages().size() -1).getDate(), null, getMessage.getType());
 			//todo 取得加入room之前的對話
+		}else if(getMessage.getType().equals(GetMessage.Type.ABOVE)){
+			sendGetMessage(getMessage.getMessages().get(getMessage.getMessages().size() -1).getDate(),
+					getMessage.getMessages().get(0).getRid(), getMessage.getType());
 		}
-//		else if(){
-//
-//		}
 	}
 
 	public void addRoom(Room room){
@@ -617,7 +619,7 @@ public class IMService extends Service {
 
 	public void receiveGetMessage(String data){
 		GetMessage getMessage = GsonUtils.fromJson(data, GetMessage.class);
-		addMessages(getMessage.getMessages());
+		addMessages(getMessage);
 	}
 
 	@Override

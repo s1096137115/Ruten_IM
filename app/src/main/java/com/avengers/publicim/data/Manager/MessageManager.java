@@ -39,12 +39,12 @@ public class MessageManager {
 		});
 	}
 
-	public void add(final List<Message> list){
+	public void add(final List<Message> list, final String type){
 		mHandler.post(new Runnable() {
 			@Override
 			public void run() {
 				for (MessageListener listener : mMessageListeners){
-					listener.onMessagesAddition(list);
+					listener.onMessagesAddition(list, type);
 				}
 			}
 		});

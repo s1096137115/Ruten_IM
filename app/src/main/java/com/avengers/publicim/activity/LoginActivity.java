@@ -13,6 +13,7 @@ import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.PreferenceHelper;
+import com.avengers.publicim.utils.SystemUtils;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -23,7 +24,7 @@ public class LoginActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_login);
 		String account = PreferenceHelper.LoginStatus.getAccount();
 		if(!account.isEmpty()){
-			RosterEntry entry = new RosterEntry(new User("Android-Emulator", account),
+			RosterEntry entry = new RosterEntry(new User(SystemUtils.getAndroidID(), account),
 					new Presence("","", Presence.Status.ONLINE), 0, "");
 			IMApplication.setAccount(entry);
 			startActivity(new Intent(LoginActivity.this, MainActivity.class));
@@ -36,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
 			@Override
 			public void onClick(View v) {
 				String account = ((EditText)findViewById(R.id.etAccount)).getText().toString();
-				RosterEntry entry = new RosterEntry(new User("Android-Emulator", account),
+				RosterEntry entry = new RosterEntry(new User(SystemUtils.getAndroidID(), account),
 						new Presence("","", Presence.Status.ONLINE), 0, "");
 				IMApplication.setAccount(entry);
 				PreferenceHelper.LoginStatus.setAccount(account);

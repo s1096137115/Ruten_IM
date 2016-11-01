@@ -11,7 +11,7 @@ public interface MessageListener extends Listener{
 
 	void onMessageAddition(Message message);
 
-	void onMessagesAddition(List<Message> list);
+	void onMessagesAddition(List<Message> list, String type);
 
 	void onMessageUpdate(Message message);
 

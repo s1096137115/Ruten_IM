@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.provider.Settings;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -18,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/2.
@@ -79,5 +81,13 @@ public class SystemUtils {
 		}
 		sdf = new SimpleDateFormat(type, Locale.TAIWAN);
 		return sdf.format(new Date(timestamp));
+	}
+
+	public static String getAndroidID(){
+		return Settings.Secure.getString(IMApplication.getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+	}
+
+	public static String getUUID(){
+		return UUID.randomUUID().toString();
 	}
 }
