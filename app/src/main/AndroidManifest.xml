@@ -62,6 +62,26 @@
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
 		</activity>
+
+		<!-- [START gcm_listener] --> <!-- 3.0 -->
+		<!--目的：取得GCM發怖的資料，並發出通知(Notification)-->
+		<service
+			android:name=".component.fcm.MyFcmListenerService">
+			<intent-filter>
+				<action android:name="com.google.firebase.MESSAGING_EVENT" />
+			</intent-filter>
+		</service>
+		<!-- [END gcm_listener] -->
+
+		<!-- [START instanceId_listener] --> <!-- 3.0 -->
+		<!--目的：用來處理Token有發生改變-->
+		<service
+			android:name=".component.fcm.MyInstanceIDListenerService">
+			<intent-filter>
+				<action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+			</intent-filter>
+		</service>
+		<!-- [END instanceId_listener] -->
 	</application>
 
 </manifest>

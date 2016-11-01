@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "381249272383",
+    "firebase_url": "https://im-test-79e12.firebaseio.com",
+    "project_id": "im-test-79e12",
+    "storage_bucket": "im-test-79e12.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381249272383:android:e18b8d9f49fe87cf",
+        "android_client_info": {
+          "package_name": "com.avengers.publicim"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "381249272383-nonahc8ou6jdsd417s39d1ehv78ok8jr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBa0vGfCoqd53YtMbZljltaKdR6PP637tA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
