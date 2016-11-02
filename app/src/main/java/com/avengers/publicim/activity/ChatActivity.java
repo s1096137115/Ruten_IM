@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.ChatAdapter;
-import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.data.action.GetMessage;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Member;
@@ -27,6 +26,7 @@ import com.avengers.publicim.data.listener.RoomListener;
 import com.avengers.publicim.utils.OnRcvScrollListener;
 import com.avengers.publicim.utils.OnRcvScrollListener.Position;
 import com.avengers.publicim.utils.SystemUtils;
+import com.avengers.publicim.view.LoginAccount;
 
 import java.util.List;
 
@@ -93,7 +93,7 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 		//hasUnread
 		Member myself = null;
 		for (Member member: mRoom.getMembers()) {
-			if(member.getUser().equals(IMApplication.getUser().getName())){
+			if(member.getUser().equals(LoginAccount.getInstance().getUser().getName())){
 				myself = member;
 				break;
 			}
@@ -143,7 +143,7 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 			case R.id.action_exit_group:
 				getProgress().setMessage("Waiting...");
 				getProgress().show();
-				mIMService.sendSetRoomMemberRole(mRoom, IMApplication.getUser(), Room.Role.EXIT);
+				mIMService.sendSetRoomMemberRole(mRoom, LoginAccount.getInstance().getUser(), Room.Role.EXIT);
 				break;
 		}
 		return true;
@@ -233,12 +233,12 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 				}
 				break;
 			case ServiceEvent.Event.LOAD_MESSAGE:
-//				rid = event.getBundle().getString(Room.RID);
-//				if(rid.equals(mContact.getRid())){
+				rid = event.getBundle().getString(Room.RID);
+				if(rid.equals(mContact.getRid())){
 					mChatAdapter.setFullLoad(false);
 					mChatAdapter.loadUp(mDB.getMessages(mContact));
 					mChatAdapter.refresh(1000);
-//				}
+				}
 				break;
 		}
 	}

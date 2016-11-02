@@ -13,6 +13,7 @@ import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.data.action.GetUser;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.fragment.InviteRosterFragment;
+import com.avengers.publicim.view.LoginAccount;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class InviteRosterAdapter extends BaseAdapter{
 		((NormalTextViewHolder)holder).mID.setText(mAdvUser.get(position).getName());
 		((NormalTextViewHolder)holder).mIcon.setImageResource(R.drawable.ic_person_black_48dp);
 
-		if(IMApplication.getUser().getName().equals(mAdvUser.get(position).getName())){
+		if(LoginAccount.getInstance().getUser().getName().equals(mAdvUser.get(position).getName())){
 			((NormalTextViewHolder)holder).mDetail.setText(IMApplication.getContext().getString(R.string.msg_get_user_yourself));
 			((NormalTextViewHolder)holder).mButton.setVisibility(View.GONE);
 		}else if(mRosterManager.contains(mAdvUser.get(position))){

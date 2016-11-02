@@ -17,12 +17,12 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.component.IMService;
 import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.fragment.ChatListFragment;
 import com.avengers.publicim.fragment.RosterFragment;
 import com.avengers.publicim.utils.PreferenceHelper;
+import com.avengers.publicim.view.LoginAccount;
 
 import io.socket.client.Socket;
 
@@ -183,8 +183,9 @@ public class MainActivity extends BaseActivity {
 
 	private void logout(){
 		mIMService.disconnect();
-		PreferenceHelper.LoginStatus.setAccount("");
-		IMApplication.setAccount(null);
+		PreferenceHelper.LoginStatus.clearAccount();
+		LoginAccount.getInstance().clearAccount();
+		LoginAccount.getInstance().clearInstance();
 		mDB.clearInstance();
 		mRosterManager.clearInstance();
 		mRoomManager.clearInstance();

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
+import com.avengers.publicim.R;
 import com.avengers.publicim.activity.MainActivity;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -72,7 +73,7 @@ public class MyFcmListenerService extends FirebaseMessagingService {
 				new NotificationCompat.Builder(this)
 						//.setLargeIcon(icon)
 						.setDefaults(NotificationCompat.DEFAULT_ALL) //default sound` vibrate and light
-//						.setSmallIcon(R.drawable.ic_launcher)
+						.setSmallIcon(R.mipmap.ic_launcher)
 						.setContentTitle(title)
 						.setAutoCancel(true)
 						.setCategory(NotificationCompat.CATEGORY_MESSAGE)

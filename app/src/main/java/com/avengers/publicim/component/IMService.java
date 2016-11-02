@@ -35,6 +35,7 @@ import com.avengers.publicim.data.listener.ServiceListener;
 import com.avengers.publicim.utils.GsonUtils;
 import com.avengers.publicim.utils.PreferenceHelper;
 import com.avengers.publicim.utils.SystemUtils;
+import com.avengers.publicim.view.LoginAccount;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
@@ -146,7 +147,7 @@ public class IMService extends Service {
 			if(getMessage.getType().equals(GetMessage.Type.ABOVE)){
 				ServiceEvent event = new ServiceEvent(ServiceEvent.Event.LOAD_MESSAGE);
 				Bundle bundle = new Bundle();
-//				bundle.putString(Room.RID, getMessage.getRid());
+				bundle.putString(Room.RID, getMessage.getRid());
 				event.setBundle(bundle);
 				mRoomManager.notify(event);
 			}
@@ -374,7 +375,7 @@ public class IMService extends Service {
 				long date = Long.valueOf(args[2].toString());
 				message.setMid(mid);
 				message.setDate(date);
-				message.setFrom(IMApplication.getUser());
+				message.setFrom(LoginAccount.getInstance().getUser());
 				addMessage(message);
 			}
 		});
@@ -404,7 +405,7 @@ public class IMService extends Service {
 	public void sendPresence(Presence presence){
 		try {
 			final JSONObject obj = GsonUtils.toJSONObject(presence);
-			final JSONObject obj2 = GsonUtils.toJSONObject(IMApplication.getUser());
+			final JSONObject obj2 = GsonUtils.toJSONObject(LoginAccount.getInstance().getUser());
 			obj.put("from",obj2);
 			mSocket.emit(Constants.Socket.EVENT_SEND_PRESENCE, obj, new Ack() {
 				@Override
@@ -558,7 +559,7 @@ public class IMService extends Service {
 		updateMember(setRoomMemberRole.getRoom(), setRoomMemberRole.getRoom().getMembers());
 		for (Member member: setRoomMemberRole.getRoom().getMembers()) {
 //			mDB.updateMember(member);
-			if(member.getRole().equals(Room.Role.EXIT) && member.getUser().equals(IMApplication.getUser().getName())){
+			if(member.getRole().equals(Room.Role.EXIT) && member.getUser().equals(LoginAccount.getInstance().getUser().getName())){
 				Room room = mRoomManager.getItem(Room.Type.GROUP, setRoomMemberRole.getRoom().getRid());
 				deleteRoom(room);
 			}
@@ -575,7 +576,7 @@ public class IMService extends Service {
 
 	public void receiveGetRoster(String data){
 		GetRoster getRoster = GsonUtils.fromJson(data, GetRoster.class);
-		updateRoster(getRoster.getRosterEntries());
+		if(TextUtils.isEmpty(getRoster.getError())) updateRoster(getRoster.getRosterEntries());
 	}
 
 	public void receiveSetRoster(String data){
@@ -596,7 +597,7 @@ public class IMService extends Service {
 
 	public void receiveGetRoom(String data){
 		GetRoom getRoom = GsonUtils.fromJson(data, GetRoom.class);
-		updateRooms(getRoom.getRooms());
+		if(TextUtils.isEmpty(getRoom.getError())) updateRooms(getRoom.getRooms());
 	}
 
 	public void receiveCreateRoom(String data){
@@ -619,7 +620,7 @@ public class IMService extends Service {
 
 	public void receiveGetMessage(String data){
 		GetMessage getMessage = GsonUtils.fromJson(data, GetMessage.class);
-		addMessages(getMessage);
+		if(TextUtils.isEmpty(getMessage.getError())) addMessages(getMessage);
 	}
 
 	@Override
@@ -648,7 +649,7 @@ public class IMService extends Service {
 		@Override
 		public void call(final Object... args) {
 			Log.d("acho","connect");
-			JSONObject obj = GsonUtils.toJSONObject(IMApplication.getUser());
+			JSONObject obj = GsonUtils.toJSONObject(LoginAccount.getInstance().getUser());
 			try {
 				mSocket.emit(Constants.Socket.EVENT_JOIN, obj, new Ack() {
 					@Override
@@ -662,7 +663,7 @@ public class IMService extends Service {
 						sendGetMessage(PreferenceHelper.UpdateStatus.getUpdateTime(), null, GetMessage.Type.BELOW);
 						sendGetRoster();
 						sendGetRoom();
-						sendPresence(IMApplication.getPresence());
+						sendPresence(LoginAccount.getInstance().getPresence());
 					}
 				});
 			} catch (Exception e) {
@@ -728,7 +729,7 @@ public class IMService extends Service {
 			Log.d(TAG, args[0].toString());
 			Message message = GsonUtils.fromJson(args[0].toString(), Message.class);
 			//原device不處理，其他device跟進
-			if(message.getFrom().equals(IMApplication.getUser())) return;
+			if(message.getFrom().equals(LoginAccount.getInstance().getUser())) return;
 			//沒有room的message不處理(本身退出群組時仍會收到系統訊息)
 			if(mRoomManager.getItem(Room.Type.ALL, message.getRid()) == null) return;
 			addMessage(message);

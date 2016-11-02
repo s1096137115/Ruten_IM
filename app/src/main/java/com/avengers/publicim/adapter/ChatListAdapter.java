@@ -8,11 +8,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.utils.SystemUtils;
+import com.avengers.publicim.view.LoginAccount;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class ChatListAdapter extends BaseAdapter{
 		String title = "";
 		if(mRooms.get(position).getType().equals(Room.Type.SINGLE)){
 			for (Member member : mRooms.get(position).getMembers()) {
-				if(!member.getUser().equals(IMApplication.getUser().getName())){
+				if(!member.getUser().equals(LoginAccount.getInstance().getUser().getName())){
 					title = member.getUser();
 				}
 			}

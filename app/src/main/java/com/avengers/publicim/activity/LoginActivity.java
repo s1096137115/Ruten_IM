@@ -8,12 +8,12 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.PreferenceHelper;
 import com.avengers.publicim.utils.SystemUtils;
+import com.avengers.publicim.view.LoginAccount;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -22,11 +22,12 @@ public class LoginActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
-		String account = PreferenceHelper.LoginStatus.getAccount();
-		if(!account.isEmpty()){
-			RosterEntry entry = new RosterEntry(new User(SystemUtils.getAndroidID(), account),
-					new Presence("","", Presence.Status.ONLINE), 0, "");
-			IMApplication.setAccount(entry);
+//		String account = PreferenceHelper.LoginStatus.getAccount();
+
+		if(LoginAccount.getInstance().getAccount() != null){
+//			RosterEntry entry = new RosterEntry(new User(SystemUtils.getAndroidID(), account),
+//					new Presence("","", Presence.Status.ONLINE), 0, "");
+//			IMApplication.setAccount(entry);
 			startActivity(new Intent(LoginActivity.this, MainActivity.class));
 			finish();
 		}
@@ -39,7 +40,7 @@ public class LoginActivity extends AppCompatActivity {
 				String account = ((EditText)findViewById(R.id.etAccount)).getText().toString();
 				RosterEntry entry = new RosterEntry(new User(SystemUtils.getAndroidID(), account),
 						new Presence("","", Presence.Status.ONLINE), 0, "");
-				IMApplication.setAccount(entry);
+//				IMApplication.setAccount(entry);
 				PreferenceHelper.LoginStatus.setAccount(account);
 				startActivity(new Intent(LoginActivity.this, MainActivity.class));
 				finish();

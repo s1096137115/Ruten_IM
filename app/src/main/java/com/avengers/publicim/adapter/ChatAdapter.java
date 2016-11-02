@@ -8,13 +8,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.SystemUtils;
+import com.avengers.publicim.view.LoginAccount;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -94,7 +94,7 @@ public class ChatAdapter extends BaseAdapter {
 			((SelfHolder) holder).mRead.setVisibility(View.GONE);
 			int count = 0;
 			for (Member member:mRoom.getMembers()) {
-				if(member.getUser().equals(IMApplication.getUser().getName())) continue;
+				if(member.getUser().equals(LoginAccount.getInstance().getUser().getName())) continue;
 				if(member.getRead_time() >= mMessages.get(position).getDate()){
 					((SelfHolder) holder).mRead.setVisibility(View.VISIBLE);
 					count ++;
@@ -127,7 +127,7 @@ public class ChatAdapter extends BaseAdapter {
 		}else if(mMessages.get(position).getType().equals(Message.Type.DATE)){
 			return TYPE_DATE;
 		}else{
-			return mMessages.get(position).getFrom().getName().equals(IMApplication.getUser().getName())
+			return mMessages.get(position).getFrom().getName().equals(LoginAccount.getInstance().getUser().getName())
 					? TYPE_SEND : TYPE_RECEIVE;
 		}
 	}
@@ -160,13 +160,13 @@ public class ChatAdapter extends BaseAdapter {
 	public int positionOfUnread(){
 		Member myself = null;
 		for (Member member: mRoom.getMembers()) {
-			if(member.getUser().equals(IMApplication.getUser().getName())){
+			if(member.getUser().equals(LoginAccount.getInstance().getUser().getName())){
 				myself = member;
 				break;
 			}
 		}
 		for (int i = 0; i < mMessages.size(); i++) {
-			if(mMessages.get(i).getFrom().getName().equals(IMApplication.getUser().getName())) continue;
+			if(mMessages.get(i).getFrom().getName().equals(LoginAccount.getInstance().getUser().getName())) continue;
 			if(mMessages.get(i).getType().equals(Message.Type.DATE)) continue;
 			if(myself == null) {
 				String a = "";

@@ -36,8 +36,6 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	protected IMService mIMService;
 	protected boolean mIsBind = false;
 	protected DbHelper mDB;
-//	protected DialogBuilder mBuilder;
-//	protected ProgressDialog mProgressDialog;
 	protected Handler mHandler;
 	protected RosterManager mRosterManager;
 	protected RoomManager mRoomManager;
@@ -47,8 +45,8 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDB = DbHelper.getInstance(this);
-		initManager();
 		mHandler = new Handler();
+		initManager();
 		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
@@ -71,7 +69,14 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 			startService(intent);
 			bindService(intent,mSC,BIND_AUTO_CREATE);
 		}
-		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
+//		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		setBuilder(null);
+		setIMProgress(null);
 	}
 
 	@Override
@@ -82,13 +87,13 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 			unregisterListeners();
 			mIsBind =false;
 		}
-		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
+//		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
+//		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
 
 	@Override
@@ -139,6 +144,7 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 				((BaseFragment)fragment).onBackendConnected();
 			}
 		}
+		if(!mIMService.connected()) mIMService.connect();
 	}
 
 	private ServiceConnection mSC = new ServiceConnection() {

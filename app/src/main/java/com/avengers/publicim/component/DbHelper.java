@@ -11,6 +11,7 @@ import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.User;
+import com.avengers.publicim.view.LoginAccount;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,8 @@ public class DbHelper extends SQLiteOpenHelper{
 
 	public static synchronized DbHelper getInstance(Context context){
 		if(instance == null){
-			String name = IMApplication.getUser().getName() + "_IMDatabase.db";
+
+			String name = LoginAccount.getInstance().getUser().getName() + "_IMDatabase.db";
 			instance = new DbHelper(context, name);
 		}
 		return instance;
@@ -84,7 +86,7 @@ public class DbHelper extends SQLiteOpenHelper{
 				"AND msg.rid = r.rid " +
 				"GROUP BY msg.rid " +
 				"ORDER BY last DESC",
-				"#system", IMApplication.getUser().getName(), IMApplication.getUser().getName(),
+				"#system", LoginAccount.getInstance().getUser().getName(), LoginAccount.getInstance().getUser().getName(),
 				Room.UNREAD, Message.TABLE_NAME, Member.TABLE_NAME, Room.TABLE_NAME);
 		Cursor cursor = db.rawQuery(SQL_SEL, null);
 		ArrayList<Room> list = new ArrayList<>();
@@ -109,7 +111,7 @@ public class DbHelper extends SQLiteOpenHelper{
 						"AND mem.rid =" + rid +
 						"AND r.rid =" + rid +
 						"GROUP BY msg.rid",
-				IMApplication.getUser().getName(), IMApplication.getUser().getName(),
+				LoginAccount.getInstance().getUser().getName(), LoginAccount.getInstance().getUser().getName(),
 				Room.UNREAD, Message.TABLE_NAME, Member.TABLE_NAME, Room.TABLE_NAME);
 		return db.rawQuery(SQL_SEL, null);
 	}
