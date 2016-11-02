@@ -187,9 +187,7 @@ public class MainActivity extends BaseActivity {
 		LoginAccount.getInstance().clearAccount();
 		LoginAccount.getInstance().clearInstance();
 		mDB.clearInstance();
-		mRosterManager.clearInstance();
-		mRoomManager.clearInstance();
-		mMessageManager.clearInstance();
+		clearManager();
 		mIMService.stopService(new Intent(this, IMService.class));
 	}
 

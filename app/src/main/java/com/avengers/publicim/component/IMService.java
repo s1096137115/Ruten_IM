@@ -76,6 +76,11 @@ public class IMService extends Service {
 		setSocketListener(mSocket);
 	}
 
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+	}
+
 	private void initSocket(){
 		try {
 			IO.Options opts = new IO.Options();
@@ -97,7 +102,7 @@ public class IMService extends Service {
 
 	private void setSocketListener(Socket socket){
 		socket.on(Socket.EVENT_CONNECT, onConnect);
-		socket.on(Socket.EVENT_DISCONNECT, onConnectError);
+		socket.on(Socket.EVENT_DISCONNECT, onDisconnect);
 		socket.on(Socket.EVENT_ERROR, onConnectError);
 		socket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
 		socket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -684,6 +689,20 @@ public class IMService extends Service {
 				public void run() {
 					Toast.makeText(IMApplication.getContext(),
 							"connectError", Toast.LENGTH_LONG).show();
+				}
+			});
+		}
+	};
+
+	private Emitter.Listener onDisconnect = new Emitter.Listener() {
+		@Override
+		public void call(Object... args) {
+			Log.d("acho","disconnect:");
+			mHandler.post(new Runnable() {
+				@Override
+				public void run() {
+					Toast.makeText(IMApplication.getContext(),
+							"disconnect", Toast.LENGTH_LONG).show();
 				}
 			});
 		}

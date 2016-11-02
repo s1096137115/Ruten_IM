@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 
 import com.avengers.publicim.component.DbHelper;
@@ -23,6 +22,7 @@ import com.avengers.publicim.data.listener.RoomListener;
 import com.avengers.publicim.data.listener.RosterListener;
 import com.avengers.publicim.data.listener.ServiceListener;
 import com.avengers.publicim.fragment.BaseFragment;
+import com.avengers.publicim.utils.HomeWatcher;
 import com.avengers.publicim.view.DialogBuilder;
 import com.avengers.publicim.view.IMProgressDialog;
 
@@ -40,25 +40,54 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	protected RosterManager mRosterManager;
 	protected RoomManager mRoomManager;
 	protected MessageManager mMessageManager;
+	protected HomeWatcher mHomeWatcher;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDB = DbHelper.getInstance(this);
 		mHandler = new Handler();
-		initManager();
-		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
+		setHomeWatcher();
 	}
 
-	private void initManager(){
+	private void setHomeWatcher(){
+		mHomeWatcher = new HomeWatcher(this);
+		mHomeWatcher.setOnHomePressedListener(new HomeWatcher.OnHomePressedListener() {
+			@Override
+			public void onHomePressed() {
+				mHandler.postDelayed(mRunnable, 10000);
+			}
+
+			@Override
+			public void onHomeLongPressed() {
+				String a = "";
+			}
+		});
+	}
+
+	private void cancelDisconnect(){
+		mHandler.removeCallbacks(mRunnable);
+	}
+
+	private void setManager(){
 		mRosterManager = RosterManager.getInstance(IMApplication.getContext());
 		mRoomManager = RoomManager.getInstance(IMApplication.getContext());
 		mMessageManager = MessageManager.getInstance();
 	}
 
+	protected void clearManager(){
+		mRosterManager.clearInstance();
+		mRoomManager.clearInstance();
+		mMessageManager.clearInstance();
+	}
+
 	@Override
 	protected void onStart() {
 		super.onStart();
+		cancelDisconnect();
+		setManager();
+		mHomeWatcher.startWatch();
 		setBuilder(new DialogBuilder(this));
 		setIMProgress(new IMProgressDialog(this));
 		if(mIsBind){
@@ -82,6 +111,7 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	@Override
 	protected void onStop() {
 		super.onStop();
+		mHomeWatcher.stopWatch();
 		if(mIsBind){
 			unbindService(mSC);
 			unregisterListeners();
@@ -161,6 +191,16 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 		public void onServiceDisconnected(ComponentName name) {
 			mIsBind = false;
 			unregisterListeners();
+		}
+	};
+
+	private Runnable mRunnable = new Runnable() {
+		@Override
+		public void run() {
+			mIMService.disconnect();
+			mIMService.stopService(new Intent(BaseActivity.this, IMService.class));
+			mDB.clearInstance();
+			clearManager();
 		}
 	};
 }
