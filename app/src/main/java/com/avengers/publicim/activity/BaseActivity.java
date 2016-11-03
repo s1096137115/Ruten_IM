@@ -49,6 +49,7 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 		mDB = DbHelper.getInstance(this);
 		mHandler = new Handler();
 		setHomeWatcher();
+		setManager();
 	}
 
 	private void setHomeWatcher(){
@@ -86,7 +87,6 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	protected void onStart() {
 		super.onStart();
 		cancelDisconnect();
-		setManager();
 		mHomeWatcher.startWatch();
 		setBuilder(new DialogBuilder(this));
 		setIMProgress(new IMProgressDialog(this));
@@ -199,8 +199,6 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 		public void run() {
 			mIMService.disconnect();
 			mIMService.stopService(new Intent(BaseActivity.this, IMService.class));
-			mDB.clearInstance();
-			clearManager();
 		}
 	};
 }
