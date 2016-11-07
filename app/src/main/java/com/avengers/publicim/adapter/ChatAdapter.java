@@ -16,7 +16,10 @@ import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.utils.SystemUtils;
 import com.avengers.publicim.view.LoginAccount;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -168,9 +171,6 @@ public class ChatAdapter extends BaseAdapter {
 		for (int i = 0; i < mMessages.size(); i++) {
 			if(mMessages.get(i).getFrom().getName().equals(LoginAccount.getInstance().getUser().getName())) continue;
 			if(mMessages.get(i).getType().equals(Message.Type.DATE)) continue;
-			if(myself == null) {
-				String a = "";
-			}
 			if(myself.getRead_time() <= mMessages.get(i).getDate()) return i;
 		}
 		return mMessages.size() -1;
@@ -178,11 +178,14 @@ public class ChatAdapter extends BaseAdapter {
 
 	public void loadUp(List<Message> messages){
 		if(messages.size() < LOAD_SIZE) mFullLoad = true;
-		mMessages.addAll(0, messages);
-		if(mMessages.size() == messages.size()){//判斷是否是第一次載入
-			addDateMsg(0, messages.size()-1);
-		}else{
+		Collection<Message> subtract = CollectionUtils.subtract(messages, mMessages);//過濾掉重覆的資料
+		if(subtract.isEmpty()) return;
+
+		mMessages.addAll(0, subtract);
+		if(mMessages.size() > subtract.size()){
 			addDateMsg(0, messages.size());//更新的範團包含銜接的地方
+		}else{
+			addDateMsg(0, messages.size()-1);
 		}
 		if(mFullLoad) addTopDate();
 	}
@@ -216,7 +219,7 @@ public class ChatAdapter extends BaseAdapter {
 			String previous = SystemUtils.getDate(mMessages.get(i-1).getDate(), Constants.Date.WEEK);
 			String self = SystemUtils.getDate(mMessages.get(i).getDate(), Constants.Date.WEEK);
 			if(!self.equals(previous)){
-				mMessages.add(i, new Message("", new User("", "#local"), mRoom.getRid(), Message.Type.DATE, self, 0));
+				mMessages.add(i, new Message(self, new User("", "#local"), mRoom.getRid(), Message.Type.DATE, self, 0));
 			}
 		}
 	}
@@ -227,7 +230,7 @@ public class ChatAdapter extends BaseAdapter {
 	private void addTopDate(){
 		if(mMessages.isEmpty()) return;
 		String self = SystemUtils.getDate(mMessages.get(0).getDate(), Constants.Date.WEEK);
-		mMessages.add(0, new Message("", new User("", "#local"), mRoom.getRid(), Message.Type.DATE, self, 0));
+		mMessages.add(0, new Message(self, new User("", "#local"), mRoom.getRid(), Message.Type.DATE, self, 0));
 	}
 
 	public static class TheOtherViewHolder extends RecyclerView.ViewHolder {

@@ -564,18 +564,18 @@ public class IMService extends Service {
 		updateMember(setRoomMemberRole.getRoom(), setRoomMemberRole.getRoom().getMembers());
 		for (Member member: setRoomMemberRole.getRoom().getMembers()) {
 //			mDB.updateMember(member);
-			if(member.getRole().equals(Room.Role.EXIT) && member.getUser().equals(LoginAccount.getInstance().getUser().getName())){
+			if(member.getRole().equals(Room.Role.EXIT)
+					&& member.getUser().equals(LoginAccount.getInstance().getUser().getName())){
 				Room room = mRoomManager.getItem(Room.Type.GROUP, setRoomMemberRole.getRoom().getRid());
 				deleteRoom(room);
+				for (ServiceListener listener : mServiceListener) {
+					ServiceEvent event = new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG);
+					Bundle bundle = new Bundle();
+					bundle.putSerializable(Room.class.getSimpleName(), setRoomMemberRole.getRoom());
+					event.setBundle(bundle);
+					listener.onServeiceResponse(event);
+				}
 			}
-		}
-		for (ServiceListener listener : mServiceListener) {
-			ServiceEvent event = new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG);
-			Bundle bundle = new Bundle();
-			bundle.putSerializable(Room.class.getSimpleName(), setRoomMemberRole.getRoom());
-			event.setBundle(bundle);
-			Log.d("test", "role" + setRoomMemberRole.getRoom().getMembers().size());
-			listener.onServeiceResponse(event);
 		}
 	}
 

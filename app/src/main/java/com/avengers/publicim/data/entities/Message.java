@@ -173,4 +173,24 @@ public class Message implements Serializable, Comparable<Message>{
 	public int compareTo(@NonNull Message another) {
 		return this.getDate() < another.getDate() ? -1 : (this.getDate().equals(another.getDate()) ? 0 : 1);
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof Message) {
+			Message message = (Message) o;
+			return this.mid.equals(message.mid);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		final int PRIME = 31;
+		int result = 1;
+		result = PRIME * result + (PRIME * getRid().hashCode())
+				+ getDate().hashCode() + getFrom().hashCode()
+				+ getContext().hashCode() + getRid().hashCode()
+				+ getType().hashCode();
+		return result;
+	}
 }
