@@ -38,7 +38,8 @@ public class Room extends Contact {
 					+ RID + " VARCHAR(50) PRIMARY KEY, "
 					+ NAME + " VARCHAR(50), "
 					+ OWNER + " VARCHAR(30), "
-					+ TYPE + " VARCHAR(20) "
+					+ TYPE + " VARCHAR(20), "
+					+ Option.MUTE + " VARCHAR(5) "
 					+ ") ";
 
 	public class Role{
@@ -101,17 +102,21 @@ public class Room extends Contact {
 	@SerializedName("type")
 	private String type;
 
+	@SerializedName("option")
+	private Option option;
+
 	private long date;
 
 	private Message lastMsg;
 
 	private int unread;
 
-	public Room(String rid, String name,String owner, String type) {
+	public Room(String rid, String name,String owner, String type, Option option) {
 		this.rid = rid;
 		this.name = name;
 		this.owner = owner;
 		this.type = type;
+		this.option = option;
 	}
 
 	public static Room newInstance(Cursor cursor){
@@ -119,7 +124,8 @@ public class Room extends Contact {
 				cursor.getString(cursor.getColumnIndexOrThrow(RID)),
 				cursor.getString(cursor.getColumnIndexOrThrow(NAME)),
 				cursor.getString(cursor.getColumnIndexOrThrow(OWNER)),
-				cursor.getString(cursor.getColumnIndexOrThrow(TYPE))
+				cursor.getString(cursor.getColumnIndexOrThrow(TYPE)),
+				Option.newInstance(cursor)
 		);
 	}
 
@@ -129,6 +135,7 @@ public class Room extends Contact {
 		values.put(NAME, name);
 		values.put(OWNER, owner);
 		values.put(TYPE, type);
+		if(option != null && option.getMute() != null) values.put(Option.MUTE, option.getMute());
 		return values;
 	}
 
@@ -164,6 +171,14 @@ public class Room extends Contact {
 
 	public void setOwner(String owner) {
 		this.owner = owner;
+	}
+
+	public Option getOption() {
+		return option;
+	}
+
+	public void setOption(Option option) {
+		this.option = option;
 	}
 
 	public Long getDate() {
@@ -215,9 +230,12 @@ public class Room extends Contact {
 		if(o instanceof Room) {
 			Room room = (Room) o;
 			return this.rid.equals(room.rid)
-					&& this.name.equals(room.name) && this.name.equals(room.name)
-					&& this.owner.equals(room.owner) && this.type.equals(room.type)
-					&& CollectionUtils.isEqualCollection(this.members, room.members);
+					&& this.name.equals(room.name)
+					&& this.name.equals(room.name)
+					&& this.owner.equals(room.owner)
+					&& this.type.equals(room.type)
+					&& CollectionUtils.isEqualCollection(this.members, room.members)
+					&& this.option.equals(room.option);
 		}
 		return false;
 	}

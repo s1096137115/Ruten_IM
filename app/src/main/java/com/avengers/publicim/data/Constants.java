@@ -42,5 +42,8 @@ public class Constants {
 		public static final String EVENT_SET_ROOM_MEMBER_ROLE = "setRoomMemberRole";
 		public static final String EVENT_GET_USER = "getUser";
 		public static final String EVENT_GET_MESSAGE = "getMessage";
+		public static final String EVENT_REGISTER_PUSH = "registerPush";
+		public static final String EVENT_UNREGISTER_PUSH = "unregisterPush";
+		public static final String EVENT_SET_ROOM_OPTION = "setRoomOption";
 	}
 }

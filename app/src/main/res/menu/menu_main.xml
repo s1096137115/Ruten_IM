@@ -8,18 +8,24 @@
 		android:title="@string/action_settings"
 		app:showAsAction="never"/>
 	<item
-		android:id="@+id/action_invite_friend"
+		android:id="@+id/action_register_push"
 		android:orderInCategory="200"
+		android:title="@string/action_register_push"
+		android:checkable="true"
+		app:showAsAction="never"/>
+	<item
+		android:id="@+id/action_invite_friend"
+		android:orderInCategory="300"
 		android:title="@string/action_invite_friend"
 		app:showAsAction="never"/>
 	<item
 		android:id="@+id/action_create_group"
-		android:orderInCategory="300"
+		android:orderInCategory="400"
 		android:title="@string/action_create_group"
 		app:showAsAction="never"/>
 	<item
 		android:id="@+id/action_logout"
-		android:orderInCategory="400"
+		android:orderInCategory="500"
 		android:title="@string/action_logout"
 		app:showAsAction="never"/>
 </menu>

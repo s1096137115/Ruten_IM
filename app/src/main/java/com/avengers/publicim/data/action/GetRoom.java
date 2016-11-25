@@ -1,5 +1,6 @@
 package com.avengers.publicim.data.action;
 
+import com.avengers.publicim.data.entities.Option;
 import com.avengers.publicim.data.entities.Room;
 import com.google.gson.annotations.SerializedName;
 
@@ -20,6 +21,9 @@ public class GetRoom {
 
 	@SerializedName("room")
 	private List<Room> rooms;
+
+	@SerializedName("option")
+	private Option option;
 
 	public String getAction() {
 		return action;
@@ -51,5 +55,13 @@ public class GetRoom {
 
 	public void setRooms(List<Room> rooms) {
 		this.rooms = rooms;
+	}
+
+	public Option getOption() {
+		return option;
+	}
+
+	public void setOption(Option option) {
+		this.option = option;
 	}
 }

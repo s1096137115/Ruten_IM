@@ -69,7 +69,8 @@ public class RosterEntry extends Contact implements Parcelable {
 
 	public static RosterEntry newInstance(Cursor cursor){
 		return new RosterEntry(
-				User.newInstance(cursor), Presence.newInstance(cursor),
+				User.newInstance(cursor),
+				Presence.newInstance(cursor),
 				cursor.getInt(cursor.getColumnIndexOrThrow(RosterEntry.RELATIONSHIP)),
 				cursor.getString(cursor.getColumnIndexOrThrow(RosterEntry.RID))
 		);

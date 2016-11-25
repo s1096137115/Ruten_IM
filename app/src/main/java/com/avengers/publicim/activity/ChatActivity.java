@@ -19,6 +19,7 @@ import com.avengers.publicim.data.action.GetMessage;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
+import com.avengers.publicim.data.entities.Option;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.listener.MessageListener;
@@ -46,6 +47,8 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		//todo resume重撈db
+		//todo getMessage設size
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chat);
 		mSendButton = (ImageButton) findViewById(R.id.textSendButton);
@@ -126,6 +129,15 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 	}
 
 	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		if(mRoom.getOption() != null && mRoom.getOption().getMute() != null){
+			boolean checked = mRoom.getOption().getMute() == Option.Mute.TURN_ON;
+			menu.findItem(R.id.action_mute).setChecked(checked);
+		}
+		return true;
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		Intent intent;
@@ -134,6 +146,11 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 				intent = new Intent(this, ViewMemberActivity.class);
 				intent.putExtra(Contact.Type.CONTACT, mContact);
 				startActivity(intent);
+				break;
+			case R.id.action_mute:
+				int value = mRoom.getOption().getMute() == Option.Mute.TURN_ON ?
+						Option.Mute.TURN_OFF : Option.Mute.TURN_ON;
+				mIMService.sendSetRoomOption(mContact.getRid(), value);
 				break;
 			case R.id.action_invite_member:
 				intent = new Intent(this, InviteMemberActivity.class);

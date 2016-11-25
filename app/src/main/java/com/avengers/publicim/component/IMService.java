@@ -20,12 +20,15 @@ import com.avengers.publicim.data.action.GetMessage;
 import com.avengers.publicim.data.action.GetRoom;
 import com.avengers.publicim.data.action.GetRoster;
 import com.avengers.publicim.data.action.GetUser;
+import com.avengers.publicim.data.action.RegisterPush;
 import com.avengers.publicim.data.action.SetRoomMemberRole;
+import com.avengers.publicim.data.action.SetRoomOption;
 import com.avengers.publicim.data.action.SetRoster;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
 import com.avengers.publicim.data.entities.MessageRead;
+import com.avengers.publicim.data.entities.Option;
 import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
@@ -36,6 +39,7 @@ import com.avengers.publicim.utils.GsonUtils;
 import com.avengers.publicim.utils.PreferenceHelper;
 import com.avengers.publicim.utils.SystemUtils;
 import com.avengers.publicim.view.LoginAccount;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
@@ -65,6 +69,9 @@ public class IMService extends Service {
 	private static MessageManager mMessageManager;
 
 	public IMService() {
+		//todo 改為MVVM架構
+		//todo db、socket功能抽出service
+		//todo listener替換為rxbus
 	}
 
 	@Override
@@ -232,6 +239,12 @@ public class IMService extends Service {
 	}
 
 	public void updateRooms(List<Room> listNew){
+		//比對時值不得為null
+		for (Room room: listNew) {
+			if(room.getOption() == null)
+			room.setOption(new Option(Option.Mute.TURN_OFF));
+		}
+
 		List<Room> listOld = mRoomManager.getList(Room.Type.ALL);
 		List<Room>[] list = categorize(listNew,listOld);
 		if(list[MODIFY_NEW].isEmpty() && list[MODIFY_OLD].isEmpty()) return;
@@ -555,9 +568,56 @@ public class IMService extends Service {
 		mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
 	}
 
+	public void sendRegisterPush(boolean register){
+		RegisterPush registerPush = new RegisterPush();
+		registerPush.setAction(register ? Constants.Socket.EVENT_REGISTER_PUSH : Constants.Socket.EVENT_UNREGISTER_PUSH);
+		registerPush.setToken(FirebaseInstanceId.getInstance().getToken());
+		registerPush.setSystem(RegisterPush.System.ANDROID);
+		final JSONObject obj = GsonUtils.toJSONObject(registerPush);
+		mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
+	}
+
+	public void sendSetRoomOption(String rid, int mute){
+		SetRoomOption setRoomOption = new SetRoomOption();
+		setRoomOption.setAction(Constants.Socket.EVENT_SET_ROOM_OPTION);
+		setRoomOption.setRid(rid);
+		setRoomOption.setMute(mute);
+		final JSONObject obj = GsonUtils.toJSONObject(setRoomOption);
+		mSocket.emit(Constants.Socket.EVENT_REQUEST, obj);
+	}
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 	//Receive from Socket
 	//---------------------------------------------------------------------------------------------------------------------------------
+
+	public void receiveSetRoomOption(String data){
+		SetRoomOption setRoomOption = GsonUtils.fromJson(data, SetRoomOption.class);
+		if(setRoomOption.getError() != null){
+			Log.d(TAG, setRoomOption.getError());
+		}else{
+			Room room = mRoomManager.getItem(Room.Type.ALL ,setRoomOption.getRid());
+			room.getOption().setMute(setRoomOption.getMute());
+			mDB.updateRoom(room);
+			ServiceEvent event = new ServiceEvent(ServiceEvent.Event.GET_ROOM);
+			Bundle bundle = new Bundle();
+			bundle.putString(Room.RID, setRoomOption.getRid());
+			event.setBundle(bundle);
+			mRoomManager.notify(event);
+		}
+	}
+
+	public void receiveRegisterPush(String data){
+		RegisterPush registerPush = GsonUtils.fromJson(data, RegisterPush.class);
+		if(registerPush.getError() != null){
+			Log.d(TAG, registerPush.getError());
+		}else{
+			if(registerPush.getAction().equals(Constants.Socket.EVENT_REGISTER_PUSH)){
+				PreferenceHelper.LoginStatus.setPush(PreferenceHelper.LoginStatus.PUSH_REGISTER);
+			}else if(registerPush.getAction().equals(Constants.Socket.EVENT_UNREGISTER_PUSH)){
+				PreferenceHelper.LoginStatus.setPush(PreferenceHelper.LoginStatus.PUSH_UNREGISTER);
+			}
+		}
+	}
 
 	public void receiveSetRoomMemberRole(String data){
 		SetRoomMemberRole setRoomMemberRole = GsonUtils.fromJson(data, SetRoomMemberRole.class);
@@ -664,11 +724,14 @@ public class IMService extends Service {
 						String errorMessage = (String)args[0];
 						Boolean state = (Boolean)args[1];
 
-//						sendGetSyncData();
 						sendGetMessage(PreferenceHelper.UpdateStatus.getUpdateTime(), null, GetMessage.Type.BELOW);
 						sendGetRoster();
 						sendGetRoom();
 						sendPresence(LoginAccount.getInstance().getPresence());
+						if(PreferenceHelper.LoginStatus.getPush() == PreferenceHelper.LoginStatus.PUSH_NULL){
+							sendRegisterPush(true);
+						}
+
 					}
 				});
 			} catch (Exception e) {
@@ -732,6 +795,11 @@ public class IMService extends Service {
 					receiveGetUser(args[0].toString());
 				}else if(action.equals(Constants.Socket.EVENT_GET_MESSAGE)){
 					receiveGetMessage(args[0].toString());
+				}else if(action.equals(Constants.Socket.EVENT_REGISTER_PUSH) ||
+						action.equals(Constants.Socket.EVENT_UNREGISTER_PUSH)){
+					receiveRegisterPush(args[0].toString());
+				}else if(action.equals(Constants.Socket.EVENT_SET_ROOM_OPTION)){
+					receiveSetRoomOption(args[0].toString());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

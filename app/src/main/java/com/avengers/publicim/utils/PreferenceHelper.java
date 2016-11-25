@@ -16,6 +16,13 @@ public class PreferenceHelper {
 	public static class UpdateStatus {
 		private static String PREFERENCES_FIELD_UPDATE_TIME = "updateTime";
 
+		public static void clearUpdateStatus(){
+			SharedPreferences.Editor editor = IMApplication.getContext().getSharedPreferences(
+					UPDATE_STATUS_SHARED_PREFERENCES, Activity.MODE_PRIVATE).edit();
+			editor.clear();
+			editor.apply();
+		}
+
 		public static long getUpdateTime(){
 			if(LoginAccount.getInstance().getUser() != null){
 				PREFERENCES_FIELD_UPDATE_TIME = LoginAccount.getInstance().getUser().getName() + "_updateTime";
@@ -38,6 +45,18 @@ public class PreferenceHelper {
 
 	public static class LoginStatus {
 		private static String PREFERENCES_FIELD_LOGIN_ACCOUNT = "loginAccount";
+		private static String PREFERENCES_FIELD_REGISTER_PUSH = "registerPush";
+
+		public static final int PUSH_UNREGISTER = 0;
+		public static final int PUSH_REGISTER = 1;
+		public static final int PUSH_NULL = -1;
+
+		public static void clearLoginStatus(){
+			SharedPreferences.Editor editor = IMApplication.getContext().getSharedPreferences(
+					LOGIN_STATUS_SHARED_PREFERENCES, Activity.MODE_PRIVATE).edit();
+			editor.clear();
+			editor.apply();
+		}
 
 		public static String getAccount(){
 			SharedPreferences spf = IMApplication.getContext().getSharedPreferences(
@@ -52,10 +71,16 @@ public class PreferenceHelper {
 			editor.apply();
 		}
 
-		public static void clearAccount(){
+		public static int getPush(){
+			SharedPreferences spf = IMApplication.getContext().getSharedPreferences(
+					LOGIN_STATUS_SHARED_PREFERENCES, Activity.MODE_PRIVATE);
+			return spf.getInt(PREFERENCES_FIELD_REGISTER_PUSH, PUSH_NULL);
+		}
+
+		public static void setPush(int push){
 			SharedPreferences.Editor editor = IMApplication.getContext().getSharedPreferences(
 					LOGIN_STATUS_SHARED_PREFERENCES, Activity.MODE_PRIVATE).edit();
-			editor.clear();
+			editor.putInt(PREFERENCES_FIELD_REGISTER_PUSH, push);
 			editor.apply();
 		}
 	}

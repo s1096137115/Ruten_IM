@@ -139,6 +139,13 @@ public class MainActivity extends BaseActivity {
 	}
 
 	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		boolean checked = PreferenceHelper.LoginStatus.getPush() == PreferenceHelper.LoginStatus.PUSH_REGISTER;
+		menu.findItem(R.id.action_register_push).setChecked(checked);
+		return true;
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
@@ -149,6 +156,15 @@ public class MainActivity extends BaseActivity {
 		switch (id){
 			case R.id.action_settings:
 //				mIMService.connect();
+				break;
+			case R.id.action_register_push:
+				if (item.isChecked()){
+					item.setChecked(false);
+					mIMService.sendRegisterPush(false);
+				}else{
+					item.setChecked(true);
+					mIMService.sendRegisterPush(true);
+				}
 				break;
 			case R.id.action_invite_friend:
 				intent = new Intent(this, InviteRosterActivity.class);
@@ -182,8 +198,9 @@ public class MainActivity extends BaseActivity {
 	}
 
 	private void logout(){
+		mIMService.sendRegisterPush(false);
 		mIMService.disconnect();
-		PreferenceHelper.LoginStatus.clearAccount();
+		PreferenceHelper.LoginStatus.clearLoginStatus();
 		LoginAccount.getInstance().clearAccount();
 		LoginAccount.getInstance().clearInstance();
 		mDB.clearInstance();

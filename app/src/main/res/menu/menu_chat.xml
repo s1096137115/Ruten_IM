@@ -8,13 +8,19 @@
 		android:title="@string/action_view_member"
 		app:showAsAction="never"/>
 	<item
-		android:id="@+id/action_invite_member"
+		android:id="@+id/action_mute"
 		android:orderInCategory="200"
+		android:title="@string/action_mute"
+		android:checkable="true"
+		app:showAsAction="never"/>
+	<item
+		android:id="@+id/action_invite_member"
+		android:orderInCategory="300"
 		android:title="@string/action_invite_group"
 		app:showAsAction="never"/>
 	<item
 		android:id="@+id/action_exit_group"
-		android:orderInCategory="300"
+		android:orderInCategory="400"
 		android:title="@string/action_exit_group"
 		app:showAsAction="never"/>
 </menu>

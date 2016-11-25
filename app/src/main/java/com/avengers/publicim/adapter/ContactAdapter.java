@@ -144,7 +144,6 @@ public class ContactAdapter extends BaseAdapter {
 	}
 
 	public void update(){
-
 		mRooms = mRoomManager.getList(Room.Type.GROUP);
 		mRoster = mRosterManager.getList(RosterEntry.Type.ROSTER);
 		mContacts.clear();
