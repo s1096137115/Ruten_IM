@@ -21,7 +21,7 @@
 	<string name="msg_get_user_not_yet">"尚未加入此人為好友"</string>
 	<string name="msg_get_user_already">"此人己是你的好友"</string>
 
-	<string name="text_group_name">"群組名稱"</string>
+	<string name="text_group_name">"群組名稱(必填)"</string>
 	<string name="text_member_name">"成員名稱"</string>
 
 	<string name="title_activity_invite_member">新增成員</string>
@@ -29,4 +29,10 @@
 	<string name="title_activity_chat">ChatActivity</string>
 	<string name="title_activity_invite_roster">InviteRosterActivity</string>
 	<string name="title_activity_create_group">建立群組</string>
+	
+	<string name="dialog_message_over_limit">此群組成員已達 100 位上限，無法新增成員</string>
+	<string name="dialog_message_group_name_error">未填入群組名稱(必填)，請返回原頁面</string>
+	<string name="dialog_message_below_limit">未勾選好友(至少一位)，請返回原頁面</string>
+	<string name="dialog_button_positive">確認</string>
+
 </resources>

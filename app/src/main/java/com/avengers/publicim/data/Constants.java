@@ -7,6 +7,7 @@ public class Constants {
 
 	//room-base
 	public static final String CHAT_SERVER_URL = "http://10.17.1.40:8000";
+//	public static final String CHAT_SERVER_URL = "http://172.18.0.71:8040";
 	//normal
 //	public static final String CHAT_SERVER_URL = "http://10.17.1.30:8000";
 	//max-local

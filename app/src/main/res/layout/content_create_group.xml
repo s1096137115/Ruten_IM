@@ -19,16 +19,6 @@
 		android:layout_alignParentLeft="true"
 		android:layout_alignParentStart="true"/>
 
-	<android.support.v7.widget.RecyclerView
-		android:id="@+id/recyclerView"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:layout_below="@+id/member"
-		android:layout_above="@+id/button"
-		android:layout_alignParentLeft="true"
-		android:layout_alignParentStart="true"
-		tools:listitem="@layout/view_roster_item"
-		/>
 
 	<Button
 		android:layout_width="match_parent"
@@ -49,6 +39,26 @@
 		android:layout_alignParentLeft="true"
 		android:layout_alignParentStart="true"
 		android:padding="8dp"
+		/>
+
+	<TextView
+		android:id="@+id/tv_member_limit"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_above="@id/button"
+		android:padding="10dp"
+		android:gravity="center_horizontal"
+		/>
+
+	<android.support.v7.widget.RecyclerView
+		android:id="@+id/recyclerView"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@+id/member"
+		android:layout_above="@+id/tv_member_limit"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentStart="true"
+		tools:listitem="@layout/view_roster_item"
 		/>
 
 </RelativeLayout>
