@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -82,8 +83,12 @@ public class InviteMemberActivity extends BaseActivity{
     private void setPreviewVisiable(){
         if(mSelects.isEmpty()){
             mPreview.setVisibility(View.GONE);
+            mButton.setText("邀請加入");
+            mButton.setEnabled(false);
         }else{
             mPreview.setVisibility(View.VISIBLE);
+            mButton.setText("邀請加入"+"( "+mSelects.size()+ " )");
+            mButton.setEnabled(true);
         }
     }
 
@@ -110,9 +115,6 @@ public class InviteMemberActivity extends BaseActivity{
                 case INVITE:
                     mContact = (Contact)bundle.getSerializable(Contact.Type.CONTACT);
                     mRoom = mRoomManager.getItem(Room.Type.ALL ,mContact.getRid());
-                    break;
-                case CREATE:
-                    mSelects = bundle.getParcelableArrayList(EXTRA);
                     break;
             }
         }
@@ -193,13 +195,6 @@ public class InviteMemberActivity extends BaseActivity{
         mInviteAdapter.refresh();
     }
 
-    private void setResult(){
-        Intent intent = new Intent();
-        intent.putParcelableArrayListExtra(EXTRA, (ArrayList<? extends Parcelable>) mSelects);
-        setResult(RESULT_OK, intent);
-        finish();
-    }
-
     @Override
     public void onServeiceResponse(ServiceEvent event) {
         switch (event.getEvent()){
@@ -229,11 +224,29 @@ public class InviteMemberActivity extends BaseActivity{
                     }
                     break;
                 case CREATE:
-                    setResult();
+                    Intent intent = new Intent(InviteMemberActivity.this, CreateGroupActivity.class);
+                    intent.putParcelableArrayListExtra(EXTRA, (ArrayList<? extends Parcelable>) mSelects);
+                    startActivityForResult(intent, CREATE);
                     break;
             }
         }
     };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case InviteMemberActivity.CREATE:
+                if (data != null) {
+                    mSelects = data.getExtras().getParcelableArrayList(EXTRA);
+                    mCreateApater.update(mSelects);
+                    mCreateApater.refresh();
+                    mInviteAdapter.setSelectedList(mSelects);
+                    mInviteAdapter.refresh();
+                }
+                break;
+        }
+    }
 
     private TextWatcher textWatcher = new TextWatcher() {
         @Override

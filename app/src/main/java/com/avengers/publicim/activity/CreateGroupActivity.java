@@ -3,8 +3,7 @@ package com.avengers.publicim.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -13,9 +12,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.avengers.publicim.R;
-import com.avengers.publicim.adapter.CreateGroupAdapter;
+import com.avengers.publicim.adapter.InviteMemberAdapter;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Room;
@@ -27,17 +27,18 @@ import com.avengers.publicim.utils.ItemClickSupport;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.avengers.publicim.activity.InviteMemberActivity.CREATE;
 import static com.avengers.publicim.activity.InviteMemberActivity.EXTRA;
 import static com.avengers.publicim.component.IMApplication.getProgress;
 
 public class CreateGroupActivity extends BaseActivity implements RoomListener {
 	private List<RosterEntry> mSelects = new ArrayList<>();
 	private RecyclerView mRecyclerView;
-	private CreateGroupAdapter mCreateApater;
+	private InviteMemberAdapter mInviteAdapter;
 	private Button mButton;
 	private EditText mGroupName;
 	private Room mRoom;
+	private List<RosterEntry> mEntries = new ArrayList<>();
+	private TextView mGroupLimitText;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,27 +46,24 @@ public class CreateGroupActivity extends BaseActivity implements RoomListener {
 		setContentView(R.layout.activity_create_group);
 		mButton = (Button)findViewById(R.id.button);
 		mGroupName = (EditText)findViewById(R.id.textInput);
+		mGroupLimitText = (TextView) findViewById(R.id.tv_member_limit);
 		setToolbar();
-		mCreateApater = new CreateGroupAdapter(this, mSelects);
-		setRecyclerView(mCreateApater);
+
+		mSelects = (List<RosterEntry>) getIntent().getSerializableExtra(InviteMemberActivity.EXTRA);
+
+		mEntries = mRosterManager.getList(RosterEntry.Type.ROSTER);
+
+		mInviteAdapter = new InviteMemberAdapter(this , mRosterManager.getList(RosterEntry.Type.ROSTER));
+		mInviteAdapter.setSelectedList(mSelects);
+		setRecyclerView(mInviteAdapter);
 
 		mGroupName.addTextChangedListener(textWatcher);
 
 		mButton.setOnClickListener(onClickListener);
-		mButton.setEnabled(false);
 
-		ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(onRemove);
+		ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(onSelect);
+		updateView();
 
-		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-		fab.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				Intent intent = new Intent(CreateGroupActivity.this, InviteMemberActivity.class);
-				intent.putExtra(InviteMemberActivity.REQUEST_CODE, CREATE);
-				intent.putParcelableArrayListExtra(EXTRA, (ArrayList<? extends Parcelable>) mSelects);
-				startActivityForResult(intent, CREATE);
-			}
-		});
 	}
 
 	private void setToolbar(){
@@ -75,22 +73,8 @@ public class CreateGroupActivity extends BaseActivity implements RoomListener {
 
 	private void setRecyclerView(RecyclerView.Adapter adapter){
 		mRecyclerView = (RecyclerView)findViewById(R.id.recyclerView);
-		mRecyclerView.setLayoutManager(new GridLayoutManager(this, 4));
-		mRecyclerView.setHasFixedSize(true);
+		mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 		mRecyclerView.setAdapter(adapter);
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		switch (requestCode){
-			case InviteMemberActivity.CREATE:
-				if(data != null){
-					mSelects = data.getExtras().getParcelableArrayList(EXTRA);
-					mCreateApater.update(mSelects);
-					mCreateApater.refresh();
-				}
-		}
 	}
 
 	@Override
@@ -138,6 +122,20 @@ public class CreateGroupActivity extends BaseActivity implements RoomListener {
 	private View.OnClickListener onClickListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
+			String message = "";
+			String title = getString(R.string.dialog_button_positive);
+			if(mGroupName.getText().length() == 0) {
+				message = getString(R.string.dialog_message_group_name_error);
+				showMessageDialog(message, title);
+				return;
+			}
+
+			if(mSelects.size() > 100) {
+				message = getString(R.string.dialog_message_over_limit);
+				showMessageDialog(message, title);
+				return;
+			}
+
 			getProgress().setMessage("Waiting...");
 			getProgress().show();
 			mIMService.sendCreateRoom(mGroupName.getText().toString(), Room.Type.GROUP);
@@ -151,11 +149,6 @@ public class CreateGroupActivity extends BaseActivity implements RoomListener {
 
 		@Override
 		public void onTextChanged(CharSequence s, int start, int before, int count) {
-			if(s.length() != 0){
-				mButton.setEnabled(true);
-			}else{
-				mButton.setEnabled(false);
-			}
 		}
 
 		@Override
@@ -163,11 +156,40 @@ public class CreateGroupActivity extends BaseActivity implements RoomListener {
 		}
 	};
 
-	private ItemClickSupport.OnItemClickListener onRemove = new ItemClickSupport.OnItemClickListener() {
+	private ItemClickSupport.OnItemClickListener onSelect = new ItemClickSupport.OnItemClickListener() {
 		@Override
 		public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-			mSelects.remove(position);
-			mCreateApater.notifyItemRemoved(position);
+			InviteMemberAdapter.NormalTextViewHolder holder = (InviteMemberAdapter.NormalTextViewHolder)
+					recyclerView.findViewHolderForAdapterPosition(position);
+			if(mSelects.contains(mEntries.get(position))){
+				holder.getmCheckBox().setChecked(false);
+				mSelects.remove(mEntries.get(position));
+			}else{
+				mSelects.add(mEntries.get(position));
+				holder.getmCheckBox().setChecked(true);
+			}
+			updateView();
 		}
 	};
+
+	private void updateView() {
+		int number = 100 - mSelects.size();
+		mGroupLimitText.setText("此群組最多可邀請"+String.valueOf(number) +"位好友加入");
+		mButton.setText("確認建立("+ mSelects.size() +")");
+		if(mSelects.size() == 0) {
+			mButton.setEnabled(false);
+		} else {
+			mButton.setEnabled(true);
+		}
+	}
+
+	@Override
+	public void onBackPressed() {
+
+		Intent intent = new Intent();
+		intent.putParcelableArrayListExtra(EXTRA, (ArrayList<? extends Parcelable>) mSelects);
+		setResult(RESULT_OK, intent);
+		finish();
+	}
+
 }

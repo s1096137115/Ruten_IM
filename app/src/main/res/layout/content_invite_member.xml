@@ -16,7 +16,7 @@
 		android:inputType="text"
 		android:maxLines="1"
 		android:imeOptions="actionSearch"
-		android:hint="search"
+		android:hint="輸入姓名或暱稱搜尋好友"
 		android:paddingLeft="10dp"
 		android:paddingRight="10dp"
 		/>
