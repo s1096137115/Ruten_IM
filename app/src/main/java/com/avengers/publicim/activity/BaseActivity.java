@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.avengers.publicim.component.DbHelper;
 import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.component.IMService;
@@ -41,6 +42,7 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	protected RoomManager mRoomManager;
 	protected MessageManager mMessageManager;
 	protected HomeWatcher mHomeWatcher;
+	protected MaterialDialog messageDialog;
 
 
 	@Override
@@ -122,6 +124,7 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 
 	@Override
 	protected void onDestroy() {
+		dismissMessageDialog();
 		super.onDestroy();
 //		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
 	}
@@ -166,6 +169,23 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 		if (this instanceof MessageListener) {
 			mMessageManager.removeMessageListener((MessageListener) this);
 		}
+	}
+
+	protected void dismissMessageDialog(){
+		if(messageDialog != null && messageDialog.isShowing()){
+			messageDialog.dismiss();
+		}
+
+		messageDialog = null;
+	}
+
+	public void showMessageDialog(String message, String positiveText){
+		dismissMessageDialog();
+
+		messageDialog = new MaterialDialog.Builder(this)
+				.content(message)
+				.positiveText(positiveText)
+				.show();
 	}
 
 	protected void onBackendConnected() {

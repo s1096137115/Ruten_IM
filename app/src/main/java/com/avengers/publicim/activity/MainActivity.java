@@ -171,7 +171,8 @@ public class MainActivity extends BaseActivity {
 				startActivity(intent);
 				break;
 			case R.id.action_create_group:
-				intent = new Intent(this, CreateGroupActivity.class);
+				intent = new Intent(this, InviteMemberActivity.class);
+				intent.putExtra(InviteMemberActivity.REQUEST_CODE, InviteMemberActivity.CREATE);
 				startActivity(intent);
 //				getBuilder()
 //						.setTitle("createGroup")
