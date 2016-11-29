@@ -32,6 +32,7 @@ import com.avengers.publicim.data.entities.Option;
 import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
+import com.avengers.publicim.data.entities.SingleInvite;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.listener.ServiceListener;
@@ -440,15 +441,6 @@ public class IMService extends Service {
 		}
 	}
 
-	public void sendInvite(List<Invite> list){
-		for (Invite invite: list) {
-			sendInvite(invite);
-		}
-		for (ServiceListener listener : mServiceListener) {
-			listener.onServeiceResponse(new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG));
-		}
-	}
-
 	/**
 	 * 邀請好友、邀請至聊天室
 	 * @param invite
@@ -623,7 +615,6 @@ public class IMService extends Service {
 		SetRoomMemberRole setRoomMemberRole = GsonUtils.fromJson(data, SetRoomMemberRole.class);
 		updateMember(setRoomMemberRole.getRoom(), setRoomMemberRole.getRoom().getMembers());
 		for (Member member: setRoomMemberRole.getRoom().getMembers()) {
-//			mDB.updateMember(member);
 			if(member.getRole().equals(Room.Role.EXIT)
 					&& member.getUser().equals(LoginAccount.getInstance().getUser().getName())){
 				Room room = mRoomManager.getItem(Room.Type.GROUP, setRoomMemberRole.getRoom().getRid());
@@ -862,7 +853,7 @@ public class IMService extends Service {
 		@Override
 		public void call(final Object... args) {
 			Log.d(TAG, args[0].toString());
-			Invite invite = GsonUtils.fromJson(args[0].toString(), Invite.class);
+			SingleInvite invite = GsonUtils.fromJson(args[0].toString(), SingleInvite.class);
 
 			//由於sendInvite的callback給的資料太少
 			//所以不論是邀請或被邀請都在這做最後的sync

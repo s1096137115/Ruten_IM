@@ -16,10 +16,12 @@ import android.widget.EditText;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.CreateGroupAdapter;
+import com.avengers.publicim.data.entities.GroupInvite;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
+import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.listener.RoomListener;
 import com.avengers.publicim.utils.ItemClickSupport;
@@ -127,10 +129,17 @@ public class CreateGroupActivity extends BaseActivity implements RoomListener {
 					finish();
 					return;
 				}
+				List<User> users = new ArrayList<>();
 				for (RosterEntry entry: mSelects) {
-					Invite invite = new Invite(entry.getUser(), Invite.Type.ROOM, mRoom.getRid());
-					mIMService.sendInvite(invite);
+					users.add(entry.getUser());
 				}
+				GroupInvite invite = new GroupInvite(users, Invite.Type.ROOM, mRoom.getRid());
+				mIMService.sendInvite(invite);
+
+//				for (RosterEntry entry: mSelects) {
+//					Invite invite = new Invite(entry.getUser(), Invite.Type.ROOM, mRoom.getRid());
+//					mIMService.sendInvite(invite);
+//				}
 				break;
 		}
 	}

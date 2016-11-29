@@ -1,7 +1,6 @@
 package com.avengers.publicim.data.action;
 
-import com.avengers.publicim.data.entities.Presence;
-import com.avengers.publicim.data.entities.User;
+import com.avengers.publicim.data.entities.AdvUser;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -15,22 +14,6 @@ public class GetUser implements Serializable{
 		public static final String ID = "id";
 		public static final String PHONE = "phone";
 		public static final String NICKNAME = "nickname";
-	}
-
-	public final class AdvUser extends User{
-		private Presence presence;
-
-		public AdvUser(String uid, String name) {
-			super(uid, name);
-		}
-
-		public Presence getPresence() {
-			return presence;
-		}
-
-		public void setPresence(Presence presence) {
-			this.presence = presence;
-		}
 	}
 
 	@SerializedName("action")

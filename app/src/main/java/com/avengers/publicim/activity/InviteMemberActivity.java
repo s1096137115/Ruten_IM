@@ -17,10 +17,12 @@ import com.avengers.publicim.R;
 import com.avengers.publicim.adapter.CreateGroupAdapter;
 import com.avengers.publicim.adapter.InviteMemberAdapter;
 import com.avengers.publicim.data.entities.Contact;
+import com.avengers.publicim.data.entities.GroupInvite;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Room;
 import com.avengers.publicim.data.entities.RosterEntry;
+import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.utils.ItemClickSupport;
 
@@ -221,12 +223,15 @@ public class InviteMemberActivity extends BaseActivity{
             switch (mRequestCode) {
                 case INVITE:
                     List<RosterEntry> list = ((InviteMemberAdapter) mRecyclerView.getAdapter()).getSelectedList();
+                    if(list.isEmpty()) return;
+                    getProgress().setMessage("Waiting...");
+                    getProgress().show();
+                    List<User> users = new ArrayList<>();
                     for (RosterEntry entry: list) {
-                        getProgress().setMessage("Waiting...");
-                        getProgress().show();
-                        Invite invite = new Invite(entry.getUser(), Invite.Type.ROOM, mContact.getRid());
-                        mIMService.sendInvite(invite);
+                        users.add(entry.getUser());
                     }
+                    GroupInvite invite = new GroupInvite(users, Invite.Type.ROOM, mContact.getRid());
+                    mIMService.sendInvite(invite);
                     break;
                 case CREATE:
                     setResult();

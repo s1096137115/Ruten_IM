@@ -10,9 +10,7 @@ import android.widget.TextView;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.component.IMApplication;
-import com.avengers.publicim.data.action.GetUser;
-import com.avengers.publicim.data.entities.Invite;
-import com.avengers.publicim.fragment.InviteRosterFragment;
+import com.avengers.publicim.data.entities.AdvUser;
 import com.avengers.publicim.view.LoginAccount;
 
 import java.util.List;
@@ -23,9 +21,10 @@ import java.util.List;
 
 public class InviteRosterAdapter extends BaseAdapter{
 	private final Fragment mFragment;
-	private List<GetUser.AdvUser> mAdvUser;
+	private List<AdvUser> mAdvUser;
+	private View.OnClickListener onClickListener;
 
-	public InviteRosterAdapter(Fragment fragment, List<GetUser.AdvUser> list){
+	public InviteRosterAdapter(Fragment fragment, List<AdvUser> list){
 		super(fragment.getContext());
 		mAdvUser = list;
 		mFragment = fragment;
@@ -37,7 +36,7 @@ public class InviteRosterAdapter extends BaseAdapter{
 	}
 
 	@Override
-	public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+	public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 		((NormalTextViewHolder)holder).mID.setText(mAdvUser.get(position).getName());
 		((NormalTextViewHolder)holder).mIcon.setImageResource(R.drawable.ic_person_black_48dp);
 
@@ -46,19 +45,14 @@ public class InviteRosterAdapter extends BaseAdapter{
 			((NormalTextViewHolder)holder).mButton.setVisibility(View.GONE);
 		}else if(mRosterManager.contains(mAdvUser.get(position))){
 			((NormalTextViewHolder)holder).mDetail.setText(IMApplication.getContext().getString(R.string.msg_get_user_already));
-			((NormalTextViewHolder)holder).mButton.setVisibility(View.GONE);
+			((NormalTextViewHolder)holder).mButton.setText(IMApplication.getContext().getString(R.string.action_chat));
+			((NormalTextViewHolder)holder).mButton.setVisibility(View.VISIBLE);
 		}else{
 			((NormalTextViewHolder)holder).mDetail.setText(IMApplication.getContext().getString(R.string.msg_get_user_not_yet));
 			((NormalTextViewHolder)holder).mButton.setVisibility(View.VISIBLE);
 		}
 
-		((NormalTextViewHolder)holder).mButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Invite invite = new Invite(getItem(position), Invite.Type.FRIEND);
-				((InviteRosterFragment)mFragment).sendInvite(invite);
-			}
-		});
+		if(onClickListener != null) ((NormalTextViewHolder)holder).mButton.setOnClickListener(onClickListener);
 	}
 
 	@Override
@@ -66,8 +60,12 @@ public class InviteRosterAdapter extends BaseAdapter{
 		return mAdvUser == null ? 0 : mAdvUser.size();
 	}
 
-	public GetUser.AdvUser getItem(int position){
+	public AdvUser getItem(int position){
 		return mAdvUser.get(position);
+	}
+
+	public void setOnClickListener(View.OnClickListener onClickListener) {
+		this.onClickListener = onClickListener;
 	}
 
 	public static class NormalTextViewHolder extends RecyclerView.ViewHolder {
@@ -84,6 +82,46 @@ public class InviteRosterAdapter extends BaseAdapter{
 			mID = (TextView)view.findViewById(R.id.id);
 			mDetail = (TextView)view.findViewById(R.id.detail);
 			mButton = (Button)view.findViewById(R.id.btAdd);
+		}
+
+		public View getmView() {
+			return mView;
+		}
+
+		public void setmView(View mView) {
+			this.mView = mView;
+		}
+
+		public ImageView getmIcon() {
+			return mIcon;
+		}
+
+		public void setmIcon(ImageView mIcon) {
+			this.mIcon = mIcon;
+		}
+
+		public TextView getmID() {
+			return mID;
+		}
+
+		public void setmID(TextView mID) {
+			this.mID = mID;
+		}
+
+		public TextView getmDetail() {
+			return mDetail;
+		}
+
+		public void setmDetail(TextView mDetail) {
+			this.mDetail = mDetail;
+		}
+
+		public Button getmButton() {
+			return mButton;
+		}
+
+		public void setmButton(Button mButton) {
+			this.mButton = mButton;
 		}
 	}
 }

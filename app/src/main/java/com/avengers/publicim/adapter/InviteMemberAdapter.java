@@ -32,7 +32,7 @@ public class InviteMemberAdapter extends BaseAdapter {
 	}
 
 	@Override
-	public void onBindViewHolder(final RecyclerView.ViewHolder holder,final int position) {
+	public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 		((NormalTextViewHolder)holder).mID.setText(mRosterEntries.get(position).getUser().getName());
 		((NormalTextViewHolder)holder).mIcon.setImageResource(R.drawable.ic_person_black_48dp);
 		((NormalTextViewHolder)holder).mCheckBox.setVisibility(View.VISIBLE);
