@@ -10,17 +10,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.avengers.publicim.R;
+import com.avengers.publicim.activity.BaseActivity;
 import com.avengers.publicim.activity.ChatActivity;
-import com.avengers.publicim.activity.InviteMemberActivity;
 import com.avengers.publicim.adapter.ContactAdapter;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.listener.RoomListener;
 import com.avengers.publicim.data.listener.RosterListener;
 import com.avengers.publicim.utils.ItemClickSupport;
-
-import retrofit2.http.HEAD;
-
 
 
 public class RosterFragment extends BaseFragment implements RosterListener, RoomListener{
@@ -82,6 +79,8 @@ public class RosterFragment extends BaseFragment implements RosterListener, Room
 //				mIMService.sendGetUser(GetUser.Type.ID, "test02");
 //				mIMService.sendGetMessage(PreferenceHelper.UpdateStatus.getUpdateTime(), null);
 //				mIMService.sendGetMessageRead();
+				((BaseActivity)getActivity()).getProgress().setMessage("Waiting...");
+				((BaseActivity)getActivity()).getProgress().show();
 			}
 		});
 	}

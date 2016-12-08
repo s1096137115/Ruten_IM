@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.avengers.publicim.R;
+import com.avengers.publicim.activity.BaseActivity;
 import com.avengers.publicim.activity.ChatActivity;
 import com.avengers.publicim.adapter.InviteRosterAdapter;
 import com.avengers.publicim.component.IMApplication;
@@ -20,8 +21,6 @@ import com.avengers.publicim.data.entities.RosterEntry;
 import com.avengers.publicim.data.entities.SingleInvite;
 import com.avengers.publicim.data.event.ServiceEvent;
 
-import static com.avengers.publicim.R.id.recyclerView;
-import static com.avengers.publicim.component.IMApplication.getProgress;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -51,7 +50,7 @@ public class InviteRosterFragment extends BaseFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_invite_roster, container, false);
-		mRecyclerView = (RecyclerView) view.findViewById(recyclerView);
+		mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
 		mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 		mAdapter = new InviteRosterAdapter(this, mGetUser.getUsers());
 		mRecyclerView.setAdapter(mAdapter);
@@ -61,8 +60,8 @@ public class InviteRosterFragment extends BaseFragment {
 	}
 
 	public void sendInvite(Invite invite){
-		getProgress().setMessage("Waiting...");
-		getProgress().show();
+		((BaseActivity)getActivity()).getProgress().setMessage("Waiting...");
+		((BaseActivity)getActivity()).getProgress().show();
 		mIMService.sendInvite(invite);
 	}
 
@@ -70,7 +69,7 @@ public class InviteRosterFragment extends BaseFragment {
 	public void onServeiceResponse(ServiceEvent event) {
 		switch (event.getEvent()){
 			case ServiceEvent.Event.CLOSE_DIALOG:
-				getProgress().dismiss();
+				((BaseActivity)getActivity()).getProgress().dismiss();
 				getActivity().finish();
 				break;
 		}

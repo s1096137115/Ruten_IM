@@ -17,15 +17,17 @@
 	android:minHeight="75dp"
 	android:paddingTop="6dip"
 	android:gravity="left">
-	<ImageView
+	<cn.carbs.android.avatarimageview.library.AvatarImageView
 		android:id="@+id/icon"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
+		android:layout_width="50dp"
+		android:layout_height="50dp"
+		android:layout_gravity="center_vertical"
 		android:scaleType="fitXY"
 		android:layout_marginTop="0dp"
-		android:layout_gravity="center_vertical"
-		android:src="@mipmap/ic_profile"
-		/>
+		tools:src="@mipmap/ic_profile"
+		app:aiv_BoarderWidth="2dp"
+		app:aiv_ShowBoarder="false"
+		app:aiv_TextSizeRatio="0.6"/>
 	<LinearLayout
 		android:id="@+id/linear_layout1"
 		android:layout_width="match_parent"

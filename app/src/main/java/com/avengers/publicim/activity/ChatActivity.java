@@ -31,8 +31,6 @@ import com.avengers.publicim.view.LoginAccount;
 
 import java.util.List;
 
-import static com.avengers.publicim.R.id.recyclerView;
-import static com.avengers.publicim.component.IMApplication.getProgress;
 import static com.avengers.publicim.utils.OnRcvScrollListener.Position.BOTTOM;
 
 public class ChatActivity extends BaseActivity implements MessageListener, RoomListener{
@@ -79,7 +77,7 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 	}
 
 	public void setRecyclerView(){
-		mRecyclerView = (RecyclerView) findViewById(recyclerView);
+		mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
 		mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 		mRecyclerView.setHasFixedSize(true);
 		mRecyclerView.setItemAnimator(new DefaultItemAnimator());

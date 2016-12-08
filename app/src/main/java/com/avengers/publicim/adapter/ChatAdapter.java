@@ -4,10 +4,10 @@ import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
+import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import cn.carbs.android.avatarimageview.library.AvatarImageView;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/15.
@@ -85,6 +87,10 @@ public class ChatAdapter extends BaseAdapter {
 				((TheOtherViewHolder) holder).mID.setVisibility(View.VISIBLE);
 			}
 			((TheOtherViewHolder) holder).mContent.setText(mMessages.get(position).getContext());
+
+			char first = mMessages.get(position).getFrom().getName().charAt(0);
+			((TheOtherViewHolder) holder).mImageView.setTextAndColor(String.valueOf(first),
+					IMApplication.getContext().getResources().getColor(R.color.colorPrimaryDark));
 
 			String eventTime = SystemUtils.getDate(mMessages.get(position).getDate(), Constants.Date.SHORT).replace(" ","\n");
 			((TheOtherViewHolder) holder).mDatetime.setText(eventTime);
@@ -234,14 +240,14 @@ public class ChatAdapter extends BaseAdapter {
 	}
 
 	public static class TheOtherViewHolder extends RecyclerView.ViewHolder {
-		ImageView mImageView;
+		AvatarImageView mImageView;
 		TextView mID;
 		TextView mContent;
 		TextView mDatetime;
 
 		TheOtherViewHolder(View view) {
 			super(view);
-			mImageView = (ImageView)view.findViewById(R.id.icon);
+			mImageView = (AvatarImageView)view.findViewById(R.id.icon);
 			mID = (TextView)view.findViewById(R.id.id);
 			mContent = (TextView)view.findViewById(R.id.msg);
 			mDatetime = (TextView)view.findViewById(R.id.datetime);

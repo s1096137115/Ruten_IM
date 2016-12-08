@@ -27,9 +27,6 @@ import com.avengers.publicim.utils.HomeWatcher;
 import com.avengers.publicim.view.DialogBuilder;
 import com.avengers.publicim.view.IMProgressDialog;
 
-import static com.avengers.publicim.component.IMApplication.setBuilder;
-import static com.avengers.publicim.component.IMApplication.setIMProgress;
-
 /**
  * Created by D-IT-MAX2 on 2016/3/1.
  */
@@ -43,13 +40,16 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	protected MessageManager mMessageManager;
 	protected HomeWatcher mHomeWatcher;
 	protected MaterialDialog messageDialog;
-
+	protected IMProgressDialog mProgressDialog;
+	protected DialogBuilder mBuilder;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mDB = DbHelper.getInstance(this);
 		mHandler = new Handler();
+		mProgressDialog = new IMProgressDialog(this);
+		mBuilder = new DialogBuilder(this);
 		setHomeWatcher();
 		setManager();
 	}
@@ -64,7 +64,6 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 
 			@Override
 			public void onHomeLongPressed() {
-				String a = "";
 			}
 		});
 	}
@@ -85,13 +84,19 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 		mMessageManager.clearInstance();
 	}
 
+	public DialogBuilder getBuilder(){
+		return mBuilder;
+	}
+
+	public IMProgressDialog getProgress(){
+		return mProgressDialog;
+	}
+
 	@Override
 	protected void onStart() {
 		super.onStart();
 		cancelDisconnect();
 		mHomeWatcher.startWatch();
-		setBuilder(new DialogBuilder(this));
-		setIMProgress(new IMProgressDialog(this));
 		if(mIsBind){
 			registerListeners();
 			onBackendConnected();
@@ -101,13 +106,6 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 			bindService(intent,mSC,BIND_AUTO_CREATE);
 		}
 //		Log.i(this.getClass().getSimpleName(), Thread.currentThread().getStackTrace()[2].getMethodName());
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-		setBuilder(null);
-		setIMProgress(null);
 	}
 
 	@Override

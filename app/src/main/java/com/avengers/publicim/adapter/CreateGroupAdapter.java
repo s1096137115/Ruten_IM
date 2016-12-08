@@ -8,9 +8,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
+import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.data.entities.RosterEntry;
 
 import java.util.List;
+
+import cn.carbs.android.avatarimageview.library.AvatarImageView;
 
 /**
  * Created by D-IT-MAX2 on 2016/10/3.
@@ -32,7 +35,10 @@ public class CreateGroupAdapter extends BaseAdapter {
 	@Override
 	public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 		((NormalTextViewHolder)holder).mID.setText(mRosterEntries.get(position).getUser().getName());
-		((NormalTextViewHolder)holder).mIcon.setImageResource(R.drawable.ic_person_black_48dp);
+//		((NormalTextViewHolder)holder).mIcon.setImageResource(R.drawable.ic_person_black_48dp);
+		char first = mRosterEntries.get(position).getUser().getName().charAt(0);
+		((NormalTextViewHolder) holder).mIcon.setTextAndColor(String.valueOf(first),
+				IMApplication.getContext().getResources().getColor(R.color.colorPrimaryDark));
 //		holder.mRemove.setOnClickListener(new View.OnClickListener() {
 //			@Override
 //			public void onClick(View v) {
@@ -67,14 +73,14 @@ public class CreateGroupAdapter extends BaseAdapter {
 
 	public static class NormalTextViewHolder extends RecyclerView.ViewHolder {
 		View mView;
-		ImageView mIcon;
+		AvatarImageView mIcon;
 		ImageView mRemove;
 		TextView mID;
 
 		NormalTextViewHolder(View view) {
 			super(view);
 			mView = view.findViewById(R.id.view);
-			mIcon = (ImageView)view.findViewById(R.id.icon);
+			mIcon = (AvatarImageView)view.findViewById(R.id.icon);
 			mRemove = (ImageView)view.findViewById(R.id.remove);
 			mID = (TextView)view.findViewById(R.id.id);
 		}
@@ -87,11 +93,11 @@ public class CreateGroupAdapter extends BaseAdapter {
 			this.mView = mView;
 		}
 
-		public ImageView getmIcon() {
+		public AvatarImageView getmIcon() {
 			return mIcon;
 		}
 
-		public void setmIcon(ImageView mIcon) {
+		public void setmIcon(AvatarImageView mIcon) {
 			this.mIcon = mIcon;
 		}
 

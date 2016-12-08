@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
@@ -14,6 +13,8 @@ import com.avengers.publicim.data.entities.AdvUser;
 import com.avengers.publicim.view.LoginAccount;
 
 import java.util.List;
+
+import cn.carbs.android.avatarimageview.library.AvatarImageView;
 
 /**
  * Created by D-IT-MAX2 on 2016/9/20.
@@ -38,7 +39,11 @@ public class InviteRosterAdapter extends BaseAdapter{
 	@Override
 	public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 		((NormalTextViewHolder)holder).mID.setText(mAdvUser.get(position).getName());
-		((NormalTextViewHolder)holder).mIcon.setImageResource(R.drawable.ic_person_black_48dp);
+
+//		((NormalTextViewHolder)holder).mIcon.setImageResource(R.drawable.ic_person_black_48dp);
+		char first = mAdvUser.get(position).getName().charAt(0);
+		((NormalTextViewHolder)holder).mIcon.setTextAndColor(String.valueOf(first),
+				IMApplication.getContext().getResources().getColor(R.color.colorPrimaryDark));
 
 		if(LoginAccount.getInstance().getUser().getName().equals(mAdvUser.get(position).getName())){
 			((NormalTextViewHolder)holder).mDetail.setText(IMApplication.getContext().getString(R.string.msg_get_user_yourself));
@@ -70,7 +75,7 @@ public class InviteRosterAdapter extends BaseAdapter{
 
 	public static class NormalTextViewHolder extends RecyclerView.ViewHolder {
 		View mView;
-		ImageView mIcon;
+		AvatarImageView mIcon;
 		TextView mID;
 		TextView mDetail;
 		Button mButton;
@@ -78,7 +83,7 @@ public class InviteRosterAdapter extends BaseAdapter{
 		NormalTextViewHolder(View view) {
 			super(view);
 			mView = view.findViewById(R.id.view);
-			mIcon = (ImageView)view.findViewById(R.id.icon);
+			mIcon = (AvatarImageView)view.findViewById(R.id.icon);
 			mID = (TextView)view.findViewById(R.id.id);
 			mDetail = (TextView)view.findViewById(R.id.detail);
 			mButton = (Button)view.findViewById(R.id.btAdd);
@@ -92,11 +97,11 @@ public class InviteRosterAdapter extends BaseAdapter{
 			this.mView = mView;
 		}
 
-		public ImageView getmIcon() {
+		public AvatarImageView getmIcon() {
 			return mIcon;
 		}
 
-		public void setmIcon(ImageView mIcon) {
+		public void setmIcon(AvatarImageView mIcon) {
 			this.mIcon = mIcon;
 		}
 

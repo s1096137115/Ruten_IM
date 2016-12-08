@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.avengers.publicim.activity.InviteMemberActivity.EXTRA;
-import static com.avengers.publicim.component.IMApplication.getProgress;
+
 
 public class CreateGroupActivity extends BaseActivity implements RoomListener {
 	private List<RosterEntry> mSelects = new ArrayList<>();

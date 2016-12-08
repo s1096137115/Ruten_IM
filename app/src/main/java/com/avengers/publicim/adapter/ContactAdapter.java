@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.avengers.publicim.R;
+import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.data.entities.Contact;
 import com.avengers.publicim.data.entities.Presence;
 import com.avengers.publicim.data.entities.Room;
@@ -17,6 +18,8 @@ import com.avengers.publicim.data.entities.RosterEntry;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import cn.carbs.android.avatarimageview.library.AvatarImageView;
 
 /**
  * Created by D-IT-MAX2 on 2016/6/23.
@@ -64,16 +67,21 @@ public class ContactAdapter extends BaseAdapter {
 
 	@Override
 	public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+		char first = mContacts.get(position).getName().charAt(0);
 		if(holder instanceof HeaderViewHolder) {
 			((HeaderViewHolder) holder).title.setText(mContacts.get(position).getName());
 		}else if(holder instanceof ContactViewHolder) {
 			if(mContacts.get(position) instanceof RosterEntry){
-				((ContactViewHolder) holder).icon.setImageResource(R.drawable.ic_person_black_48dp);
+//				((ContactViewHolder) holder).icon.setImageResource(R.drawable.ic_person_black_48dp);
+				((ContactViewHolder) holder).icon.setTextAndColor(String.valueOf(first),
+						IMApplication.getContext().getResources().getColor(R.color.colorPrimaryDark));
 				int visibility = ((RosterEntry) mContacts.get(position)).getPresence()
 						.getStatus() == Presence.Status.ONLINE ? View.VISIBLE : View.GONE;
 				((ContactViewHolder) holder).status.setVisibility(visibility);
 			}else{
-				((ContactViewHolder) holder).icon.setImageResource(R.drawable.ic_group_black_48dp);
+//				((ContactViewHolder) holder).icon.setImageResource(R.drawable.ic_group_black_48dp);
+				((ContactViewHolder) holder).icon.setTextAndColor(String.valueOf(first),
+						IMApplication.getContext().getResources().getColor(R.color.colorPrimaryDark));
 				((ContactViewHolder) holder).status.setVisibility(View.GONE);
 			}
 			((ContactViewHolder) holder).id.setText((mContacts.get(position)).getName());
@@ -154,13 +162,13 @@ public class ContactAdapter extends BaseAdapter {
 	}
 
 	public static class ContactViewHolder extends RecyclerView.ViewHolder {
-		ImageView icon;
+		AvatarImageView icon;
 		ImageView status;
 		TextView id;
 
 		ContactViewHolder(View view) {
 			super(view);
-			icon = (ImageView)view.findViewById(R.id.icon);
+			icon = (AvatarImageView)view.findViewById(R.id.icon);
 			status = (ImageView)view.findViewById(R.id.status);
 			id = (TextView)view.findViewById(R.id.id);
 		}

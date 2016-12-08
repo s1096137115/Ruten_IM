@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.avengers.publicim.R.id.recyclerView;
-import static com.avengers.publicim.component.IMApplication.getProgress;
+
 
 public class InviteMemberActivity extends BaseActivity{
     private RecyclerView mRecyclerView;

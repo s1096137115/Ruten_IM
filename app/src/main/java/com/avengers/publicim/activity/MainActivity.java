@@ -26,7 +26,7 @@ import com.avengers.publicim.view.LoginAccount;
 
 import io.socket.client.Socket;
 
-import static com.avengers.publicim.component.IMApplication.getProgress;
+
 
 public class MainActivity extends BaseActivity {
 	private Socket mSocket;
