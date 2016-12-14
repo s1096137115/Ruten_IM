@@ -51,11 +51,11 @@ public class CreateGroupActivity extends BaseActivity implements RoomListener {
 		mGroupLimitText = (TextView) findViewById(R.id.tv_member_limit);
 		setToolbar();
 
-		mSelects = (List<RosterEntry>) getIntent().getSerializableExtra(InviteMemberActivity.EXTRA);
+		mEntries = (List<RosterEntry>) getIntent().getSerializableExtra(InviteMemberActivity.EXTRA);
 
-		mEntries = mRosterManager.getList(RosterEntry.Type.ROSTER);
+		mSelects.addAll(mEntries);
 
-		mInviteAdapter = new InviteMemberAdapter(this , mRosterManager.getList(RosterEntry.Type.ROSTER));
+		mInviteAdapter = new InviteMemberAdapter(this , mEntries);
 		mInviteAdapter.setSelectedList(mSelects);
 		setRecyclerView(mInviteAdapter);
 
@@ -117,6 +117,8 @@ public class CreateGroupActivity extends BaseActivity implements RoomListener {
 				for (RosterEntry entry: mSelects) {
 					users.add(entry.getUser());
 				}
+
+
 				GroupInvite invite = new GroupInvite(users, Invite.Type.ROOM, mRoom.getRid());
 				mIMService.sendInvite(invite);
 

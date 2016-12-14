@@ -201,6 +201,8 @@ public class InviteMemberActivity extends BaseActivity{
         switch (event.getEvent()){
             case ServiceEvent.Event.CLOSE_DIALOG:
                 getProgress().dismiss();
+                Intent returnIntent = new Intent();
+                setResult(RESULT_OK, returnIntent);
                 finish();
                 break;
         }
@@ -226,6 +228,7 @@ public class InviteMemberActivity extends BaseActivity{
                     }
                     GroupInvite invite = new GroupInvite(users, Invite.Type.ROOM, mContact.getRid());
                     mIMService.sendInvite(invite);
+
                     break;
                 case CREATE:
                     Intent intent = new Intent(InviteMemberActivity.this, CreateGroupActivity.class);
@@ -247,6 +250,7 @@ public class InviteMemberActivity extends BaseActivity{
                     mCreateApater.refresh();
                     mInviteAdapter.setSelectedList(mSelects);
                     mInviteAdapter.refresh();
+                    setPreviewVisiable();
                 }
                 break;
         }
@@ -299,4 +303,6 @@ public class InviteMemberActivity extends BaseActivity{
             setPreviewVisiable();
         }
     };
+
+
 }

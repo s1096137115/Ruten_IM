@@ -9,12 +9,33 @@
 	tools:context="com.avengers.publicim.activity.ViewMemberActivity"
 	tools:showIn="@layout/activity_member">
 
+	<Button
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/msg_invite_roster"
+		android:id="@+id/button"
+		android:layout_alignParentBottom="true"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentEnd="true"
+		/>
+
+	<TextView
+		android:id="@+id/tv_member_limit"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_above="@id/button"
+		android:padding="10dp"
+		android:text="@string/msg_invite_roster_limit"
+		android:gravity="center_horizontal"
+		/>
+
 	<android.support.v7.widget.RecyclerView
 		android:id="@+id/recyclerView"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:layout_alignParentLeft="true"
 		android:layout_alignParentStart="true"
+		android:layout_above="@+id/tv_member_limit"
 		tools:listitem="@layout/view_roster_item"
 		/>
 

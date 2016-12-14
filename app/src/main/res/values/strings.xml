@@ -16,10 +16,12 @@
 
 	<string name="msg_read_count">"已讀" %d</string>
 	<string name="msg_read">"已讀"</string>
-	<string name="msg_get_user_not_find">"此使用者不存在"</string>
-	<string name="msg_get_user_yourself">"你找到了自己"</string>
-	<string name="msg_get_user_not_yet">"尚未加入此人為好友"</string>
-	<string name="msg_get_user_already">"此人己是你的好友"</string>
+	<string name="msg_get_user_not_find">"此手機號碼/姓名不存在\n快邀請他加入會員"</string>
+	<string name="msg_get_user_yourself">"這是你本人哦"</string>
+	<string name="msg_get_user_not_yet">"尚未加入好友"</string>
+	<string name="msg_get_user_already">"已加入好友"</string>
+	<string name="msg_invite_roster">邀請好友</string>
+	<string name="msg_invite_roster_limit">此群組最多可邀請 100 位好友加入</string>
 
 	<string name="text_group_name">"群組名稱(必填)"</string>
 	<string name="text_member_name">"成員名稱"</string>
