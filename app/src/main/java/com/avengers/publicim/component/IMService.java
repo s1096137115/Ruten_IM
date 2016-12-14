@@ -24,6 +24,8 @@ import com.avengers.publicim.data.action.RegisterPush;
 import com.avengers.publicim.data.action.SetRoomMemberRole;
 import com.avengers.publicim.data.action.SetRoomOption;
 import com.avengers.publicim.data.action.SetRoster;
+import com.avengers.publicim.data.entities.AdvUser;
+import com.avengers.publicim.data.entities.GroupInvite;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
@@ -464,7 +466,15 @@ public class IMService extends Service {
 //				}
 				//群組邀請不會有callback，所以這裡只有邀請好友會觸發
 				for (ServiceListener listener : mServiceListener) {
-					listener.onServeiceResponse(new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG));
+					ServiceEvent event = new ServiceEvent(ServiceEvent.Event.CLOSE_DIALOG);
+					if(invite instanceof SingleInvite) {
+						SingleInvite singleInvite = (SingleInvite) invite;
+						User user = singleInvite.getTo();
+						Bundle bundle = new Bundle();
+						bundle.putString(User.NAME, user.getName());
+						event.setBundle(bundle);
+					}
+					listener.onServeiceResponse(event);
 				}
 			}
 		});

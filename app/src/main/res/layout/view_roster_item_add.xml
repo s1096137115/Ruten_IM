@@ -67,7 +67,7 @@
 				android:id="@+id/btAdd"
 				android:layout_width="70dp"
 				android:layout_height="35dp"
-				android:text="add"
+				android:text="加入"
 				android:textSize="12sp"
 				android:layout_alignParentRight="true"
 				android:layout_centerInParent="true"

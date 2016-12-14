@@ -34,6 +34,9 @@ import java.util.List;
 import static com.avengers.publicim.utils.OnRcvScrollListener.Position.BOTTOM;
 
 public class ChatActivity extends BaseActivity implements MessageListener, RoomListener{
+	public static final int REQUEST_INVITE_MEMBER = 0;
+	public static final int REQUEST_VIEW_MEMBER = 1;
+
 	private RecyclerView mRecyclerView;
 	private ChatAdapter mChatAdapter;
 	private Room mRoom;
@@ -143,7 +146,7 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 			case R.id.action_view_member:
 				intent = new Intent(this, ViewMemberActivity.class);
 				intent.putExtra(Contact.Type.CONTACT, mContact);
-				startActivity(intent);
+				startActivityForResult(intent, REQUEST_VIEW_MEMBER);
 				break;
 			case R.id.action_mute:
 				int value = mRoom.getOption().getMute() == Option.Mute.TURN_ON ?
@@ -153,7 +156,8 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 			case R.id.action_invite_member:
 				intent = new Intent(this, InviteMemberActivity.class);
 				intent.putExtra(Contact.Type.CONTACT, mContact);
-				startActivity(intent);
+				intent.putExtra(InviteMemberActivity.REQUEST_CODE, InviteMemberActivity.INVITE);
+				startActivityForResult(intent, REQUEST_INVITE_MEMBER);
 				break;
 			case R.id.action_exit_group:
 				getProgress().setMessage("Waiting...");
@@ -310,4 +314,22 @@ public class ChatActivity extends BaseActivity implements MessageListener, RoomL
 			mPosition = position;
 		}
 	};
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (requestCode) {
+			case REQUEST_VIEW_MEMBER:
+			case REQUEST_INVITE_MEMBER:
+				if(data != null) {
+					if(mRoom != null) {
+						mChatAdapter.update(mDB.getMessages(mContact));
+						mChatAdapter.refresh(1000);
+					}else{
+						finish();
+					}
+				}
+				break;
+		}
+	}
 }
