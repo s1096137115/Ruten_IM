@@ -31,10 +31,11 @@
 	<string name="title_activity_chat">ChatActivity</string>
 	<string name="title_activity_invite_roster">InviteRosterActivity</string>
 	<string name="title_activity_create_group">建立群組</string>
-	
+
 	<string name="dialog_message_over_limit">此群組成員已達 100 位上限，無法新增成員</string>
 	<string name="dialog_message_group_name_error">未填入群組名稱(必填)，請返回原頁面</string>
 	<string name="dialog_message_below_limit">未勾選好友(至少一位)，請返回原頁面</string>
 	<string name="dialog_button_positive">確認</string>
+	<string name="title_activity_third_party">ThirdPartyActivity</string>
 
 </resources>

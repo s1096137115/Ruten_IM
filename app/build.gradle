@@ -4,7 +4,7 @@ apply plugin: 'checkstyle'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '24.0.1'
+    buildToolsVersion '24.0.3'
     defaultConfig {
         applicationId "com.avengers.publicim"
         minSdkVersion 15
@@ -21,6 +21,9 @@ android {
         debug {
             testCoverageEnabled = true
         }
+    }
+    dataBinding {
+        enabled true
     }
     productFlavors {
     }
@@ -68,7 +71,6 @@ dependencies {
     compile 'org.apache.commons:commons-collections4:4.1'
     compile 'com.github.clans:fab:1.6.4'
     compile 'com.android.support:recyclerview-v7:24.2.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha8'
     compile "com.google.firebase:firebase-messaging:9.2.1"
     compile 'com.google.android.gms:play-services-analytics:9.2.1'
     compile 'com.google.android.gms:play-services-wearable:9.2.1'
@@ -85,6 +87,8 @@ dependencies {
     //okhttp相关依赖
     compile 'com.squareup.okhttp3:okhttp:3.4.2'
     compile 'com.squareup.okhttp3:logging-interceptor:3.4.2'
+
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -12,9 +12,6 @@ import android.widget.Toast;
 
 import com.avengers.publicim.BuildConfig;
 import com.avengers.publicim.data.Constants;
-import com.avengers.publicim.data.Manager.MessageManager;
-import com.avengers.publicim.data.Manager.RoomManager;
-import com.avengers.publicim.data.Manager.RosterManager;
 import com.avengers.publicim.data.action.CreateRoom;
 import com.avengers.publicim.data.action.GetMessage;
 import com.avengers.publicim.data.action.GetRoom;
@@ -24,8 +21,6 @@ import com.avengers.publicim.data.action.RegisterPush;
 import com.avengers.publicim.data.action.SetRoomMemberRole;
 import com.avengers.publicim.data.action.SetRoomOption;
 import com.avengers.publicim.data.action.SetRoster;
-import com.avengers.publicim.data.entities.AdvUser;
-import com.avengers.publicim.data.entities.GroupInvite;
 import com.avengers.publicim.data.entities.Invite;
 import com.avengers.publicim.data.entities.Member;
 import com.avengers.publicim.data.entities.Message;
@@ -38,6 +33,9 @@ import com.avengers.publicim.data.entities.SingleInvite;
 import com.avengers.publicim.data.entities.User;
 import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.listener.ServiceListener;
+import com.avengers.publicim.data.manager.MessageManager;
+import com.avengers.publicim.data.manager.RoomManager;
+import com.avengers.publicim.data.manager.RosterManager;
 import com.avengers.publicim.utils.GsonUtils;
 import com.avengers.publicim.utils.PreferenceHelper;
 import com.avengers.publicim.utils.SystemUtils;
@@ -696,6 +694,11 @@ public class IMService extends Service {
 //			LoginTask task = new LoginTask(this, mToken);
 //			runLoginTask(task,Config.LOGIN_BY_SERVICE);
 //		}
+		//rxjava网络连接发生变化时通知的方法
+//		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+//		AndroidObservable.fromBroadcast(context, filter)
+//				.subscribe(intent -> handleConnectivityChange(intent));
+
 		return super.onStartCommand(intent, flags, startId);
 	}
 

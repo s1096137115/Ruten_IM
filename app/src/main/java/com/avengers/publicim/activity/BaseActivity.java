@@ -15,17 +15,23 @@ import com.avengers.publicim.component.DbHelper;
 import com.avengers.publicim.component.IMApplication;
 import com.avengers.publicim.component.IMService;
 import com.avengers.publicim.component.IMService.IMBinder;
-import com.avengers.publicim.data.Manager.MessageManager;
-import com.avengers.publicim.data.Manager.RoomManager;
-import com.avengers.publicim.data.Manager.RosterManager;
+import com.avengers.publicim.data.event.ServiceEvent;
 import com.avengers.publicim.data.listener.MessageListener;
 import com.avengers.publicim.data.listener.RoomListener;
 import com.avengers.publicim.data.listener.RosterListener;
 import com.avengers.publicim.data.listener.ServiceListener;
+import com.avengers.publicim.data.manager.MessageManager;
+import com.avengers.publicim.data.manager.RoomManager;
+import com.avengers.publicim.data.manager.RosterManager;
 import com.avengers.publicim.fragment.BaseFragment;
 import com.avengers.publicim.utils.HomeWatcher;
+import com.avengers.publicim.utils.RxBus;
 import com.avengers.publicim.view.DialogBuilder;
 import com.avengers.publicim.view.IMProgressDialog;
+
+import rx.Subscription;
+import rx.functions.Action1;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by D-IT-MAX2 on 2016/3/1.
@@ -43,6 +49,8 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 	protected IMProgressDialog mProgressDialog;
 	protected DialogBuilder mBuilder;
 
+	protected CompositeSubscription mSubscriptions;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -52,6 +60,23 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceL
 		mBuilder = new DialogBuilder(this);
 		setHomeWatcher();
 		setManager();
+	}
+
+	private void setSubscriptions(){
+		Subscription subscription = RxBus.getInstance().toObservable().subscribe(new Action1<Object>(){
+			@Override
+			public void call(Object o) {
+				if (o instanceof ServiceEvent) {
+					//do something
+				}
+			}
+		});
+		mSubscriptions = new CompositeSubscription();
+		mSubscriptions.add(subscription);
+	}
+
+	private void clearSubscriptions(){
+		mSubscriptions.unsubscribe();
 	}
 
 	private void setHomeWatcher(){

@@ -1,4 +1,4 @@
-package com.avengers.publicim.data.Manager;
+package com.avengers.publicim.data.manager;
 
 import android.os.Handler;
 

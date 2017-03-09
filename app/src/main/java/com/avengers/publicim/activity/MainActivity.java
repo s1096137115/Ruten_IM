@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,14 +17,25 @@ import android.widget.ImageView;
 
 import com.avengers.publicim.R;
 import com.avengers.publicim.component.IMService;
+import com.avengers.publicim.data.Constants;
 import com.avengers.publicim.data.event.ServiceEvent;
+import com.avengers.publicim.data.third_party.AppInfo;
+import com.avengers.publicim.data.third_party.ThirdPartyService;
 import com.avengers.publicim.fragment.ChatListFragment;
 import com.avengers.publicim.fragment.RosterFragment;
 import com.avengers.publicim.utils.PreferenceHelper;
+import com.avengers.publicim.utils.RetrofixUtils;
 import com.avengers.publicim.view.LoginAccount;
 
-import io.socket.client.Socket;
+import java.util.List;
 
+import io.socket.client.Socket;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 
 public class MainActivity extends BaseActivity {
@@ -152,10 +162,27 @@ public class MainActivity extends BaseActivity {
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		Intent intent;
-		final AppCompatEditText input = new AppCompatEditText(this);
 		switch (id){
 			case R.id.action_settings:
 //				mIMService.connect();
+				mSubscriptions = new CompositeSubscription();
+				final ThirdPartyService third = RetrofixUtils.getInstance(Constants.THIRD_PARTY_SERVER_URL)
+						.create(ThirdPartyService.class);
+				mSubscriptions.add(third.appList()
+						.flatMap(new Func1<List<AppInfo>, Observable<AppInfo>>() {
+					@Override
+					public Observable<AppInfo> call(List<AppInfo> appInfos) {
+						return Observable.from(appInfos);
+					}
+				})
+						.subscribeOn(Schedulers.newThread())
+						.observeOn(AndroidSchedulers.mainThread())
+						.subscribe(new Action1<AppInfo>() {
+							@Override
+							public void call(AppInfo appInfo) {
+								String a = "";
+							}
+						}));
 				break;
 			case R.id.action_register_push:
 				if (item.isChecked()){
@@ -174,19 +201,6 @@ public class MainActivity extends BaseActivity {
 				intent = new Intent(this, InviteMemberActivity.class);
 				intent.putExtra(InviteMemberActivity.REQUEST_CODE, InviteMemberActivity.CREATE);
 				startActivity(intent);
-//				getBuilder()
-//						.setTitle("createGroup")
-//						.setView(input)
-//						.setPositiveButton("y", new DialogInterface.OnClickListener() {
-//							@Override
-//							public void onClick(DialogInterface dialog, int which) {
-//								if(!input.getText().toString().isEmpty()){
-//									getProgress().setMessage("Waiting...");
-//									getProgress().show();
-//									mIMService.sendCreateRoom(input.getText().toString(), Room.Type.GROUP);
-//								}
-//							}
-//						}).show();
 				break;
 			case R.id.action_logout:
 				logout();

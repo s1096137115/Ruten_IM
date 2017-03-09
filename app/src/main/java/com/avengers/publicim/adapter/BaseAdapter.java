@@ -6,9 +6,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 
 import com.avengers.publicim.component.IMApplication;
-import com.avengers.publicim.data.Manager.MessageManager;
-import com.avengers.publicim.data.Manager.RoomManager;
-import com.avengers.publicim.data.Manager.RosterManager;
+import com.avengers.publicim.data.manager.MessageManager;
+import com.avengers.publicim.data.manager.RoomManager;
+import com.avengers.publicim.data.manager.RosterManager;
 
 /**
  * Created by D-IT-MAX2 on 2016/10/19.

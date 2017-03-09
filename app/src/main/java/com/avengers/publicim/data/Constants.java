@@ -13,6 +13,9 @@ public class Constants {
 	//max-local
 //	public static final String CHAT_SERVER_URL = "http://10.0.1.7:8000";
 
+	//3rd-party
+	public static final String THIRD_PARTY_SERVER_URL = "http://10.17.0.3:8080/";
+
 	public class Date{
 		public static final String LONG = "yyyy/M/d HH:mm";
 		public static final String SHORT = "ahh:mm";
